@@ -7,34 +7,58 @@ using Test
     CFe = ones(5)
     CMn = ones(5)
     Lx = 10.0u"km"
-    tfinal = 10.0u"s"
+    Lx = 10.0u"m"
+    tfinal = 1.0u"Myr"
 
-    Ini1D = InitialConditions1D(CMg0=CMg, CFe0=CFe, CMn0=CMn, Lx=Lx, tfinal=tfinal)
+    IC1D = InitialConditions1D(CMg0=CMg, CFe0=CFe, CMn0=CMn, Lx=Lx, tfinal=tfinal)
 
-    @test Ini1D.CMg0 == CMg
-    @test Ini1D.Lx == ustrip(u"m",Lx)
-    @test Ini1D.tfinal == ustrip(u"s",tfinal)
+    @test IC1D.CMg0 == CMg
+    @test IC1D.Lx == ustrip(u"m",Lx)
+    @test IC1D.tfinal == ustrip(u"Myr",tfinal)
 
     CMg = ones(5, 5)
     CFe = ones(5, 5)
     CMn = ones(5, 5)
     Ly = 10.0u"km"
 
-    Ini2D = InitialConditions2D(CMg0=CMg, CFe0=CFe, CMn0=CMn, Lx=Lx, Ly=Ly, tfinal=tfinal)
+    IC2D = InitialConditions2D(CMg0=CMg, CFe0=CFe, CMn0=CMn, Lx=Lx, Ly=Ly, tfinal=tfinal)
 
-    @test Ini2D.CMg0 == CMg
-    @test Ini2D.Ly == ustrip(u"m",Ly)
-    @test Ini2D.grid.x == Ini2D.x' .* ones(size(CMg,2))
-    @test Ini2D.tfinal == ustrip(u"s",tfinal)
+    @test IC2D.CMg0 == CMg
+    @test IC2D.Ly == ustrip(u"m",Ly)
+    @test IC2D.grid.x == IC2D.x' .* ones(size(CMg,2))
+    @test IC2D.tfinal == ustrip(u"Myr",tfinal)
 
     CMg = ones(5, 5, 5)
     CFe = ones(5, 5, 5)
     CMn = ones(5, 5, 5)
     Lz = 10.0u"km"
 
-    Ini3D = InitialConditions3D(CMg0=CMg, CFe0=CFe, CMn0=CMn, Lx=Lx, Ly=Ly, Lz=Lz, tfinal=tfinal)
+    IC3D = InitialConditions3D(CMg0=CMg, CFe0=CFe, CMn0=CMn, Lx=Lx, Ly=Ly, Lz=Lz, tfinal=tfinal)
 
-    @test Ini3D.CMg0 == CMg
-    @test Ini3D.Lz == ustrip(u"m",Lz)
-    @test Ini3D.grid.x == Ini3D.x' .* ones(size(CMg,2), size(CMg,3))
+    @test IC3D.CMg0 == CMg
+    @test IC3D.Lz == ustrip(u"m",Lz)
+    @test IC3D.grid.x == IC3D.x' .* ones(size(CMg,2), size(CMg,3))
+    @test IC3D.tfinal == ustrip(u"Myr",tfinal)
+
+    T = 650u"°C"
+    P = 2u"GPa"
+    domain1D = Domain1D(IC=IC1D, T=T, P=P)
+    @test domain1D.L_charact == ustrip(u"m",Lx)
+    @test domain1D.t_charact ≈ 0.22518558662307234
+    @test domain1D.tfinal_ad ≈ 4.44078155709785
+    @test domain1D.Δxad_ == 5.0
+
+end
+
+@testset "diffusion coefficients" begin
+    # test Domain
+    T=650
+    P=2
+    D0 = zeros(Float64, 4)
+    D_ini!(D0,T,P)
+
+    @test D0[1] ≈ 2.383676419323230e2
+    @test D0[2] ≈ 4.500484945403809e+02
+    @test D0[3] ≈ 6.232092221232668e+03
+    @test D0[4] ≈ 2.250242472701905e+02
 end

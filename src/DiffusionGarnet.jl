@@ -12,15 +12,13 @@ using Reexport
 @reexport using TerminalLoggers: TerminalLogger
 
 function __init__()
-    # initialise global logger for DifferentialEquations
+    # initialise global logger for OrdinaryDiffEq
     global_logger(TerminalLogger())
 end
 
-
-include("input/geometry.jl")
+include("input/initialconditions.jl")
 
 export InitialConditions1D, InitialConditions2D, InitialConditions3D
-
-
+export D_ini!, Domain1D
 
 end # module DiffusionGarnet
