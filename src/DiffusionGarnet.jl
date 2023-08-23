@@ -18,7 +18,7 @@ end
 
 include("input/initialconditions.jl")
 
-export InitialConditions1D, InitialConditions2D, InitialConditions3D
-export D_ini!, Domain1D
+export InitialConditions
+export D_ini!, Domain
 
 end # module DiffusionGarnet

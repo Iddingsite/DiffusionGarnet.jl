@@ -29,9 +29,6 @@ using Statistics
     end
 end
 
-function InitialConditions1D(;CMg0::Array{Float64, 1}, CFe0::Array{Float64, 1}, CMn0::Array{Float64, 1}, Lx::Unitful.Length, tfinal::Unitful.Time)
-    InitialConditions1D(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"m", Lx)), convert(Float64,ustrip(u"Myr",tfinal)))
-end
 
 @with_kw struct InitialConditions2D{T1 <: Array{Float64, 2}, T2 <: Float64}
     CMg0::T1
@@ -66,10 +63,6 @@ end
             new{T1, T2}(CMg0, CFe0, CMn0, nx, ny, Lx, Ly, Δx, Δy, x, y, grid, tfinal)
         end
     end
-end
-
-function InitialConditions2D(;CMg0::Array{Float64, 2}, CFe0::Array{Float64, 2}, CMn0::Array{Float64, 2}, Lx::Unitful.Length, Ly::Unitful.Length, tfinal::Unitful.Time)
-    InitialConditions2D(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"m", Lx)), convert(Float64,ustrip(u"m", Ly)), convert(Float64,ustrip(u"Myr", tfinal)))
 end
 
 
@@ -115,11 +108,17 @@ end
     end
 end
 
-function InitialConditions3D(;CMg0::Array{Float64, 3}, CFe0::Array{Float64, 3}, CMn0::Array{Float64, 3}, Lx::Unitful.Length, Ly::Unitful.Length, Lz::Unitful.Length, tfinal::Unitful.Time)
-    InitialConditions3D(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"m", Lx)), convert(Float64,ustrip(u"m", Ly)), convert(Float64,ustrip(u"m", Lz)), convert(Float64,ustrip(u"Myr", tfinal)))
+function InitialConditions(CMg0::Array{Float64, 1}, CFe0::Array{Float64, 1}, CMn0::Array{Float64, 1}, tfinal::Unitful.Time, Lx::Unitful.Length, Ly::Unitful.Length=0u"μm", Lz::Unitful.Length=0u"μm")
+    InitialConditions1D(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"m", Lx)), convert(Float64,ustrip(u"Myr",tfinal)))
 end
 
+function InitialConditions(CMg0::Array{Float64, 2}, CFe0::Array{Float64, 2}, CMn0::Array{Float64, 2},tfinal::Unitful.Time, Lx::Unitful.Length, Ly::Unitful.Length, Lz::Unitful.Length=0u"μm")
+    InitialConditions2D(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"m", Lx)), convert(Float64,ustrip(u"m", Ly)), convert(Float64,ustrip(u"Myr", tfinal)))
+end
 
+function InitialConditions(CMg0::Array{Float64, 3}, CFe0::Array{Float64, 3}, CMn0::Array{Float64, 3}, tfinal::Unitful.Time, Lx::Unitful.Length, Ly::Unitful.Length, Lz::Unitful.Length)
+    InitialConditions3D(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"m", Lx)), convert(Float64,ustrip(u"m", Ly)), convert(Float64,ustrip(u"m", Lz)), convert(Float64,ustrip(u"Myr", tfinal)))
+end
 
 
 function D_ini!(D0,T,P)
@@ -149,25 +148,23 @@ function D_ini!(D0,T,P)
     D0 .= [DMg, DFe, DMn, DCa] .* (365.25 * 24 * 3600 * 1e6)  # in years
 end
 
-@with_kw struct Domain1D{T1 <: Float64}
+@with_kw struct Domain1D{T1 <: Union{Array{Float64, 1}, Float64}}
     IC::InitialConditions1D
     T::T1
     P::T1
     time_update::T1
-    D0::Vector{T1}
-    L_charact::T1
-    D_charact::T1
-    t_charact::T1
-    Δxad_::T1
-    tfinal_ad::T1
-    function Domain1D(IC::InitialConditions1D, T::T1, P::T1, time_update::T1) where {T1 <: Float64}
-        D0 = zeros(Float64, 4)
-        @show T
-        D_ini!(D0, T, P)
-        @show D0
-        L_charact = copy(IC.Lx)
-        D_charact = mean(D0)
-        t_charact = L_charact^2 / D_charact
+    D0::Vector{Float64}
+    L_charact::Float64
+    D_charact::Float64
+    t_charact::Float64
+    Δxad_::Float64
+    tfinal_ad::Float64
+    function Domain1D(IC::InitialConditions1D, T::T1, P::T1, time_update::T1) where {T1 <: Union{Float64, Array{Float64, 1}}}
+        D0::Vector{Float64} = zeros(Float64, 4)
+        D_ini!(D0, T, P)  # compute initial diffusion coefficients
+        L_charact = copy(IC.Lx)  # characteristic length
+        D_charact = mean(D0)  # characteristic
+        t_charact = L_charact^2 / D_charact  # characteristic time
         Δxad_ = 1 / (IC.Δx / L_charact)  # inverse of nondimensionalised Δx
         tfinal_ad = IC.tfinal / t_charact  # nondimensionalised total time
         time_update = time_update / t_charact  # nondimensionalised time update
@@ -175,6 +172,6 @@ end
     end
 end
 
-function Domain1D(;IC::InitialConditions1D, T::Unitful.Temperature, P::Unitful.Pressure, time_update::Unitful.Time=0u"Myr")
-    Domain1D(IC, convert(Float64,ustrip(u"°C", T)), convert(Float64,ustrip(u"kbar", P)), convert(Float64,ustrip(u"Myr", time_update)))
+function Domain(IC::InitialConditions1D, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr")
+    Domain1D(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)))
 end

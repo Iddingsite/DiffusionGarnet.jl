@@ -10,7 +10,7 @@ using Test
     Lx = 10.0u"m"
     tfinal = 1.0u"Myr"
 
-    IC1D = InitialConditions1D(CMg0=CMg, CFe0=CFe, CMn0=CMn, Lx=Lx, tfinal=tfinal)
+    IC1D = InitialConditions(CMg, CFe, CMn, tfinal, Lx)
 
     @test IC1D.CMg0 == CMg
     @test IC1D.Lx == ustrip(u"m",Lx)
@@ -21,7 +21,7 @@ using Test
     CMn = ones(5, 5)
     Ly = 10.0u"km"
 
-    IC2D = InitialConditions2D(CMg0=CMg, CFe0=CFe, CMn0=CMn, Lx=Lx, Ly=Ly, tfinal=tfinal)
+    IC2D = InitialConditions(CMg, CFe, CMn, tfinal, Lx, Ly)
 
     @test IC2D.CMg0 == CMg
     @test IC2D.Ly == ustrip(u"m",Ly)
@@ -33,7 +33,7 @@ using Test
     CMn = ones(5, 5, 5)
     Lz = 10.0u"km"
 
-    IC3D = InitialConditions3D(CMg0=CMg, CFe0=CFe, CMn0=CMn, Lx=Lx, Ly=Ly, Lz=Lz, tfinal=tfinal)
+    IC3D = InitialConditions(CMg, CFe, CMn, tfinal, Lx, Ly, Lz)
 
     @test IC3D.CMg0 == CMg
     @test IC3D.Lz == ustrip(u"m",Lz)
@@ -42,7 +42,7 @@ using Test
 
     T = 650u"°C"
     P = 2u"GPa"
-    domain1D = Domain1D(IC=IC1D, T=T, P=P)
+    domain1D = Domain(IC1D, T, P)
     @test domain1D.L_charact == ustrip(u"m",Lx)
     @test domain1D.t_charact ≈ 0.22518558662307234
     @test domain1D.tfinal_ad ≈ 4.44078155709785
@@ -52,8 +52,8 @@ end
 
 @testset "diffusion coefficients" begin
     # test Domain
-    T=650
-    P=2
+    T=650  # in °C
+    P=2  # in kbar
     D0 = zeros(Float64, 4)
     D_ini!(D0,T,P)
 
