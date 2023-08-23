@@ -6,48 +6,54 @@ using Test
     CMg = ones(5)
     CFe = ones(5)
     CMn = ones(5)
-    Lx = 10.0u"km"
-    Lx = 10.0u"m"
+    Lx = 10.0u"µm"
     tfinal = 1.0u"Myr"
 
     IC1D = InitialConditions(CMg, CFe, CMn, tfinal, Lx)
 
     @test IC1D.CMg0 == CMg
-    @test IC1D.Lx == ustrip(u"m",Lx)
+    @test IC1D.Lx == ustrip(u"µm",Lx)
     @test IC1D.tfinal == ustrip(u"Myr",tfinal)
 
     CMg = ones(5, 5)
     CFe = ones(5, 5)
     CMn = ones(5, 5)
-    Ly = 10.0u"km"
+    Ly = 10.0u"µm"
 
     IC2D = InitialConditions(CMg, CFe, CMn, tfinal, Lx, Ly)
 
     @test IC2D.CMg0 == CMg
-    @test IC2D.Ly == ustrip(u"m",Ly)
+    @test IC2D.Ly == ustrip(u"µm",Ly)
     @test IC2D.grid.x == IC2D.x' .* ones(size(CMg,2))
     @test IC2D.tfinal == ustrip(u"Myr",tfinal)
 
     CMg = ones(5, 5, 5)
     CFe = ones(5, 5, 5)
     CMn = ones(5, 5, 5)
-    Lz = 10.0u"km"
+    Lz = 10.0u"µm"
 
     IC3D = InitialConditions(CMg, CFe, CMn, tfinal, Lx, Ly, Lz)
 
     @test IC3D.CMg0 == CMg
-    @test IC3D.Lz == ustrip(u"m",Lz)
+    @test IC3D.Lz == ustrip(u"µm",Lz)
     @test IC3D.grid.x == IC3D.x' .* ones(size(CMg,2), size(CMg,3))
     @test IC3D.tfinal == ustrip(u"Myr",tfinal)
 
     T = 650u"°C"
     P = 2u"GPa"
     domain1D = Domain(IC1D, T, P)
-    @test domain1D.L_charact == ustrip(u"m",Lx)
+    @test domain1D.L_charact == ustrip(u"µm",Lx)
     @test domain1D.t_charact ≈ 0.22518558662307234
     @test domain1D.tfinal_ad ≈ 4.44078155709785
     @test domain1D.Δxad_ == 5.0
 
+    domain2D = Domain(IC2D, T, P)
+    @test domain2D.L_charact == ustrip(u"µm",Lx)
+    @test domain2D.Δyad_ == 5.0
+
+    domain3D = Domain(IC3D, T, P)
+    @test domain3D.L_charact == ustrip(u"µm",Lx)
+    @test domain3D.Δzad_ == 5.0
 end
 
 @testset "diffusion coefficients" begin
