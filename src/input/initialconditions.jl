@@ -114,12 +114,7 @@ end
     end
 end
 
-"""
-sd
 
-
-
-"""
 function InitialConditions1D(CMg0::Array{<:Real, 1}, CFe0::Array{<:Real, 1}, CMn0::Array{<:Real, 1}, tfinal::Unitful.Time, Lx::Unitful.Length)
     InitialConditions1D(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"Myr",tfinal)))
 end

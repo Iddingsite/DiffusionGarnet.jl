@@ -3,12 +3,13 @@ push!(LOAD_PATH,"../src/")
 using DiffusionGarnet
 using Documenter
 
-makedocs(
+makedocs(;
          sitename = "DiffusionGarnet.jl",
          modules  = [DiffusionGarnet],
          pages=[
-                "index.md"
-               ])
+                "Home" => "index.md"
+               ],
+)
 
 deploydocs(;
     repo="github.com/Iddingsite/DiffusionGarnet.jl.git", devbranch = "main"
