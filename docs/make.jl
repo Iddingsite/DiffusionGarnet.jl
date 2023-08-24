@@ -10,6 +10,6 @@ makedocs(
                 "Home" => "index.md"
                ])
                
-# deploydocs(;
-#     repo="github.com/Iddingsite/DiffusionGarnet.jl",
-# )
+deploydocs(;
+    repo="github.com/Iddingsite/DiffusionGarnet.jl.git",
+)
