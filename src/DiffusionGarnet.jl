@@ -3,7 +3,7 @@ module DiffusionGarnet
 using Reexport
 
 @reexport using Plots
-@reexport using OrdinaryDiffEq, DiffEqCallbacks, LinearSolve
+# @reexport using OrdinaryDiffEq, DiffEqCallbacks, LinearSolve
 @reexport using BenchmarkTools
 @reexport using Parameters
 @reexport using Unitful
