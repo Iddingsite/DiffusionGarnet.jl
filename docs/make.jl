@@ -7,9 +7,9 @@ makedocs(
          sitename = "DiffusionGarnet.jl",
          modules  = [DiffusionGarnet],
          pages=[
-                "Home" => "index.md"
+                "index.md"
                ])
-               
+
 deploydocs(;
     repo="github.com/Iddingsite/DiffusionGarnet.jl.git", devbranch = "main"
 )
