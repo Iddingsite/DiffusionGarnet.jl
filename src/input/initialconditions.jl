@@ -31,6 +31,32 @@ using Statistics
     end
 end
 
+@with_kw struct InitialConditionsSpherical{T1<:Array{<:Real, 1} , T2 <: Float64}
+    CMg0::T1
+    CFe0::T1
+    CMn0::T1
+    nx::Int
+    Lx::T2
+    Δx::T2
+    x::StepRangeLen
+    tfinal::T2
+    function InitialConditions1D(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, tfinal::T2) where {T1 <: Array{<:Real, 1}, T2 <: Float64}
+        if Lx <= 0
+            error("Length should be positive.")
+        elseif tfinal <= 0
+            error("Total time should be positive.")
+        elseif size(CMg0, 1) != size(CFe0, 1) || size(CMg0, 1) != size(CMn0, 1)
+            error("Initial conditions should have the same size.")
+        elseif maximum(sum.(CMg0.+ CFe0.+ CMn0)) >= 1
+            error("Initial conditions should be in mass fraction.")
+        else
+            nx = size(CMg0, 1)
+            Δx = Lx / (nx)
+            x = range(Δx/2, length=nx, stop= Lx-Δx/2)
+            new{T1, T2}(CMg0, CFe0, CMn0, nx, Lx, Δx, x, tfinal)
+        end
+    end
+end
 
 @with_kw struct InitialConditions2D{T1 <: Array{<:Real, 2}, T2 <: Float64}
     CMg0::T1
@@ -155,81 +181,117 @@ function D_ini!(D0,T,P)
     D0 .= [DMg, DFe, DMn, DCa] .* (365.25 * 24 * 3600 * 1e6)  # in years
 end
 
-@with_kw struct Domain1D{T1 <: Union{Array{Float64, 1}, Float64}}
+@with_kw struct Domain1D{T1 <: Union{Array{Float64, 1}, Float64}, T2 <: Float64}
     IC::InitialConditions1D
     T::T1
     P::T1
     time_update::T1
-    D0::Vector{Float64}
-    L_charact::Float64
-    D_charact::Float64
-    t_charact::Float64
-    Δxad_::Float64
-    tfinal_ad::Float64
+    D0::Vector{T2}
+    D::NamedTuple{(:DMgMg, :DMgFe, :DMgMn, :DFeMg, :DFeFe, :DFeMn, :DMnMg, :DMnFe, :DMnMn),
+                  Tuple{Vector{T2}, Vector{T2}, Vector{T2}, Vector{T2}, Vector{T2}, Vector{T2}, Vector{T2}, Vector{T2}, Vector{T2}}}  # tensor of interdiffusion coefficients
+    L_charact::T2
+    D_charact::T2
+    t_charact::T2
+    Δxad_::T2
+    u0::Matrix{T2}
+    tfinal_ad::T2
     function Domain1D(IC::InitialConditions1D, T::T1, P::T1, time_update::T1) where {T1 <: Union{Float64, Array{Float64, 1}}}
+        @unpack nx, Δx, tfinal, Lx, CMg0, CFe0, CMn0 = IC
+
         D0::Vector{Float64} = zeros(Float64, 4)
         D_ini!(D0, T, P)  # compute initial diffusion coefficients
-        L_charact = copy(IC.Lx)  # characteristic length
+
+        D = (DMgMg = zeros(nx), DMgFe = zeros(nx), DMgMn = zeros(nx), DFeMg = zeros(nx), DFeFe = zeros(nx), DFeMn = zeros(nx), DMnMg = zeros(nx), DMnFe = zeros(nx), DMnMn = zeros(nx))  # tensor of interdiffusion coefficients
+
+        u0::Matrix{typeof(CMg0[1])} = similar(CMg0, (nx, 3))
+        u0[:,1] .= CMg0
+        u0[:,2] .= CFe0
+        u0[:,3] .= CMn0
+
+        L_charact = copy(Lx)  # characteristic length
         D_charact = mean(D0)  # characteristic
         t_charact = L_charact^2 / D_charact  # characteristic time
-        Δxad_ = 1 / (IC.Δx / L_charact)  # inverse of nondimensionalised Δx
-        tfinal_ad = IC.tfinal / t_charact  # nondimensionalised total time
+
+        Δxad_ = 1 / (Δx / L_charact)  # inverse of nondimensionalised Δx
+        tfinal_ad = tfinal / t_charact  # nondimensionalised total time
         time_update = time_update / t_charact  # nondimensionalised time update
-        new{T1}(IC, T, P, time_update, D0, L_charact, D_charact, t_charact, Δxad_, tfinal_ad)
+        new{T1, Float64}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, u0, tfinal_ad)
     end
 end
 
-@with_kw struct Domain2D{T1 <: Union{Array{Float64, 2}, Float64}}
+
+@with_kw struct Domain2D{T1 <: Union{Array{Float64, 2}, Float64}, T2 <: Float64}
     IC::InitialConditions2D
     T::T1
     P::T1
     time_update::T1
-    D0::Vector{Float64}
-    L_charact::Float64
-    D_charact::Float64
-    t_charact::Float64
-    Δxad_::Float64
-    Δyad_::Float64
-    tfinal_ad::Float64
+    D0::Vector{T2}
+    D::NamedTuple{(:DMgMg, :DMgFe, :DMgMn, :DFeMg, :DFeFe, :DFeMn, :DMnMg, :DMnFe, :DMnMn),
+                  Tuple{Matrix{T2}, Matrix{T2}, Matrix{T2}, Matrix{T2}, Matrix{T2}, Matrix{T2}, Matrix{T2}, Matrix{T2}, Matrix{T2}}}  # tensor of interdiffusion coefficients
+    L_charact::T2
+    D_charact::T2
+    t_charact::T2
+    Δxad_::T2
+    Δyad_::T2
+    u0::Array{T2, 2}
+    tfinal_ad::T2
     function Domain2D(IC::InitialConditions2D, T::T1, P::T1, time_update::T1) where {T1 <: Union{Float64, Array{Float64, 2}}}
+        @unpack nx, ny, Δx, Δy, tfinal, Lx, CMg0, CFe0, CMn0 = IC
+
         D0::Vector{Float64} = zeros(Float64, 4)
         D_ini!(D0, T, P)  # compute initial diffusion coefficients
-        L_charact = copy(IC.Lx)  # characteristic length
+
+        D = (DMgMg = zeros(nx, ny), DMgFe = zeros(nx, ny), DMgMn = zeros(nx, ny), DFeMg = zeros(nx, ny), DFeFe = zeros(nx, ny), DFeMn = zeros(nx, ny), DMnMg = zeros(nx, ny), DMnFe = zeros(nx, ny), DMnMn = zeros(nx, ny))  # tensor of interdiffusion coefficients
+
+        u0::Matrix{typeof(CMg0[1])} = similar(CMg0, (nx, ny, 3))
+        u0[:, :, 1] .= CMg0
+        u0[:, :, 2] .= CFe0
+        u0[:, :, 3] .= CMn0
+
+        L_charact = copy(Lx)  # characteristic length
         D_charact = mean(D0)  # characteristic
         t_charact = L_charact^2 / D_charact  # characteristic time
-        Δxad_ = 1 / (IC.Δx / L_charact)  # inverse of nondimensionalised Δx
-        Δyad_ = 1 / (IC.Δy / L_charact)  # inverse of nondimensionalised Δy
-        tfinal_ad = IC.tfinal / t_charact  # nondimensionalised total time
+        Δxad_ = 1 / (Δx / L_charact)  # inverse of nondimensionalised Δx
+        Δyad_ = 1 / (Δy / L_charact)  # inverse of nondimensionalised Δy
+        tfinal_ad = tfinal / t_charact  # nondimensionalised total time
         time_update = time_update / t_charact  # nondimensionalised time update
-        new{T1}(IC, T, P, time_update, D0, L_charact, D_charact, t_charact, Δxad_, Δyad_, tfinal_ad)
+        new{T1, Float64}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, Δyad_, u0, tfinal_ad)
     end
 end
 
-@with_kw struct Domain3D{T1 <: Union{Array{Float64, 3}, Float64}}
+@with_kw struct Domain3D{T1 <: Union{Array{Float64, 3}, Float64}, T2 <: Float64}
     IC::InitialConditions3D
     T::T1
     P::T1
     time_update::T1
-    D0::Vector{Float64}
-    L_charact::Float64
-    D_charact::Float64
-    t_charact::Float64
-    Δxad_::Float64
-    Δyad_::Float64
-    Δzad_::Float64
-    tfinal_ad::Float64
+    D0::Vector{T2}
+    D::NamedTuple{(:DMgMg, :DMgFe, :DMgMn, :DFeMg, :DFeFe, :DFeMn, :DMnMg, :DMnFe, :DMnMn),
+                  Tuple{Array{T2, 3}, Array{T2, 3}, Array{T2, 3}, Array{T2, 3}, Array{T2, 3}, Array{T2, 3}, Array{T2, 3}, Array{T2, 3}, Array{T2, 3}}}  # tensor of interdiffusion coefficients
+    L_charact::T2
+    D_charact::T2
+    t_charact::T2
+    Δxad_::T2
+    Δyad_::T2
+    Δzad_::T2
+    tfinal_ad::T2
     function Domain3D(IC::InitialConditions3D, T::T1, P::T1, time_update::T1) where {T1 <: Union{Float64, Array{Float64, 3}}}
+        @unpack nx, ny, nz, Δx, Δy, Δz, tfinal, Lx = IC
+
         D0::Vector{Float64} = zeros(Float64, 4)
         D_ini!(D0, T, P)  # compute initial diffusion coefficients
-        L_charact = copy(IC.Lx)  # characteristic length
+
+        D = (DMgMg = zeros(nx, ny, nz), DMgFe = zeros(nx, ny, nz), DMgMn = zeros(nx, ny, nz), DFeMg = zeros(nx, ny, nz), DFeFe = zeros(nx, ny, nz), DFeMn = zeros(nx, ny, nz), DMnMg = zeros(nx, ny, nz), DMnFe = zeros(nx, ny, nz), DMnMn = zeros(nx, ny, nz))  # tensor of interdiffusion coefficients
+
+        L_charact = copy(Lx)  # characteristic length
         D_charact = mean(D0)  # characteristic
         t_charact = L_charact^2 / D_charact  # characteristic time
-        Δxad_ = 1 / (IC.Δx / L_charact)  # inverse of nondimensionalised Δx
-        Δyad_ = 1 / (IC.Δy / L_charact)  # inverse of nondimensionalised Δy
-        Δzad_ = 1 / (IC.Δz / L_charact)  # inverse of nondimensionalised Δz
-        tfinal_ad = IC.tfinal / t_charact  # nondimensionalised total time
+
+        Δxad_ = 1 / (Δx / L_charact)  # inverse of nondimensionalised Δx
+        Δyad_ = 1 / (Δy / L_charact)  # inverse of nondimensionalised Δy
+        Δzad_ = 1 / (Δz / L_charact)  # inverse of nondimensionalised Δz
+        tfinal_ad = tfinal / t_charact  # nondimensionalised total time
         time_update = time_update / t_charact  # nondimensionalised time update
-        new{T1}(IC, T, P, time_update, D0, L_charact, D_charact, t_charact, Δxad_, Δyad_, Δzad_, tfinal_ad)
+        new{T1, Float64}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, Δyad_, Δzad_, tfinal_ad)
     end
 end
 

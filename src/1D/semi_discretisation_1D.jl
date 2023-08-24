@@ -1,65 +1,66 @@
+import Base.@propagate_inbounds
+
+function Diffusion_coef_1D!(D, CMg, CFe, CMn, D0, D_charact)
+
+    DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn = D
+
+    @propagate_inbounds @inline sum_D(CMg, CFe, CMn, D0, I) = D0[1] * CMg[I] + D0[2] * CFe[I] + D0[3] * CMn[I] +
+    D0[4] * (1 - CMg[I] - CFe[I] - CMn[I])
+
+    for I in eachindex(DMgMg)
+        DMgMg[I] = (D0[1] - D0[1] * CMg[I] / sum_D(CMg, CFe, CMn, D0, I) * (D0[1] - D0[end])) / D_charact
+        DMgFe[I] = (      - D0[1] * CMg[I] / sum_D(CMg, CFe, CMn, D0, I) * (D0[2] - D0[end])) / D_charact
+        DMgMn[I] = (      - D0[1] * CMg[I] / sum_D(CMg, CFe, CMn, D0, I) * (D0[3] - D0[end])) / D_charact
+
+        DFeMg[I] = (      - D0[2] * CFe[I] / sum_D(CMg, CFe, CMn, D0, I) * (D0[1] - D0[end])) / D_charact
+        DFeFe[I] = (D0[2] - D0[2] * CFe[I] / sum_D(CMg, CFe, CMn, D0, I) * (D0[2] - D0[end])) / D_charact
+        DFeMn[I] = (      - D0[2] * CFe[I] / sum_D(CMg, CFe, CMn, D0, I) * (D0[3] - D0[end])) / D_charact
+
+        DMnMg[I] = (      - D0[3] * CMn[I] / sum_D(CMg, CFe, CMn, D0, I) * (D0[1] - D0[end])) / D_charact
+        DMnFe[I] = (      - D0[3] * CMn[I] / sum_D(CMg, CFe, CMn, D0, I) * (D0[2] - D0[end])) / D_charact
+        DMnMn[I] = (D0[3] - D0[3] * CMn[I] / sum_D(CMg, CFe, CMn, D0, I) * (D0[3] - D0[end])) / D_charact
+    end
+
+end
 
 
+function stencil_diffusion!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δxad_)
 
-# @views av(A) = 0.5*(A[1:end-1].+A[2:end])
-# # macros to avoid array allocation
-# macro qx(D,C,ix, Δx_ad) esc(:((0.5*($D[$ix]+$D[$ix+1])) * ($C[$ix+1]-$C[$ix])/Δx_ad )) end
-# macro sum_D(CMg, CFe, CMn, D0, ix) esc(:($D0[1] * $CMg[$ix] + $D0[2] * $CFe[$ix] + $D0[3] * $CMn[$ix] +
-#                                        $D0[4] * (1 - $CMg[$ix] - $CFe[$ix] - $CMn[$ix]))) end
+    DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn = D
 
+    @propagate_inbounds @inline qx(D, C, ix, Δxad_) = 0.5 * (D[ix] + D[ix+1]) * (C[ix+1]-C[ix]) * Δxad_
 
+    for ix in eachindex(dtCMg)
+        if ix > 1 && ix < size(dtCMg, 1)
+            dtCMg[ix] = (qx(DMgMg,CMg,ix,Δxad_) - qx(DMgMg,CMg,ix-1,Δxad_)) * Δxad_ +
+                        (qx(DMgFe,CFe,ix,Δxad_) - qx(DMgFe,CFe,ix-1,Δxad_)) * Δxad_ +
+                        (qx(DMgMn,CMn,ix,Δxad_) - qx(DMgMn,CMn,ix-1,Δxad_)) * Δxad_
+            dtCFe[ix] = (qx(DFeMg,CMg,ix,Δxad_) - qx(DFeMg,CMg,ix-1,Δxad_)) * Δxad_ +
+                        (qx(DFeFe,CFe,ix,Δxad_) - qx(DFeFe,CFe,ix-1,Δxad_)) * Δxad_ +
+                        (qx(DFeMn,CMn,ix,Δxad_) - qx(DFeMn,CMn,ix-1,Δxad_)) * Δxad_
+            dtCMn[ix] = (qx(DMnMg,CMg,ix,Δxad_) - qx(DMnMg,CMg,ix-1,Δxad_)) * Δxad_ +
+                        (qx(DMnFe,CFe,ix,Δxad_) - qx(DMnFe,CFe,ix-1,Δxad_)) * Δxad_ +
+                        (qx(DMnMn,CMn,ix,Δxad_) - qx(DMnMn,CMn,ix-1,Δxad_)) * Δxad_
+        end
+    end
+end
 
-# function stencil_diffusion_1D!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn, Δx_ad)
+function semi_dicretisation_diffusion_1D(du,u,p,t)
 
+    @unpack D, D0, D_charact, Δxad_ = p
 
-#     for I in eachindex((dtCMg))
-#         if I<size(dtCMg,1) && I> 1
-#             dtCMg[ix] = (@qx(DMgMg,CMg,ix,Δx_ad) - @qx(DMgMg,CMg,ix-1,Δx_ad)) / Δx_ad +
-#                         (@qx(DMgFe,CFe,ix,Δx_ad) - @qx(DMgFe,CFe,ix-1,Δx_ad)) / Δx_ad +
-#                         (@qx(DMgMn,CMn,ix,Δx_ad) - @qx(DMgMn,CMn,ix-1,Δx_ad)) / Δx_ad
-#             dtCFe[ix] = (@qx(DFeMg,CMg,ix,Δx_ad) - @qx(DFeMg,CMg,ix-1,Δx_ad)) / Δx_ad +
-#                         (@qx(DFeFe,CFe,ix,Δx_ad) - @qx(DFeFe,CFe,ix-1,Δx_ad)) / Δx_ad +
-#                         (@qx(DFeMn,CMn,ix,Δx_ad) - @qx(DFeMn,CMn,ix-1,Δx_ad)) / Δx_ad
-#             dtCMn[ix] = (@qx(DMnMg,CMg,ix,Δx_ad) - @qx(DMnMg,CMg,ix-1,Δx_ad)) / Δx_ad +
-#                         (@qx(DMnFe,CFe,ix,Δx_ad) - @qx(DMnFe,CFe,ix-1,Δx_ad)) / Δx_ad +
-#                         (@qx(DMnMn,CMn,ix,Δx_ad) - @qx(DMnMn,CMn,ix-1,Δx_ad)) / Δx_ad
-#         else
-#             dtCMg[ix] = 0
-#             dtCFe[ix] = 0
-#             dtCMn[ix] = 0
-#         end
-#     end
-# end
+    CMg = @view u[:,1]
+    CFe = @view u[:,2]
+    CMn = @view u[:,3]
 
+    dtCMg = @view du[:,1]
+    dtCFe = @view du[:,2]
+    dtCMn = @view du[:,3]
 
-# test = ones(100,100)
+    # update diffusive parameters
+    Diffusion_coef_1D!(D, CMg, CFe ,CMn, D0, D_charact)
 
-# dtCMg = ones(100)
-# dtCMn = ones(100)
-# dtCFe = ones(100)
+    # semi-discretization
+    stencil_diffusion!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δxad_)
+end
 
-
-# for I in eachindex((dtCMg))
-#     if I<size(dtCMg,1) && I> 1
-#         dtCMg[ix] = (@qx(DMgMg,CMg,ix,Δx_ad) - @qx(DMgMg,CMg,ix-1,Δx_ad)) / Δx_ad +
-#                     (@qx(DMgFe,CFe,ix,Δx_ad) - @qx(DMgFe,CFe,ix-1,Δx_ad)) / Δx_ad +
-#                     (@qx(DMgMn,CMn,ix,Δx_ad) - @qx(DMgMn,CMn,ix-1,Δx_ad)) / Δx_ad
-#         dtCFe[ix] = (@qx(DFeMg,CMg,ix,Δx_ad) - @qx(DFeMg,CMg,ix-1,Δx_ad)) / Δx_ad +
-#                     (@qx(DFeFe,CFe,ix,Δx_ad) - @qx(DFeFe,CFe,ix-1,Δx_ad)) / Δx_ad +
-#                     (@qx(DFeMn,CMn,ix,Δx_ad) - @qx(DFeMn,CMn,ix-1,Δx_ad)) / Δx_ad
-#         dtCMn[ix] = (@qx(DMnMg,CMg,ix,Δx_ad) - @qx(DMnMg,CMg,ix-1,Δx_ad)) / Δx_ad +
-#                     (@qx(DMnFe,CFe,ix,Δx_ad) - @qx(DMnFe,CFe,ix-1,Δx_ad)) / Δx_ad +
-#                     (@qx(DMnMn,CMn,ix,Δx_ad) - @qx(DMnMn,CMn,ix-1,Δx_ad)) / Δx_ad
-#     else
-#         dtCMg[ix] = 0
-#         dtCFe[ix] = 0
-#         dtCMn[ix] = 0
-#     end
-# end
-
-
-# for i in eachindex(test)
-
-#     @show i
-
-# end

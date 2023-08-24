@@ -3,8 +3,9 @@ module DiffusionGarnet
 using Reexport
 
 @reexport using Plots
-# @reexport using OrdinaryDiffEq, DiffEqCallbacks, LinearSolve
+@reexport using OrdinaryDiffEq
 @reexport using BenchmarkTools
+@reexport using Symbolics
 @reexport using Parameters
 @reexport using Unitful
 @reexport using DelimitedFiles
@@ -18,8 +19,12 @@ function __init__()
 end
 
 include("input/initialconditions.jl")
+include("1D/semi_discretisation_1D.jl")
+include("simulate/simulate.jl")
 
 export InitialConditions1D, InitialConditions2D, InitialConditions3D
 export D_ini!, Domain
+export semi_dicretisation_diffusion_1D
+export simulate
 
 end # module DiffusionGarnet
