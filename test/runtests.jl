@@ -3,36 +3,36 @@ using Test
 
 @testset "initial conditions" begin
     # 1D, test geometry.jl
-    CMg = ones(5)
-    CFe = ones(5)
-    CMn = ones(5)
+    CMg = ones(5) .* 0.1
+    CFe = ones(5) .* 0.1
+    CMn = ones(5) .* 0.1
     Lx = 10.0u"µm"
     tfinal = 1.0u"Myr"
 
-    IC1D = InitialConditions(CMg, CFe, CMn, tfinal, Lx)
+    IC1D = InitialConditions1D(CMg, CFe, CMn, tfinal, Lx)
 
     @test IC1D.CMg0 == CMg
     @test IC1D.Lx == ustrip(u"µm",Lx)
     @test IC1D.tfinal == ustrip(u"Myr",tfinal)
 
-    CMg = ones(5, 5)
-    CFe = ones(5, 5)
-    CMn = ones(5, 5)
+    CMg = ones(5, 5) .* 0.1
+    CFe = ones(5, 5) .* 0.1
+    CMn = ones(5, 5) .* 0.1
     Ly = 10.0u"µm"
 
-    IC2D = InitialConditions(CMg, CFe, CMn, tfinal, Lx, Ly)
+    IC2D = InitialConditions2D(CMg, CFe, CMn, tfinal, Lx, Ly)
 
     @test IC2D.CMg0 == CMg
     @test IC2D.Ly == ustrip(u"µm",Ly)
     @test IC2D.grid.x == IC2D.x' .* ones(size(CMg,2))
     @test IC2D.tfinal == ustrip(u"Myr",tfinal)
 
-    CMg = ones(5, 5, 5)
-    CFe = ones(5, 5, 5)
-    CMn = ones(5, 5, 5)
+    CMg = ones(5, 5, 5) .* 0.1
+    CFe = ones(5, 5, 5) .* 0.1
+    CMn = ones(5, 5, 5) .* 0.1
     Lz = 10.0u"µm"
 
-    IC3D = InitialConditions(CMg, CFe, CMn, tfinal, Lx, Ly, Lz)
+    IC3D = InitialConditions3D(CMg, CFe, CMn, tfinal, Lx, Ly, Lz)
 
     @test IC3D.CMg0 == CMg
     @test IC3D.Lz == ustrip(u"µm",Lz)

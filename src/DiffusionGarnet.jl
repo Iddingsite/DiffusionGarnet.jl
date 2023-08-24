@@ -7,6 +7,7 @@ using Reexport
 @reexport using BenchmarkTools
 @reexport using Parameters
 @reexport using Unitful
+@reexport using DelimitedFiles
 # @reexport using ParallelStencil
 @reexport using Logging: global_logger
 @reexport using TerminalLoggers: TerminalLogger
@@ -18,7 +19,7 @@ end
 
 include("input/initialconditions.jl")
 
-export InitialConditions
+export InitialConditions1D, InitialConditions2D, InitialConditions3D
 export D_ini!, Domain
 
 end # module DiffusionGarnet

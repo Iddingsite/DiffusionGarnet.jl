@@ -4,7 +4,7 @@ using Parameters
 using Statistics
 
 
-@with_kw struct InitialConditions1D{T1<:Array{Float64, 1} , T2 <: Float64}
+@with_kw struct InitialConditions1D{T1<:Array{<:Real, 1} , T2 <: Float64}
     CMg0::T1
     CFe0::T1
     CMn0::T1
@@ -13,13 +13,15 @@ using Statistics
     Δx::T2
     x::StepRangeLen
     tfinal::T2
-    function InitialConditions1D(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, tfinal::T2) where {T1 <: Array{Float64, 1}, T2 <: Float64}
+    function InitialConditions1D(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, tfinal::T2) where {T1 <: Array{<:Real, 1}, T2 <: Float64}
         if Lx <= 0
             error("Length should be positive.")
         elseif tfinal <= 0
             error("Total time should be positive.")
         elseif size(CMg0, 1) != size(CFe0, 1) || size(CMg0, 1) != size(CMn0, 1)
             error("Initial conditions should have the same size.")
+        elseif maximum(sum.(CMg0.+ CFe0.+ CMn0)) >= 1
+            error("Initial conditions should be in mass fraction.")
         else
             nx = size(CMg0, 1)
             Δx = Lx / (nx)
@@ -30,7 +32,7 @@ using Statistics
 end
 
 
-@with_kw struct InitialConditions2D{T1 <: Array{Float64, 2}, T2 <: Float64}
+@with_kw struct InitialConditions2D{T1 <: Array{<:Real, 2}, T2 <: Float64}
     CMg0::T1
     CFe0::T1
     CMn0::T1
@@ -42,15 +44,17 @@ end
     Δy::T2
     x::StepRangeLen
     y::StepRangeLen
-    grid::NamedTuple{(:x, :y), Tuple{Matrix{Float64}, Matrix{Float64}}}
+    grid::NamedTuple{(:x, :y), Tuple{Matrix{T2}, Matrix{T2}}}
     tfinal::T2
-    function InitialConditions2D(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, Ly::T2, tfinal::T2) where {T1 <: Array{Float64, 2}, T2 <: Float64}
+    function InitialConditions2D(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, Ly::T2, tfinal::T2) where {T1 <: Array{<:Real, 2}, T2 <: Float64}
         if Lx <= 0 || Ly <= 0
             error("Length should be positive.")
         elseif tfinal <= 0
             error("Total time should be positive.")
         elseif size(CMg0, 1) != size(CFe0, 1) || size(CMg0, 1) != size(CMn0, 1) || size(CMg0, 2) != size(CFe0, 2) || size(CMg0, 2) != size(CMn0, 2)
             error("Initial conditions should have the same size.")
+        elseif maximum(sum.(CMg0.+ CFe0.+ CMn0)) > 1
+            error("Initial conditions should be in mass fraction.")
         else
             nx = size(CMg0, 1)
             ny = size(CMg0, 2)
@@ -66,7 +70,7 @@ end
 end
 
 
-@with_kw struct InitialConditions3D{T1 <: Array{Float64, 3}, T2 <: Float64}
+@with_kw struct InitialConditions3D{T1 <: Array{<:Real, 3}, T2 <: Float64}
     CMg0::T1
     CFe0::T1
     CMn0::T1
@@ -82,15 +86,17 @@ end
     x::StepRangeLen
     y::StepRangeLen
     z::StepRangeLen
-    grid::NamedTuple{(:x, :y, :z), Tuple{Matrix{Float64}, Matrix{Float64}, Matrix{Float64}}}
+    grid::NamedTuple{(:x, :y, :z), Tuple{Matrix{T2}, Matrix{T2}, Matrix{T2}}}
     tfinal::T2
-    function InitialConditions3D(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, Ly::T2, Lz::T2, tfinal::T2) where {T1 <: Array{Float64, 3}, T2 <: Float64}
+    function InitialConditions3D(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, Ly::T2, Lz::T2, tfinal::T2) where {T1 <: Array{<:Real, 3}, T2 <: Float64}
         if Lx <= 0 || Ly <= 0 || Lz <= 0
             error("Length should be positive.")
         elseif tfinal <= 0
             error("Total time should be positive.")
         elseif size(CMg0, 1) != size(CFe0, 1) || size(CMg0, 1) != size(CMn0, 1) || size(CMg0, 2) != size(CFe0, 2) || size(CMg0, 2) != size(CMn0, 2) || size(CMg0, 3) != size(CFe0, 3) || size(CMg0, 3) != size(CMn0, 3)
             error("Initial conditions should have the same size.")
+        elseif maximum(sum.(CMg0.+ CFe0.+ CMn0)) > 1
+            error("Initial conditions should be in mass fraction.")
         else
             nx = size(CMg0, 1)
             ny = size(CMg0, 2)
@@ -108,15 +114,21 @@ end
     end
 end
 
-function InitialConditions(CMg0::Array{Float64, 1}, CFe0::Array{Float64, 1}, CMn0::Array{Float64, 1}, tfinal::Unitful.Time, Lx::Unitful.Length, Ly::Unitful.Length=0u"μm", Lz::Unitful.Length=0u"μm")
+"""
+sd
+
+
+
+"""
+function InitialConditions1D(CMg0::Array{<:Real, 1}, CFe0::Array{<:Real, 1}, CMn0::Array{<:Real, 1}, tfinal::Unitful.Time, Lx::Unitful.Length)
     InitialConditions1D(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"Myr",tfinal)))
 end
 
-function InitialConditions(CMg0::Array{Float64, 2}, CFe0::Array{Float64, 2}, CMn0::Array{Float64, 2},tfinal::Unitful.Time, Lx::Unitful.Length, Ly::Unitful.Length, Lz::Unitful.Length=0u"μm")
+function InitialConditions2D(CMg0::Array{<:Real, 2}, CFe0::Array{<:Real, 2}, CMn0::Array{<:Real, 2},tfinal::Unitful.Time, Lx::Unitful.Length, Ly::Unitful.Length)
     InitialConditions2D(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"µm", Ly)), convert(Float64,ustrip(u"Myr", tfinal)))
 end
 
-function InitialConditions(CMg0::Array{Float64, 3}, CFe0::Array{Float64, 3}, CMn0::Array{Float64, 3}, tfinal::Unitful.Time, Lx::Unitful.Length, Ly::Unitful.Length, Lz::Unitful.Length)
+function InitialConditions3D(CMg0::Array{<:Real, 3}, CFe0::Array{<:Real, 3}, CMn0::Array{<:Real, 3}, tfinal::Unitful.Time, Lx::Unitful.Length, Ly::Unitful.Length, Lz::Unitful.Length)
     InitialConditions3D(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"µm", Ly)), convert(Float64,ustrip(u"µm", Lz)), convert(Float64,ustrip(u"Myr", tfinal)))
 end
 
