@@ -1,6 +1,6 @@
 using DiffusionGarnet
 
-const data = DelimitedFiles.readdlm("./examples/1D_diffusion/Data_Grt_1D.txt", '\t', '\n', header=true)[1]
+const data = DelimitedFiles.readdlm("./examples/1D/Data_Grt_1D.txt", '\t', '\n', header=true)[1]
 
 const Mg0 = data[:, 4]
 const Fe0 = data[:, 2]
@@ -20,7 +20,7 @@ p2 = plot!(distance, Ca0, label="Ca initial", linestyle = :dash, linewidth=1, li
 
 display(plot(p1, p2, layout = l))
 
-IC1D = InitialConditions1D(Mg0, Fe0, Mn0, tfinal, Lx)
+IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
 
 const T = 900u"°C"
 const P = 0.6u"GPa"
