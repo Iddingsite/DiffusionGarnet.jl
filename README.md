@@ -13,7 +13,7 @@ It is build on top of the [DifferentialEquations.jl](https://github.com/SciML/Di
 ### Quick start
 
 ```julia
-# load the data of your choice (here from the text file located in the folder examples/1D)
+# load the data of your choice (here from the text file located in https://github.com/Iddingsite/DiffusionGarnet.jl/tree/main/examples/1D, place it in the same folder as where you are running the code)
 data = DelimitedFiles.readdlm("./Data_Grt_1D.txt", '\t', '\n', header=true)[1]
 
 Mg0 = data[:, 4]
@@ -21,8 +21,8 @@ Fe0 = data[:, 2]
 Mn0 = data[:, 3]
 Ca0 = data[:, 5]
 distance = data[:, 1]
-Lx = (data[end,1] - data[1,1])u"µm"
-tfinal = 15u"Myr"
+Lx = (data[end,1] - data[1,1])u"µm"  # length in x of the model
+tfinal = 15u"Myr"  # total time of the model
 
 # define the initial conditions in 1D of your problem
 IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
@@ -38,6 +38,8 @@ domain1D = Domain(IC1D, T, P)
 sol = simulate(domain1D)
 
 # you can now plot the solutions from the sol variable
+
+# extract characteristic time to convert back to dimensional time
 @unpack tfinal_ad, t_charact = domain1D
 
 anim = @animate for i = LinRange(0, tfinal_ad, 100)
@@ -66,7 +68,7 @@ println("...Done!")
 
 Here is the resulting gif obtained:
 
-![1D diffusion profil of a garnet](examples/1D/Grt_1D.gif)
+![1D diffusion profil of a garnet](docs/src/assets/img/Grt_1D.gif)
 
 
 ## Installation
