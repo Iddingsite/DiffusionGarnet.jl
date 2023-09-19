@@ -1,6 +1,8 @@
 # DiffusionGarnet.jl
 
-DiffusionGarnet is a Julia package that can be used to model coupled diffusion of major elements on real garnet data. It currently supports 1D and spherical coordinates and is soon to be extended to support 2D and 3D coordinates.
+ Garnet is a mineral commonly used in metamorphic petrology to better understand geological processes as it is present in various different rock types. This mineral commonly shows a wide spread of compositional zoning that has been interpreted as recording ranges of pressure (P) and temperature (T) conditions. Modelling diffusion processes can help to better understand this zoning and better constrain the pressure-temperature-time (PTt) conditions of the metamorphic event of interest.
+
+DiffusionGarnet is a Julia package that can be used to model coupled diffusion of major elements on real garnet data. It currently supports 1D and spherical coordinates for evenly spaced data and is soon to be extended to support 2D and 3D coordinates.
 
 ## Getting Started: Installation And Quick Start
 
@@ -14,6 +16,8 @@ julia>]
 ```
 
 ### Quick Start
+
+DiffusionGarnet requires input data with 
 
 ```julia
 # load the data of your choice (here from the text file located in the folder examples/1D)
