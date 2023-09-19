@@ -1,6 +1,6 @@
 # DiffusionGarnet
 
-[![Build Status](https://github.com/Iddingsite/DiffusionGarnet.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/Iddingsite/DiffusionGarnet.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![Build Status](https://github.com/Iddingsite/DiffusionGarnet.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/Iddingsite/DiffusionGarnet.jl/actions/workflows/CI.yml)
 [![][docs-dev-img]][docs-dev-url]
 
 [docs-dev-img]: https://img.shields.io/badge/docs-latest-blue.svg
