@@ -66,7 +66,7 @@ gif(anim, "./Grt_1D_test.gif", fps = 7)
 println("...Done!")
 ```
 
-Here is the resulting gif obtained:
+Here is the gif obtained:
 
 ![1D diffusion profil of a garnet](docs/src/assets/img/Grt_1D.gif)
 
