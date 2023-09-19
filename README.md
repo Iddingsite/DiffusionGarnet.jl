@@ -84,4 +84,4 @@ julia>]
 
 The development of this package was supported by the European Research Council (ERC) under the European Union's Horizon 2020 research and innovation programme (grant agreement No 850530).
 
-Author: Hugo Dominguez (hugo.dominguez@unibe.ch)
+Author: Hugo Dominguez (hugo.dominguez@unibe.ch).
