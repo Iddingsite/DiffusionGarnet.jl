@@ -47,22 +47,22 @@ function stencil_diffusion_spherical!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δr
             dtCMn[ix] = (qx(DMnMg,CMg,ix,Δrad_) - qx(DMnMg,CMg,ix-1,Δrad_)) * Δrad_ +
                         (qx(DMnFe,CFe,ix,Δrad_) - qx(DMnFe,CFe,ix-1,Δrad_)) * Δrad_ +
                         (qx(DMnMn,CMn,ix,Δrad_) - qx(DMnMn,CMn,ix-1,Δrad_)) * Δrad_ +
-                        DMnMg[ix] /  r_ad[ix] * (CMg[ix+1]-CMg[ix-1]) * Δrad_ +
+                        DMnMg[ix] / r_ad[ix] * (CMg[ix+1]-CMg[ix-1]) * Δrad_ +
                         DMnFe[ix] / r_ad[ix] * (CFe[ix+1]-CFe[ix-1]) * Δrad_ +
                         DMnMn[ix] / r_ad[ix] * (CMn[ix+1]-CMn[ix-1]) * Δrad_
         end
 
         # solve singularities
         if ix == 1
-            dtCMg[ix] = 6 * DMgMg[ix] * (CMg[ix+1]-CMg[ix]) / Δrad^2 +
-                        6 * DMgFe[ix] * (CFe[ix+1]-CFe[ix]) / Δrad^2 +
-                        6 * DMgMn[ix] * (CMn[ix+1]-CMn[ix]) / Δrad^2
-            dtCFe[ix] = 6 * DFeMg[ix] * (CMg[ix+1]-CMg[ix]) / Δrad^2 +
-                        6 * DFeFe[ix] * (CFe[ix+1]-CFe[ix]) / Δrad^2 +
-                        6 * DFeMn[ix] * (CMn[ix+1]-CMn[ix]) / Δrad^2
-            dtCMn[ix] = 6 * DMnMg[ix] * (CMg[ix+1]-CMg[ix]) / Δrad^2 +
-                        6 * DMnFe[ix] * (CFe[ix+1]-CFe[ix]) / Δrad^2 +
-                        6 * DMnMn[ix] * (CMn[ix+1]-CMn[ix]) / Δrad^2
+            dtCMg[ix] = 6 * DMgMg[ix] * (CMg[ix+1]-CMg[ix]) / (Δrad)^2 +
+                        6 * DMgFe[ix] * (CFe[ix+1]-CFe[ix]) / (Δrad)^2 +
+                        6 * DMgMn[ix] * (CMn[ix+1]-CMn[ix]) / (Δrad)^2
+            dtCFe[ix] = 6 * DFeMg[ix] * (CMg[ix+1]-CMg[ix]) / (Δrad)^2 +
+                        6 * DFeFe[ix] * (CFe[ix+1]-CFe[ix]) / (Δrad)^2 +
+                        6 * DFeMn[ix] * (CMn[ix+1]-CMn[ix]) / (Δrad)^2
+            dtCMn[ix] = 6 * DMnMg[ix] * (CMg[ix+1]-CMg[ix]) / (Δrad)^2 +
+                        6 * DMnFe[ix] * (CFe[ix+1]-CFe[ix]) / (Δrad)^2 +
+                        6 * DMnMn[ix] * (CMn[ix+1]-CMn[ix]) / (Δrad)^2
         end
     end
 end

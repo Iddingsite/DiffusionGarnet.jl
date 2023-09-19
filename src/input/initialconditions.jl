@@ -199,12 +199,13 @@ end
     Δxad_::T2
     u0::Matrix{T2}
     tfinal_ad::T2
+    time_update_ad::T1
     bc_neumann::T3
     function Domain1D(IC::InitialConditions1D, T::T1, P::T1, time_update::T1, bc_neumann::T2) where {T1 <: Union{Float64, Array{Float64, 1}}, T2 <: Tuple}
         @unpack nx, Δx, tfinal, Lx, CMg0, CFe0, CMn0 = IC
 
         D0::Vector{Float64} = zeros(Float64, 4)
-        D_ini!(D0, T, P)  # compute initial diffusion coefficients
+        D_ini!(D0, T[1], P[1])  # compute initial diffusion coefficients
 
         D = (DMgMg = zeros(nx), DMgFe = zeros(nx), DMgMn = zeros(nx), DFeMg = zeros(nx), DFeFe = zeros(nx), DFeMn = zeros(nx), DMnMg = zeros(nx), DMnFe = zeros(nx), DMnMn = zeros(nx))  # tensor of interdiffusion coefficients
 
@@ -219,8 +220,8 @@ end
 
         Δxad_ = 1 / (Δx / L_charact)  # inverse of nondimensionalised Δx
         tfinal_ad = tfinal / t_charact  # nondimensionalised total time
-        time_update = time_update / t_charact  # nondimensionalised time update
-        new{T1, Float64, T2}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, u0, tfinal_ad, bc_neumann)
+        time_update_ad = time_update ./ t_charact  # nondimensionalised time update
+        new{T1, Float64, T2}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, u0, tfinal_ad, time_update_ad, bc_neumann)
     end
 end
 
@@ -240,11 +241,12 @@ end
     r_ad::Vector{Float64}
     u0::Matrix{T2}
     tfinal_ad::T2
+    time_update_ad::T1
     function DomainSpherical(IC::InitialConditionsSpherical, T::T1, P::T1, time_update::T1) where {T1 <: Union{Float64, Array{Float64, 1}}}
         @unpack nr, Δr, r, tfinal, Lr, CMg0, CFe0, CMn0 = IC
 
         D0::Vector{Float64} = zeros(Float64, 4)
-        D_ini!(D0, T, P)  # compute initial diffusion coefficients
+        D_ini!(D0, T[1], P[1])  # compute initial diffusion coefficients
 
         D = (DMgMg = zeros(nr), DMgFe = zeros(nr), DMgMn = zeros(nr), DFeMg = zeros(nr), DFeFe = zeros(nr), DFeMn = zeros(nr), DMnMg = zeros(nr), DMnFe = zeros(nr), DMnMn = zeros(nr))  # tensor of interdiffusion coefficients
 
@@ -261,8 +263,8 @@ end
         Δrad_ = 1 / Δrad  # inverse of nondimensionalised Δr
         r_ad::Vector{Float64} = r ./ L_charact  # nondimensionalised radius
         tfinal_ad = tfinal / t_charact  # nondimensionalised total time
-        time_update = time_update / t_charact  # nondimensionalised time update
-        new{T1, Float64}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δrad, Δrad_, r_ad, u0, tfinal_ad)
+        time_update_ad = time_update ./ t_charact  # nondimensionalised time update
+        new{T1, Float64}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δrad, Δrad_, r_ad, u0, tfinal_ad, time_update_ad)
     end
 end
 

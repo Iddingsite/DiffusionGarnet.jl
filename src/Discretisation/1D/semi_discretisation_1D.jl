@@ -29,7 +29,7 @@ function stencil_diffusion_1D!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δxad_, bc
     DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn = D
 
     @propagate_inbounds @inline qx(D, C, ix, Δxad_) = 0.5 * (D[ix] + D[ix+1]) * (C[ix+1]-C[ix]) * Δxad_
-    @propagate_inbounds @inline neumann_left(D, C, ix, Δxad_) = (- D[ix]) * (C[ix]-C[ix+1]) * Δxad_
+    @propagate_inbounds @inline neumann_left(D, C, ix, Δxad_) = - D[ix] * (C[ix]-C[ix+1]) * Δxad_
     @propagate_inbounds @inline neumann_right(D, C, ix, Δxad_) = D[ix] * (C[ix-1]-C[ix]) * Δxad_
 
     @inbounds for ix in eachindex(dtCMg)
@@ -68,6 +68,7 @@ function stencil_diffusion_1D!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δxad_, bc
                     neumann_left(DMnFe,CFe,ix,Δxad_) * Δxad_ +
                     neumann_left(DMnMn,CMn,ix,Δxad_) * Δxad_
     end
+
     if bc_neumann[2] == true
         ix = last_index(dtCMg)
         dtCMg[end] = - qx(DMgMg,CMg,ix,Δxad_) * Δxad_ -
