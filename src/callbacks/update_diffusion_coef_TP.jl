@@ -27,7 +27,7 @@ end
 
 function update_diffusion_coef(integrator)
 
-    @unpack D0, P, T, time_update_ad = integrator.p
+    @unpack D0, P, T, time_update_ad, t_charact = integrator.p
 
     # find the index of the time_update_ad that is equal to t
     index = findfirst(x -> x == integrator.t, time_update_ad)
@@ -35,6 +35,9 @@ function update_diffusion_coef(integrator)
     # update diffusion coefficients
     if index !== nothing
         D_update!(D0, T[index], P[index])
-        @show integrator.t
+
+        if integrator.t ≠ 0.0
+            println("New temperature and pressure: $(T[index]) °C and $(P[index]) kbar, updated at $(round((integrator.t * t_charact), digits=2)) Myr")
+        end
     end
 end

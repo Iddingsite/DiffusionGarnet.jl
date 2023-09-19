@@ -25,7 +25,7 @@ sol = simulate(domain1D)
 anim = @animate for i = LinRange(0, tfinal_ad, 100)
     l = @layout [a ; b]
 
-    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = "Timestep = $(round(((i)* t_charact);digits=2)) Ma", legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
+    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = "Total Time = $(round(((i)* t_charact);digits=2)) Myr", legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
     p1 = plot!(distance, sol(i)[:,2], label="Fe",linecolor=1, linewidth=1)
 
 
@@ -42,5 +42,5 @@ anim = @animate for i = LinRange(0, tfinal_ad, 100)
 end every 1
 
 println("Now, generating the gif...")
-gif(anim, "./examples/1D_diffusion/Grt_1D_test.gif", fps = 7)
+gif(anim, "./examples/1D/Grt_1D.gif", fps = 7)
 println("...Done!")
