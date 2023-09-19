@@ -202,6 +202,12 @@ end
     time_update_ad::T1
     bc_neumann::T3
     function Domain1D(IC::InitialConditions1D, T::T1, P::T1, time_update::T1, bc_neumann::T2) where {T1 <: Union{Float64, Array{Float64, 1}}, T2 <: Tuple}
+
+        #check that T, P and time_update have the same size
+        if size(T, 1) != size(P, 1) || size(T, 1) != size(time_update, 1)
+            error("T, P and time_update should have the same size.")
+        end
+
         @unpack nx, Δx, tfinal, Lx, CMg0, CFe0, CMn0 = IC
 
         D0::Vector{Float64} = zeros(Float64, 4)
@@ -243,6 +249,12 @@ end
     tfinal_ad::T2
     time_update_ad::T1
     function DomainSpherical(IC::InitialConditionsSpherical, T::T1, P::T1, time_update::T1) where {T1 <: Union{Float64, Array{Float64, 1}}}
+
+        #check that T, P and time_update have the same size
+        if size(T, 1) != size(P, 1) || size(T, 1) != size(time_update, 1)
+            error("T, P and time_update should have the same size.")
+        end
+
         @unpack nr, Δr, r, tfinal, Lr, CMg0, CFe0, CMn0 = IC
 
         D0::Vector{Float64} = zeros(Float64, 4)
