@@ -8,9 +8,10 @@ makedocs(;
          modules  = [DiffusionGarnet],
          pages=[
                 "Home" => "index.md"
+                "Reference" => "reference.md"
                ],
 )
 
 deploydocs(;
-    repo="github.com/Iddingsite/DiffusionGarnet.jl.git", devbranch = "main"
+    repo="github.com/Iddingsite/DiffusionGarnet.jl", devbranch = "main"
 )

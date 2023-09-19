@@ -23,7 +23,7 @@ domain1D = Domain(IC1D, T, P, time_update)
 update_diffusion_coef_call = PresetTimeCallback(time_update_ad, update_diffusion_coef)
 
 
-sol = simulate(domain1D; callbacks=update_diffusion_coef_call);
+sol = simulate(domain1D; callback=update_diffusion_coef_call);
 
 
 @unpack tfinal_ad, t_charact = domain1D

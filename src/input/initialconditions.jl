@@ -140,19 +140,38 @@ end
     end
 end
 
+"""
+    InitialConditions1D(CMg0::Array{<:Real, 1}, CFe0::Array{<:Real, 1}, CMn0::Array{<:Real, 1}, Lx::Unitful.Length, tfinal::Unitful.Time)
 
+Return a structure containing the initial conditions for a 1D diffusion problem. CMg0, CFe0 and CMn0 need to be in mass fraction. Convert the `Lx`` and `tfinal`` to µm and Myr respectively.
+"""
 function InitialConditions1D(CMg0::Array{<:Real, 1}, CFe0::Array{<:Real, 1}, CMn0::Array{<:Real, 1}, Lx::Unitful.Length, tfinal::Unitful.Time)
     InitialConditions1D(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"Myr",tfinal)))
 end
 
+"""
+    InitialConditionsSpherical(CMg0::Array{<:Real, 1}, CFe0::Array{<:Real, 1}, CMn0::Array{<:Real, 1}, Lr::Unitful.Length, tfinal::Unitful.Time)
+
+Return a structure containing the initial conditions for a spherical diffusion problem. CMg0, CFe0 and CMn0 need to be in mass fraction. Convert `Lr` and `tfinal` to µm and Myr respectively.
+"""
 function InitialConditionsSpherical(CMg0::Array{<:Real, 1}, CFe0::Array{<:Real, 1}, CMn0::Array{<:Real, 1}, Lr::Unitful.Length, tfinal::Unitful.Time)
     InitialConditionsSpherical(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lr)), convert(Float64,ustrip(u"Myr",tfinal)))
 end
 
+"""
+    InitialConditions2D(CMg0::Array{<:Real, 2}, CFe0::Array{<:Real, 2}, CMn0::Array{<:Real, 2}, Lx::Unitful.Length, Ly::Unitful.Length, tfinal::Unitful.Time)
+
+Return a structure containing the initial conditions for a 2D diffusion problem. CMg0, CFe0 and CMn0 need to be in mass fraction. Convert `Lx`, `Ly` and `tfinal` to µm, µm and Myr respectively.
+"""
 function InitialConditions2D(CMg0::Array{<:Real, 2}, CFe0::Array{<:Real, 2}, CMn0::Array{<:Real, 2}, Lx::Unitful.Length, Ly::Unitful.Length, tfinal::Unitful.Time)
     InitialConditions2D(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"µm", Ly)), convert(Float64,ustrip(u"Myr", tfinal)))
 end
 
+"""
+    InitialConditions3D(CMg0::Array{<:Real, 3}, CFe0::Array{<:Real, 3}, CMn0::Array{<:Real, 3}, Lx::Unitful.Length, Ly::Unitful.Length, Lz::Unitful.Length, tfinal::Unitful.Time)
+
+Return a structure containing the initial conditions for a 3D diffusion problem. CMg0, CFe0 and CMn0 need to be in mass fraction. Convert `Lx`, `Ly`, `Lz` and `tfinal` to µm, µm, µm and Myr respectively.
+"""
 function InitialConditions3D(CMg0::Array{<:Real, 3}, CFe0::Array{<:Real, 3}, CMn0::Array{<:Real, 3}, Lx::Unitful.Length, Ly::Unitful.Length, Lz::Unitful.Length, tfinal::Unitful.Time)
     InitialConditions3D(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"µm", Ly)), convert(Float64,ustrip(u"µm", Lz)), convert(Float64,ustrip(u"Myr", tfinal)))
 end
@@ -362,20 +381,46 @@ end
     end
 end
 
+"""
+    Domain(IC, T, P, time_update=0u"Myr")
 
+Return a struct containing the struct IC, the PT conditions `T` and `P`  and the nondimensionalised parameters of the problem. `time_update` can be used to update the PT conditions during the simulation. If so, `T` and `P` have to be of the same size as `time_update` and correspond to the values of PT to update to.
+
+"""
+function Domain end
+
+"""
+    Domain(IC::InitialConditions1D, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr"; bc_neumann::Tuple=(false, false))
+
+When applied to 1D initial conditions, define corresponding 1D domain. `bc_neumann` can be used to define Neumann boundary conditions on the left or right of the domain if set to true.
+"""
 function Domain(IC::InitialConditions1D, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr"; bc_neumann::Tuple=(false, false))
     Domain1D(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), bc_neumann)
 end
 
+"""
+   Domain(IC::InitialConditionsSpherical, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr")
+
+When applied to spherical initial conditions, define corresponding spherical domain.
+"""
 function Domain(IC::InitialConditionsSpherical, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr")
     DomainSpherical(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)))
 end
 
+"""
+    Domain(IC::InitialConditions2D, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr")
 
+When applied to 2D initial conditions, define corresponding 2D domain.
+"""
 function Domain(IC::InitialConditions2D, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr")
     Domain2D(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)))
 end
 
+"""
+    Domain(IC::InitialConditions3D, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr")
+
+When applied to 3D initial conditions, define corresponding 3D domain.
+"""
 function Domain(IC::InitialConditions3D, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr")
     Domain3D(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)))
 end

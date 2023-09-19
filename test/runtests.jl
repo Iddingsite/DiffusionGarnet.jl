@@ -159,8 +159,8 @@ end
 
     update_diffusion_coef_call = PresetTimeCallback(time_update_ad, update_diffusion_coef)
 
-    sol_sph = simulate(domainSph; callbacks=update_diffusion_coef_call)
-    sol_1D = simulate(domain1D; callbacks=update_diffusion_coef_call)
+    sol_sph = simulate(domainSph; callback=update_diffusion_coef_call)
+    sol_1D = simulate(domain1D; callback=update_diffusion_coef_call)
 
     T=600  # in °C
     P=3  # in kbar

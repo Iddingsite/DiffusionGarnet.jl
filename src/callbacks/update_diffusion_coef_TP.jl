@@ -25,6 +25,13 @@ function D_update!(D0,T,P)
     D0 .= [DMg, DFe, DMn, DCa] .* (365.25 * 24 * 3600 * 1e6)  # in years
 end
 
+"""
+    update_diffusion_coef(integrator)
+
+Callback function to update the diffusion coefficients at a given time from a new pressure and temperature. To use with the callback `PresetTimeCallback` (https://docs.sciml.ai/stable/basics/callbacks/#PresetTimeCallback-1).
+
+Follows the syntax of callback functions defined by DiffEqCallbacks.jl (https://docs.sciml.ai/DiffEqCallbacks/stable/).
+"""
 function update_diffusion_coef(integrator)
 
     @unpack D0, P, T, time_update_ad, t_charact = integrator.p
