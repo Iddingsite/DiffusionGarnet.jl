@@ -1,10 +1,10 @@
 # DiffusionGarnet
 
 [![Build Status](https://github.com/Iddingsite/DiffusionGarnet.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/Iddingsite/DiffusionGarnet.jl/actions/workflows/CI.yml)
-[![][docs-dev-img]][docs-dev-url]
+[![][docs-dev-img]][docs-stable-url]
 
 [docs-dev-img]: https://img.shields.io/badge/docs-latest-blue.svg
-[docs-dev-url]: https://iddingsite.github.io/DiffusionGarnet.jl/dev/
+[docs-stable-url]: https://iddingsite.github.io/DiffusionGarnet.jl/
 
 DiffusionGarnet is a Julia package that can be used to model coupled diffusion of major elements on real garnet data. It currently supports 1D and spherical coordinates and is soon to be extended to support 2D and 3D coordinates.
 
