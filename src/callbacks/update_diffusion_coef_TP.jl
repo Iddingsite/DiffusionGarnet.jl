@@ -35,5 +35,6 @@ function update_diffusion_coef(integrator)
     # update diffusion coefficients
     if index !== nothing
         D_update!(D0, T[index], P[index])
+        @show integrator.t
     end
 end

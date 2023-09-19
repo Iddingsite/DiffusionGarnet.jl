@@ -129,3 +129,44 @@ end
 
     @test norm(sum.(sol[end][:,1] .+ sol[end][:,2] .+ sol[end][:,3])) ≈ 20.268803083443927
 end
+
+@testset "Callback update D0" begin
+
+    data = DelimitedFiles.readdlm("./Data_Grt_1D.txt", '\t', '\n', header=true)[1]
+
+    Mg0 = reverse(data[1:size(data,1)÷2, 4])
+    Fe0 = reverse(data[1:size(data,1)÷2, 2])
+    Mn0 = reverse(data[1:size(data,1)÷2, 3])
+    Ca0 = reverse(data[1:size(data,1)÷2, 5])
+    distance = data[1:size(data,1)÷2, 1]
+    Lx = (data[end,1] - data[1,1])u"µm"
+    tfinal = 3u"Myr"
+
+    ICSph = InitialConditionsSpherical(Mg0, Fe0, Mn0, Lx, tfinal)
+    IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
+
+    time_update = [0u"Myr", 2u"Myr"]
+    T = [850u"°C", 600u"°C"]
+    P = [0.5u"GPa", 0.3u"GPa"]
+
+    domainSph = Domain(ICSph, T, P, time_update)
+    domain1D = Domain(IC1D, T, P, time_update)
+
+    @test domainSph.D0[1] ≈ 151880.41527919917
+    @test domain1D.D0[1] ≈ 151880.41527919917
+
+    @unpack time_update_ad = domainSph
+
+    update_diffusion_coef_call = PresetTimeCallback(time_update_ad, update_diffusion_coef)
+
+    sol_sph = simulate(domainSph; callbacks=update_diffusion_coef_call)
+    sol_1D = simulate(domain1D; callbacks=update_diffusion_coef_call)
+
+    T=600  # in °C
+    P=3  # in kbar
+    D0 = zeros(Float64, 4)
+    D_ini!(D0,T,P)
+
+    @test sol_sph.prob.p.D0[1] ≈ D0[1]
+    @test sol_1D.prob.p.D0[1] ≈ D0[1]
+end

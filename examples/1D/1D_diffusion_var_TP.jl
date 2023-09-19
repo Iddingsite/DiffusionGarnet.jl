@@ -12,10 +12,9 @@ const tfinal = 15u"Myr"
 
 IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
 
-time_update = [0u"Myr", 2u"Myr", 4u"Myr", 6u"Myr", 8u"Myr", 10u"Myr", 12u"Myr", 14u"Myr"]
-T = [900u"°C", 850u"°C", 800u"°C", 750u"°C", 700u"°C", 650u"°C", 600u"°C", 550u"°C"]
-P = [0.6u"GPa", 0.5u"GPa", 0.4u"GPa", 0.3u"GPa", 3u"GPa", 3u"GPa", 3u"GPa", 3u"GPa"]
-ustrip.(u"Myr", time_update)
+time_update = [0, 2, 4, 6, 8, 10, 12, 14]u"Myr"
+T = [900, 850, 800, 750, 700, 650, 600, 550]u"°C"
+P = [0.6, 0.5, 0.4, 0.3, 0.3, 0.3, 0.3, 0.3]u"GPa"
 
 domain1D = Domain(IC1D, T, P, time_update)
 
