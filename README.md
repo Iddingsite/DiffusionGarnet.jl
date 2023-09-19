@@ -79,3 +79,7 @@ julia>]
   pkg> add DiffusionGarnet
   pkg> test DiffusionGarnet
 ```
+
+# Funding
+
+The development of this package was supported by the European Research Council (ERC) under the European Union's Horizon 2020 research and innovation programme (grant agreement No 850530).
