@@ -73,13 +73,14 @@ Here is the resulting gif obtained:
 
 ## Installation
 
-DiffusionGarnet may be installed directly with the [Julia package manager](https://docs.julialang.org/en/v1/stdlib/Pkg/index.html) from the REPL:
+DiffusionGarnet may be installed directly from the REPL:
 ```julia-repl
 julia>]
-  pkg> add DiffusionGarnet
+  pkg> add https://github.com/Iddingsite/DiffusionGarnet.jl
   pkg> test DiffusionGarnet
 ```
 
-# Funding
+# Funding & author
 
 The development of this package was supported by the European Research Council (ERC) under the European Union's Horizon 2020 research and innovation programme (grant agreement No 850530).
+

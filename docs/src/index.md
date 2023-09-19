@@ -6,10 +6,10 @@ DiffusionGarnet is a Julia package that can be used to model coupled diffusion o
 
 ## Installation
 
-DiffusionGarnet may be installed directly with the [Julia package manager](https://docs.julialang.org/en/v1/stdlib/Pkg/index.html) from the REPL:
+DiffusionGarnet may be installed directly from the REPL:
 ```julia-repl
 julia>]
-  pkg> add DiffusionGarnet
+  pkg> add https://github.com/Iddingsite/DiffusionGarnet.jl
   pkg> test DiffusionGarnet
 ```
 
