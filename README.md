@@ -8,7 +8,7 @@
 
 DiffusionGarnet is a Julia package that can be used to model coupled diffusion of major elements on real garnet data. It currently supports 1D and spherical coordinates and is soon to be extended to support 2D and 3D coordinates.
 
-It is build on top of the [DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl) package ecosystem and use [Unitful.jl](https://github.com/PainterQubits/Unitful.jl) to allow the user to define appropriate units for its problems.
+It is build on top of the [DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl) package ecosystem and uses [Unitful.jl](https://github.com/PainterQubits/Unitful.jl) to allow the user to define appropriate units for its problems.
 
 ### Quick start
 
