@@ -57,3 +57,26 @@ function simulate(domain::DomainSpherical; callback=nothing)
 
     return sol
 end
+
+"""
+    simulate(domain::Domain2D; callback=nothing)
+
+Solve the coupled diffusion equation in 2D. Save only the first and last timestep in the output solution type variable.
+
+"""
+function simulate(domain::Domain2D; callback=nothing)
+
+    @unpack tfinal_ad, u0 = domain
+
+    t = [0.0, tfinal_ad]
+
+    prob = ODEProblem(semi_discretisation_diffusion_2D, u0, t, domain)
+
+    if callback === nothing
+        @time sol = solve(prob, ROCK2(), progress=true, progress_steps=1, save_start=true, abstol=1e-6,reltol=1e-6, save_everystep = false)
+    else
+        @time sol = solve(prob, ROCK2(), progress=true, progress_steps=1, save_start=true, abstol=1e-6,reltol=1e-6, save_everystep = false, callback=callback)
+    end
+
+    return sol
+end

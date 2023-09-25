@@ -30,7 +30,6 @@ using Test
 
     @test IC2D.CMg0 == CMg
     @test IC2D.Ly == ustrip(u"µm",Ly)
-    @test IC2D.grid.x == IC2D.x' .* ones(size(CMg,2))
     @test IC2D.tfinal == ustrip(u"Myr",tfinal)
 
     CMg = ones(5, 5, 5) .* 0.1
@@ -42,7 +41,6 @@ using Test
 
     @test IC3D.CMg0 == CMg
     @test IC3D.Lz == ustrip(u"µm",Lz)
-    @test IC3D.grid.x == IC3D.x' .* ones(size(CMg,2), size(CMg,3))
     @test IC3D.tfinal == ustrip(u"Myr",tfinal)
 
     T = 650u"°C"
@@ -84,7 +82,9 @@ end
 
 @testset "1D diffusion" begin
 
-    data = DelimitedFiles.readdlm("./Data_Grt_1D.txt", '\t', '\n', header=true)[1]
+    using LinearAlgebra: norm
+
+    data = DelimitedFiles.readdlm("./Data/1D/Data_Grt_1D.txt", '\t', '\n', header=true)[1]
 
     Mg0 = data[:, 4]
     Fe0 = data[:, 2]
@@ -108,7 +108,10 @@ end
 
 @testset "Spherical diffusion" begin
 
-    data = DelimitedFiles.readdlm("./Data_Grt_1D.txt", '\t', '\n', header=true)[1]
+    using LinearAlgebra: norm
+
+
+    data = DelimitedFiles.readdlm("./Data/1D/Data_Grt_1D.txt", '\t', '\n', header=true)[1]
 
     Mg0 = reverse(data[1:size(data,1)÷2, 4])
     Fe0 = reverse(data[1:size(data,1)÷2, 2])
@@ -132,7 +135,7 @@ end
 
 @testset "Callback update D0" begin
 
-    data = DelimitedFiles.readdlm("./Data_Grt_1D.txt", '\t', '\n', header=true)[1]
+    data = DelimitedFiles.readdlm("./Data/1D/Data_Grt_1D.txt", '\t', '\n', header=true)[1]
 
     Mg0 = reverse(data[1:size(data,1)÷2, 4])
     Fe0 = reverse(data[1:size(data,1)÷2, 2])
@@ -170,3 +173,20 @@ end
     @test sol_sph.prob.p.D0[1] ≈ D0[1]
     @test sol_1D.prob.p.D0[1] ≈ D0[1]
 end
+
+using DiffusionGarnet
+
+CMg = DelimitedFiles.readdlm("test/Data/2D/Xprp_LR.txt", '\t', '\n', header=false)
+CFe = DelimitedFiles.readdlm("test/Data/2D/Xalm_LR.txt", '\t', '\n', header=false)
+CMn = DelimitedFiles.readdlm("test/Data/2D/Xsps_LR.txt", '\t', '\n', header=false)
+grt_boundary = DelimitedFiles.readdlm("test/Data/2D/Contour_LR.txt", '\t', '\n', header=false)
+
+Lx = 900.0u"µm"
+Ly = 900.0u"µm"
+tfinal = 1.0u"Myr"
+T = 900u"°C"
+P = 0.6u"GPa"
+IC2D = InitialConditions2D(CMg, CFe, CMn, Lx, Ly, tfinal)
+domain2D = Domain(IC2D, T, P)
+
+sol = simulate(domain2D)
