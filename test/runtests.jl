@@ -173,20 +173,3 @@ end
     @test sol_sph.prob.p.D0[1] ≈ D0[1]
     @test sol_1D.prob.p.D0[1] ≈ D0[1]
 end
-
-using DiffusionGarnet
-
-CMg = DelimitedFiles.readdlm("test/Data/2D/Xprp_LR.txt", '\t', '\n', header=false)
-CFe = DelimitedFiles.readdlm("test/Data/2D/Xalm_LR.txt", '\t', '\n', header=false)
-CMn = DelimitedFiles.readdlm("test/Data/2D/Xsps_LR.txt", '\t', '\n', header=false)
-grt_boundary = DelimitedFiles.readdlm("test/Data/2D/Contour_LR.txt", '\t', '\n', header=false)
-
-Lx = 900.0u"µm"
-Ly = 900.0u"µm"
-tfinal = 1.0u"Myr"
-T = 900u"°C"
-P = 0.6u"GPa"
-IC2D = InitialConditions2D(CMg, CFe, CMn, Lx, Ly, tfinal)
-domain2D = Domain(IC2D, T, P)
-
-sol = simulate(domain2D)
