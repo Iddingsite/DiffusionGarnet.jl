@@ -101,7 +101,7 @@ end
 
     domain1D = Domain(IC1D, T, P)
 
-    sol = simulate(domain1D)
+    sol = simulate(domain1D; progressbar=false)
 
     @test norm(sum.(sol[end][:,1] .+ sol[end][:,2] .+ sol[end][:,3])) ≈ 28.64886878627501
 end
@@ -128,10 +128,34 @@ end
 
     domainSph = Domain(ICSph, T, P)
 
-    sol = simulate(domainSph)
+    sol = simulate(domainSph; progressbar=false)
 
     @test norm(sum.(sol[end][:,1] .+ sol[end][:,2] .+ sol[end][:,3])) ≈ 20.268803083443927
 end
+
+@testset "2D Diffusion" begin
+
+    using LinearAlgebra: norm
+
+    CMg = DelimitedFiles.readdlm("./Data/2D/Xprp_LR.txt", '\t', '\n', header=false)
+    CFe = DelimitedFiles.readdlm("./Data/2D/Xalm_LR.txt", '\t', '\n', header=false)
+    CMn = DelimitedFiles.readdlm("./Data/2D/Xsps_LR.txt", '\t', '\n', header=false)
+    grt_boundary = DelimitedFiles.readdlm("./Data/2D/Contour_LR.txt", '\t', '\n', header=false)
+
+    Lx = 900.0u"µm"
+    Ly = 900.0u"µm"
+    tfinal = 1.0u"Myr"
+    T = 900u"°C"
+    P = 0.6u"GPa"
+    IC2D = InitialConditions2D(CMg, CFe, CMn, Lx, Ly, tfinal; grt_boundary = grt_boundary)
+    domain2D = Domain(IC2D, T, P)
+
+    sol = simulate(domain2D; progressbar=false)
+
+    @test norm(sol[end][:,:,1]) ≈ 12.783357041653609
+
+end
+
 
 @testset "Callback update D0" begin
 
@@ -162,8 +186,8 @@ end
 
     update_diffusion_coef_call = PresetTimeCallback(time_update_ad, update_diffusion_coef)
 
-    sol_sph = simulate(domainSph; callback=update_diffusion_coef_call)
-    sol_1D = simulate(domain1D; callback=update_diffusion_coef_call)
+    sol_sph = simulate(domainSph; callback=update_diffusion_coef_call, progressbar=false)
+    sol_1D = simulate(domain1D; callback=update_diffusion_coef_call, progressbar=false)
 
     T=600  # in °C
     P=3  # in kbar

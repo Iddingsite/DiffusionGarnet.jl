@@ -149,8 +149,6 @@ function semi_discretisation_diffusion_2D(du,u,p,t)
     dtCFe = @view du[:,:,2]
     dtCMn = @view du[:,:,3]
 
-    println(typeof(du))
-
     # update diffusive parameters
     @parallel Diffusion_coef_2D!(DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn,
                                  CMg, CFe ,CMn, D0, D_charact, grt_position)
