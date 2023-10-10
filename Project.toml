@@ -1,7 +1,7 @@
 name = "DiffusionGarnet"
 uuid = "d440471f-548d-4017-b306-a3be590dd0f0"
 authors = ["Hugo Dominguez"]
-version = "1.0.0-DEV"
+version = "0.0.2"
 
 [deps]
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
