@@ -76,7 +76,7 @@ Here is the gif obtained:
 DiffusionGarnet may be installed directly from the REPL:
 ```julia-repl
 julia>]
-  pkg> add https://github.com/Iddingsite/DiffusionGarnet.jl
+  pkg> add DiffusionGarnet
   pkg> test DiffusionGarnet
 ```
 
