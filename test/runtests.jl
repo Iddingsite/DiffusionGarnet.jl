@@ -170,14 +170,14 @@ end
     Ca0 = reverse(data[1:size(data,1)÷2, 5])
     distance = data[1:size(data,1)÷2, 1]
     Lx = Lr = (data[end,1] - data[1,1])u"µm"
-    tfinal = 3u"Myr"
+    tfinal = 1u"Myr"
+    T = [850u"°C", 600u"°C"]
+    P = [0.5u"GPa", 0.3u"GPa"]
 
     ICSph = InitialConditionsSpherical(Mg0, Fe0, Mn0, Lr, tfinal)
     IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
 
-    time_update = [0u"Myr", 2u"Myr"]
-    T = [850u"°C", 600u"°C"]
-    P = [0.5u"GPa", 0.3u"GPa"]
+    time_update = [0u"Myr", 1u"Myr"]
 
     domainSph = Domain(ICSph, T, P, time_update)
     domain1D = Domain(IC1D, T, P, time_update)
@@ -194,11 +194,9 @@ end
     Ly = 900.0u"µm"
 
     IC2D = InitialConditions2D(CMg, CFe, CMn, Lx, Ly, tfinal; grt_boundary = grt_boundary)
-
     domain2D = Domain(IC2D, T, P, time_update)
 
     @test domain2D.D0[1] ≈ 151880.41527919917
-
 
     @unpack time_update_ad = domainSph
 
@@ -211,6 +209,7 @@ end
     update_diffusion_coef_call = PresetTimeCallback(time_update_ad, update_diffusion_coef)
 
     sol_2D = simulate(domain2D; callback=update_diffusion_coef_call, progressbar=true)
+    sol_2D = simulate(domain2D; progressbar=true)
 
     T=600  # in °C
     P=3  # in kbar
