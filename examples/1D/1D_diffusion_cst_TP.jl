@@ -1,6 +1,10 @@
 using DiffusionGarnet
+using DelimitedFiles
 
-const data = DelimitedFiles.readdlm("./examples/1D/Data_Grt_1D.txt", '\t', '\n', header=true)[1]
+cd(@__DIR__)
+
+# load the data of your choice (here from the text file located in https://github.com/Iddingsite/DiffusionGarnet.jl/tree/main/examples/1D, place it in the same folder as where you are running the code)
+const data = DelimitedFiles.readdlm("./Data_Grt_1D.txt", '\t', '\n', header=true)[1]
 
 const Mg0 = data[:, 4]
 const Fe0 = data[:, 2]
@@ -8,18 +12,24 @@ const Mn0 = data[:, 3]
 const Ca0 = data[:, 5]
 const distance = data[:, 1]
 const Lx = (data[end,1] - data[1,1])u"µm"
-const tfinal = 15u"Myr"
+const tfinal = 1u"Myr"
 
+# define the initial conditions in 1D of your problem
 IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
 
+# define the PT conditions
 const T = 900u"°C"
 const P = 0.6u"GPa"
 
+# define a Domain struct containing the definition of your problem
 domain1D = Domain(IC1D, T, P)
 
-sol = simulate(domain1D)
+# solve the problem using DifferentialEquations.jl
+sol = simulate(domain1D);
 
+# you can now plot the solutions from the sol variable
 
+# extract characteristic time to convert back to dimensional time
 @unpack tfinal_ad, t_charact = domain1D
 
 anim = @animate for i = LinRange(0, tfinal_ad, 100)
@@ -42,5 +52,5 @@ anim = @animate for i = LinRange(0, tfinal_ad, 100)
 end every 1
 
 println("Now, generating the gif...")
-gif(anim, "./examples/1D/Grt_1D.gif", fps = 7)
+gif(anim, "./examples/1D/Grt_1D_1Ma.gif", fps = 7)
 println("...Done!")

@@ -9,13 +9,13 @@ DiffusionGarnet is a Julia package that can be used to model coupled diffusion o
 DiffusionGarnet may be installed directly from the REPL:
 ```julia-repl
 julia>]
-  pkg> add https://github.com/Iddingsite/DiffusionGarnet.jl
+  pkg> add DiffusionGarnet
   pkg> test DiffusionGarnet
 ```
 
 ## Quick Start
 
-DiffusionGarnet requires input data for the initial Mg, Fe and Mn mass fractions. 
+DiffusionGarnet requires input data for the initial Mg, Fe and Mn molar fractions.
 
 ```julia
 # load the data of your choice (here from the text file located in https://github.com/Iddingsite/DiffusionGarnet.jl/tree/main/examples/1D, place it in the same folder as where you are running the code)
@@ -29,7 +29,7 @@ distance = data[:, 1]
 Lx = (data[end,1] - data[1,1])u"µm"  # length in x of the model
 tfinal = 15u"Myr"  # total time of the model
 
-# define the initial conditions in 1D of your problem
+# define the initial conditions in 1D of your problem in that order
 IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
 
 # define the PT conditions

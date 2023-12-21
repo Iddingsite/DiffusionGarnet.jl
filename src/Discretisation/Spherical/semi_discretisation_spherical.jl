@@ -69,7 +69,7 @@ end
 
 function semi_discretisation_diffusion_spherical(du,u,p,t)
 
-    @unpack D, D0, D_charact, Δrad, Δrad_, r_ad = p
+    @unpack D, D0, D_charact, Δrad, Δrad_, r_ad = p.domain
 
     CMg = @view u[:,1]
     CFe = @view u[:,2]

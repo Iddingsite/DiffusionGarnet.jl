@@ -20,13 +20,15 @@ function simulate end
 Solve the coupled diffusion equation in 1D. Save all timesteps in the output solution type variable.
 
 """
-function simulate(domain::Domain1D; callback=nothing, progressbar=true)
+function simulate(domain::Domain1D; callback=nothing, path_save=nothing, progressbar=true)
+
+    p = (domain = domain, path_save = path_save)
 
     @unpack tfinal_ad, u0 = domain
 
     t = [0, tfinal_ad]
 
-    prob = ODEProblem(semi_discretisation_diffusion_1D, u0, t, domain)
+    prob = ODEProblem(semi_discretisation_diffusion_1D, u0, t, p)
 
     @time sol = solve(prob, ROCK2(), progress=progressbar, progress_steps=1, save_start=true, abstol=1e-6,reltol=1e-6, callback=callback)
 
@@ -39,13 +41,15 @@ end
 Solve the coupled diffusion equation in spherical coordinates. Save all timesteps in the output solution type variable.
 
 """
-function simulate(domain::DomainSpherical; callback=nothing, progressbar=true)
+function simulate(domain::DomainSpherical; callback=nothing, path_save=nothing, progressbar=true)
+
+    p = (domain = domain, path_save = path_save)
 
     @unpack tfinal_ad, u0 = domain
 
     t = [0, tfinal_ad]
 
-    prob = ODEProblem(semi_discretisation_diffusion_spherical, u0, t, domain)
+    prob = ODEProblem(semi_discretisation_diffusion_spherical, u0, t, p)
 
     @time sol = solve(prob, ROCK2(), progress=progressbar, progress_steps=1, save_start=true, abstol=1e-6,reltol=1e-6, callback=callback)
 
@@ -58,15 +62,17 @@ end
 Solve the coupled diffusion equation in 2D. Save only the first and last timestep in the output solution type variable.
 
 """
-function simulate(domain::Domain2D; callback=nothing, progressbar=true)
+function simulate(domain::Domain2D; callback=nothing, path_save=nothing, progressbar=true)
+
+    p = (domain = domain, path_save = path_save)
 
     @unpack tfinal_ad, u0 = domain
 
     t = [0.0, tfinal_ad]
 
-    prob = ODEProblem(semi_discretisation_diffusion_2D, u0, t, domain)
+    prob = ODEProblem(semi_discretisation_diffusion_2D, u0, t, p)
 
-    @time sol = solve(prob, ROCK2(), progress=progressbar, progress_steps=1, save_start=true, abstol=1e-6,reltol=1e-6, save_everystep = false, callback=callback)
+    @time sol = solve(prob, ROCK2(), progress=progressbar, progress_steps=1, save_start=true, abstol=1e-6,reltol=1e-6, save_everystep = true, callback=callback)
 
     return sol
 end

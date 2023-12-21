@@ -2,22 +2,20 @@ module DiffusionGarnet
 
 using Reexport
 
-@reexport using Plots
-@reexport using BenchmarkTools
 @reexport using Parameters
 @reexport using Unitful
-@reexport using DelimitedFiles
 @reexport using DiffEqCallbacks
 @reexport using Logging: global_logger
 @reexport using TerminalLoggers: TerminalLogger
-@reexport using ParallelStencil
+# @reexport using ParallelStencil
 
 using OrdinaryDiffEq
 using Symbolics
 using ParallelStencil
 using Preferences
-
-
+using DelimitedFiles
+using BenchmarkTools
+using Plots
 
 # initialise ParallelStencil (Thx AlbertDeMontserrat!)
 function set_backend(new_backend::String)
@@ -57,6 +55,7 @@ end
 
 include("input/initialconditions.jl")
 include("callbacks/update_diffusion_coef_TP.jl")
+include("callbacks/output.jl")
 include("Discretisation/1D/semi_discretisation_1D.jl")
 include("Discretisation/2D/semi_discretisation_2D.jl")
 include("Discretisation/Spherical/semi_discretisation_spherical.jl")
@@ -67,5 +66,6 @@ export D_ini!, Domain
 export semi_discretisation_diffusion_1D, semi_discretisation_diffusion_spherical, semi_discretisation_diffusion_2D, Diffusion_coef_2D!, stencil_diffusion_2D!
 export simulate
 export update_diffusion_coef
+export hdf5_initial_conditions, hdf5_timestep, save_data
 
 end # module DiffusionGarnet

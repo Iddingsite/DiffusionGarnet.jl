@@ -1,10 +1,11 @@
 using Unitful
-using Unitful: 𝐌, 𝐋, 𝐓, 𝚯
 using Parameters
 using Statistics
 
+abstract type InitialConditions end
+abstract type Domain end
 
-@with_kw struct InitialConditions1D{T1, T2, T3, T4}
+@with_kw struct InitialConditions1D{T1, T2, T3, T4} <: InitialConditions
     CMg0::T1
     CFe0::T1
     CMn0::T1
@@ -32,7 +33,7 @@ using Statistics
     end
 end
 
-@with_kw struct InitialConditionsSpherical{T1, T2, T3, T4}
+@with_kw struct InitialConditionsSpherical{T1, T2, T3, T4} <: InitialConditions
     CMg0::T1
     CFe0::T1
     CMn0::T1
@@ -59,7 +60,7 @@ end
     end
 end
 
-@with_kw struct InitialConditions2D{T1, T2, T3, T4}
+@with_kw struct InitialConditions2D{T1, T2, T3, T4} <: InitialConditions
     CMg0::T1
     CFe0::T1
     CMn0::T1
@@ -106,7 +107,7 @@ end
 end
 
 
-@with_kw struct InitialConditions3D{T1 <: AbstractArray{<:Real, 3}, T2 <: Float64}
+@with_kw struct InitialConditions3D{T1 <: AbstractArray{<:Real, 3}, T2 <: Float64} <: InitialConditions
     CMg0::T1
     CFe0::T1
     CMn0::T1
@@ -131,7 +132,7 @@ end
         elseif size(CMg0, 1) != size(CFe0, 1) || size(CMg0, 1) != size(CMn0, 1) || size(CMg0, 2) != size(CFe0, 2) || size(CMg0, 2) != size(CMn0, 2) || size(CMg0, 3) != size(CFe0, 3) || size(CMg0, 3) != size(CMn0, 3)
             error("Initial conditions should have the same size.")
         elseif maximum(sum.(CMg0.+ CFe0.+ CMn0)) > 1
-            error("Initial conditions should be in mass fraction.")
+            error("Initial conditions should be in molar fraction.")
         else
             nx = size(CMg0, 1)
             ny = size(CMg0, 2)
@@ -150,7 +151,7 @@ end
 """
     InitialConditions1D(CMg0::Array{<:Real, 1}, CFe0::Array{<:Real, 1}, CMn0::Array{<:Real, 1}, Lx::Unitful.Length, tfinal::Unitful.Time)
 
-Return a structure containing the initial conditions for a 1D diffusion problem. CMg0, CFe0 and CMn0 need to be in mass fraction. Convert the `Lx`` and `tfinal`` to µm and Myr respectively.
+Return a structure containing the initial conditions for a 1D diffusion problem. CMg0, CFe0 and CMn0 need to be in molar fraction. Convert the `Lx`` and `tfinal`` to µm and Myr respectively.
 """
 function InitialConditions1D(CMg0::AbstractArray{<:Real, 1}, CFe0::AbstractArray{<:Real, 1}, CMn0::AbstractArray{<:Real, 1}, Lx::Unitful.Length, tfinal::Unitful.Time)
     InitialConditions1D(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"Myr",tfinal)))
@@ -159,7 +160,7 @@ end
 """
     InitialConditionsSpherical(CMg0::Array{<:Real, 1}, CFe0::Array{<:Real, 1}, CMn0::Array{<:Real, 1}, Lr::Unitful.Length, tfinal::Unitful.Time)
 
-Return a structure containing the initial conditions for a spherical diffusion problem. CMg0, CFe0 and CMn0 need to be in mass fraction. Convert `Lr` and `tfinal` to µm and Myr respectively.
+Return a structure containing the initial conditions for a spherical diffusion problem. CMg0, CFe0 and CMn0 need to be in molar fraction. Convert `Lr` and `tfinal` to µm and Myr respectively.
 """
 function InitialConditionsSpherical(CMg0::AbstractArray{<:Real, 1}, CFe0::AbstractArray{<:Real, 1}, CMn0::AbstractArray{<:Real, 1}, Lr::Unitful.Length, tfinal::Unitful.Time)
     InitialConditionsSpherical(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lr)), convert(Float64,ustrip(u"Myr",tfinal)))
@@ -168,7 +169,7 @@ end
 """
     InitialConditions2D(CMg0::Array{<:Real, 2}, CFe0::Array{<:Real, 2}, CMn0::Array{<:Real, 2}, Lx::Unitful.Length, Ly::Unitful.Length, tfinal::Unitful.Time)
 
-Return a structure containing the initial conditions for a 2D diffusion problem. CMg0, CFe0 and CMn0 need to be in mass fraction. Convert `Lx`, `Ly` and `tfinal` to µm, µm and Myr respectively.
+Return a structure containing the initial conditions for a 2D diffusion problem. CMg0, CFe0 and CMn0 need to be in molar fraction. Convert `Lx`, `Ly` and `tfinal` to µm, µm and Myr respectively.
 """
 function InitialConditions2D(CMg0::AbstractArray{<:Real, 2}, CFe0::AbstractArray{<:Real, 2}, CMn0::AbstractArray{<:Real, 2}, Lx::Unitful.Length, Ly::Unitful.Length, tfinal::Unitful.Time; grt_boundary::AbstractArray{<:Real, 2}=similar(CMg0) .* 0.0)
     InitialConditions2D(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"µm", Ly)), convert(Float64,ustrip(u"Myr", tfinal)), grt_boundary)
@@ -177,7 +178,7 @@ end
 """
     InitialConditions3D(CMg0::Array{<:Real, 3}, CFe0::Array{<:Real, 3}, CMn0::Array{<:Real, 3}, Lx::Unitful.Length, Ly::Unitful.Length, Lz::Unitful.Length, tfinal::Unitful.Time)
 
-Return a structure containing the initial conditions for a 3D diffusion problem. CMg0, CFe0 and CMn0 need to be in mass fraction. Convert `Lx`, `Ly`, `Lz` and `tfinal` to µm, µm, µm and Myr respectively.
+Return a structure containing the initial conditions for a 3D diffusion problem. CMg0, CFe0 and CMn0 need to be in molar fraction. Convert `Lx`, `Ly`, `Lz` and `tfinal` to µm, µm, µm and Myr respectively.
 """
 function InitialConditions3D(CMg0::AbstractArray{<:Real, 3}, CFe0::AbstractArray{<:Real, 3}, CMn0::AbstractArray{<:Real, 3}, Lx::Unitful.Length, Ly::Unitful.Length, Lz::Unitful.Length, tfinal::Unitful.Time)
     InitialConditions3D(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"µm", Ly)), convert(Float64,ustrip(u"µm", Lz)), convert(Float64,ustrip(u"Myr", tfinal)))
@@ -211,7 +212,7 @@ function D_ini!(D0,T,P)
     D0 .= [DMg, DFe, DMn, DCa] .* (365.25 * 24 * 3600 * 1e6)  # in years
 end
 
-@with_kw struct Domain1D{T1 <: Union{AbstractArray{Float64, 1}, Float64}, T2 <: Float64, T3 <: Tuple}
+@with_kw struct Domain1D{T1, T2, T3} <: Domain
     IC::InitialConditions1D
     T::T1
     P::T1
@@ -236,10 +237,12 @@ end
 
         @unpack nx, Δx, tfinal, Lx, CMg0, CFe0, CMn0 = IC
 
-        D0 = zeros(Float64, 4)
+        T3 = eltype(CMg0)
+
+        D0 = zeros(T3, 4)
         D_ini!(D0, T[1], P[1])  # compute initial diffusion coefficients
 
-        D = (DMgMg = zeros(nx), DMgFe = zeros(nx), DMgMn = zeros(nx), DFeMg = zeros(nx), DFeFe = zeros(nx), DFeMn = zeros(nx), DMnMg = zeros(nx), DMnFe = zeros(nx), DMnMn = zeros(nx))  # tensor of interdiffusion coefficients
+        D = (DMgMg = zeros(T3, nx), DMgFe = zeros(T3, nx), DMgMn = zeros(T3, nx), DFeMg = zeros(T3, nx), DFeFe = zeros(T3, nx), DFeMn = zeros(T3, nx), DMnMg = zeros(T3, nx), DMnFe = zeros(T3, nx), DMnMn = zeros(T3, nx))  # tensor of interdiffusion coefficients
 
         u0 = similar(CMg0, (nx, 3))
         u0[:,1] .= CMg0
@@ -253,11 +256,11 @@ end
         Δxad_ = 1 / (Δx / L_charact)  # inverse of nondimensionalised Δx
         tfinal_ad = tfinal / t_charact  # nondimensionalised total time
         time_update_ad = time_update ./ t_charact  # nondimensionalised time update
-        new{T1, Float64, T2}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, u0, tfinal_ad, time_update_ad, bc_neumann)
+        new{T1, T3, T2}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, u0, tfinal_ad, time_update_ad, bc_neumann)
     end
 end
 
-@with_kw struct DomainSpherical{T1 <: Union{AbstractArray{Float64, 1}, Float64}, T2 <: Float64}
+@with_kw struct DomainSpherical{T1, T2} <: Domain
     IC::InitialConditionsSpherical
     T::T1
     P::T1
@@ -270,7 +273,7 @@ end
     t_charact::T2
     Δrad::T2
     Δrad_::T2
-    r_ad::Vector{Float64}
+    r_ad::Vector{T2}
     u0::Matrix{T2}
     tfinal_ad::T2
     time_update_ad::T1
@@ -283,12 +286,14 @@ end
 
         @unpack nr, Δr, r, tfinal, Lr, CMg0, CFe0, CMn0 = IC
 
-        D0::Vector{Float64} = zeros(Float64, 4)
+        T2 = eltype(CMg0)
+
+        D0::Vector{T2} = zeros(4)
         D_ini!(D0, T[1], P[1])  # compute initial diffusion coefficients
 
-        D = (DMgMg = zeros(nr), DMgFe = zeros(nr), DMgMn = zeros(nr), DFeMg = zeros(nr), DFeFe = zeros(nr), DFeMn = zeros(nr), DMnMg = zeros(nr), DMnFe = zeros(nr), DMnMn = zeros(nr))  # tensor of interdiffusion coefficients
+        D = (DMgMg = zeros(T2, nr), DMgFe = zeros(T2, nr), DMgMn = zeros(T2, nr), DFeMg = zeros(T2, nr), DFeFe = zeros(T2, nr), DFeMn = zeros(T2, nr), DMnMg = zeros(T2, nr), DMnFe = zeros(T2, nr), DMnMn = zeros(T2, nr))  # tensor of interdiffusion coefficients
 
-        u0::Matrix{typeof(CMg0[1])} = similar(CMg0, (nr, 3))
+        u0::Matrix{T2} = similar(CMg0, (nr, 3))
         u0[:,1] .= CMg0
         u0[:,2] .= CFe0
         u0[:,3] .= CMn0
@@ -299,32 +304,33 @@ end
 
         Δrad = Δr / L_charact  # nondimensionalised Δr
         Δrad_ = 1 / Δrad  # inverse of nondimensionalised Δr
-        r_ad::Vector{Float64} = r ./ L_charact  # nondimensionalised radius
+        r_ad = r ./ L_charact  # nondimensionalised radius
         tfinal_ad = tfinal / t_charact  # nondimensionalised total time
         time_update_ad = time_update ./ t_charact  # nondimensionalised time update
-        new{T1, Float64}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δrad, Δrad_, r_ad, u0, tfinal_ad, time_update_ad)
+        new{T1, T2}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δrad, Δrad_, r_ad, u0, tfinal_ad, time_update_ad)
     end
 end
 
-@with_kw struct Domain2D{T1, T2, T3, T4, T5, T6}
+@with_kw struct Domain2D{T1, T2, T3, T4, T5} <: Domain
     IC::InitialConditions2D
     T::T1
     P::T1
     time_update::T1
-    D0::T4
-    D::T5  # tensor of interdiffusion coefficients
+    D0::T3
+    D::T4  # tensor of interdiffusion coefficients
     L_charact::T2
     D_charact::T2
     t_charact::T2
     Δxad_::T2
     Δyad_::T2
-    u0::T6
+    u0::T5
     tfinal_ad::T2
-    function Domain2D(IC::InitialConditions2D, T::T1, P::T1, time_update::T1) where {T1 <: Union{Float64, AbstractArray{Float64, 2}}}
+    time_update_ad::T1
+    function Domain2D(IC::InitialConditions2D, T::T1, P::T1, time_update::T1) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}}
         @unpack nx, ny, Δx, Δy, tfinal, Lx, CMg0, CFe0, CMn0 = IC
         similar(CMg0, (nx,ny))
-        D0 = similar(CMg0, (4)) .* 0
-        D_ini!(D0, T, P)  # compute initial diffusion coefficients
+        D0 = zeros(eltype(CMg0), 4)
+        D_ini!(D0, T[1], P[1])  # compute initial diffusion coefficients
 
         D = (DMgMg = similar(CMg0, (nx,ny)) .* 0, DMgFe = similar(CMg0, (nx,ny)) .* 0, DMgMn = similar(CMg0, (nx,ny)) .* 0, DFeMg = similar(CMg0, (nx,ny)) .* 0, DFeFe = similar(CMg0, (nx,ny)) .* 0, DFeMn = similar(CMg0, (nx,ny)) .* 0, DMnMg = similar(CMg0, (nx,ny)) .* 0, DMnFe = similar(CMg0, (nx,ny)) .* 0, DMnMn = similar(CMg0, (nx,ny)) .* 0)  # tensor of interdiffusion coefficients
 
@@ -339,42 +345,40 @@ end
         Δxad_ = 1 / (Δx / L_charact)  # inverse of nondimensionalised Δx
         Δyad_ = 1 / (Δy / L_charact)  # inverse of nondimensionalised Δy
         tfinal_ad = tfinal / t_charact  # nondimensionalised total time
-        time_update = time_update / t_charact  # nondimensionalised time update
+        time_update_ad = time_update / t_charact  # nondimensionalised time update
 
         T2 = typeof(t_charact)
-        T3 = typeof(CMg0)
-        T4 = typeof(D0)
-        T5 = typeof(D)
-        T6 = typeof(u0)
+        T3 = typeof(D0)
+        T4 = typeof(D)
+        T5 = typeof(u0)
 
-        new{T1, T2, T3, T4, T5, T6}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, Δyad_, u0, tfinal_ad)
+        new{T1, T2, T3, T4, T5}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, Δyad_, u0, tfinal_ad, time_update_ad)
     end
 end
 
-@with_kw struct Domain3D{T1 <: Union{Array{Float64, 3}, Float64}, T2 <: Float64}
+@with_kw struct Domain3D{T1, T2, T3, T4, T5} <: Domain
     IC::InitialConditions3D
     T::T1
     P::T1
     time_update::T1
-    D0::Vector{T2}
-    D::NamedTuple{(:DMgMg, :DMgFe, :DMgMn, :DFeMg, :DFeFe, :DFeMn, :DMnMg, :DMnFe, :DMnMn),
-                  Tuple{Array{T2, 3}, Array{T2, 3}, Array{T2, 3}, Array{T2, 3}, Array{T2, 3}, Array{T2, 3}, Array{T2, 3}, Array{T2, 3}, Array{T2, 3}}}  # tensor of interdiffusion coefficients
+    D0::T3
+    D::T4
     L_charact::T2
     D_charact::T2
     t_charact::T2
     Δxad_::T2
     Δyad_::T2
     Δzad_::T2
-    u0::Array{T2, 4}
+    u0::T5
     tfinal_ad::T2
-    function Domain3D(IC::InitialConditions3D, T::T1, P::T1, time_update::T1) where {T1 <: Union{Float64, Array{Float64, 3}}}
+    time_update_ad::T1
+    function Domain3D(IC::InitialConditions3D, T::T1, P::T1, time_update::T1) where {T1 <: Union{Float64, Array{Float64, 1}}}
         @unpack nx, ny, nz, Δx, Δy, Δz, tfinal, Lx, CMg0, CFe0, CMn0 = IC
 
-        D0 = @zeros(4)
-        D_ini!(D0, T, P)  # compute initial diffusion coefficients
+        D0 = zeros(eltype(CMg0), 4)
+        D_ini!(D0, T[1], P[1])  # compute initial diffusion coefficients
 
-        D = (DMgMg = zeros(nx, ny, nz), DMgFe = zeros(nx, ny, nz), DMgMn = zeros(nx, ny, nz), DFeMg = zeros(nx, ny, nz), DFeFe = zeros(nx, ny, nz), DFeMn = zeros(nx, ny, nz), DMnMg = zeros(nx, ny, nz), DMnFe = zeros(nx, ny, nz), DMnMn = zeros(nx, ny, nz))  # tensor of interdiffusion coefficients
-
+        D = (DMgMg = similar(CMg0, (nx, ny, nz)), DMgFe = similar(CMg0, (nx, ny, nz)), DMgMn = similar(CMg0, (nx, ny, nz)), DFeMg = similar(CMg0, (nx, ny, nz)), DFeFe = similar(CMg0, (nx, ny, nz)), DFeMn = similar(CMg0, (nx, ny, nz)), DMnMg = similar(CMg0, (nx, ny, nz)), DMnFe = similar(CMg0, (nx, ny, nz)), DMnMn = similar(CMg0, (nx, ny, nz)))  # tensor of interdiffusion coefficients
 
         u0 = similar(CMg0, (nx, ny, nz, 3))
         u0[:, :, :, 1] .= CMg0
@@ -389,8 +393,14 @@ end
         Δyad_ = 1 / (Δy / L_charact)  # inverse of nondimensionalised Δy
         Δzad_ = 1 / (Δz / L_charact)  # inverse of nondimensionalised Δz
         tfinal_ad = tfinal / t_charact  # nondimensionalised total time
-        time_update = time_update / t_charact  # nondimensionalised time update
-        new{T1, Float64}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, Δyad_, Δzad_, u0, tfinal_ad)
+        time_update_ad = time_update / t_charact  # nondimensionalised time update
+
+        T2 = typeof(t_charact)
+        T3 = typeof(D0)
+        T4 = typeof(D)
+        T5 = typeof(u0)
+
+        new{T1, T2, T3, T4, T5}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, Δyad_, Δzad_, u0, tfinal_ad, time_update_ad)
     end
 end
 

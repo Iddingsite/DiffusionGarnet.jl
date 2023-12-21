@@ -137,8 +137,8 @@ end
 
 function semi_discretisation_diffusion_2D(du,u,p,t)
 
-    @unpack D, D0, D_charact, Δxad_, Δyad_ = p
-    @unpack grt_position, grt_boundary = p.IC
+    @unpack D, D0, D_charact, Δxad_, Δyad_ = p.domain
+    @unpack grt_position, grt_boundary = p.domain.IC
     DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn = D
 
     CMg = @view u[:,:,1]

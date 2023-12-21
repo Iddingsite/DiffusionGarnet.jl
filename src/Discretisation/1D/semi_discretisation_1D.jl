@@ -94,7 +94,7 @@ end
 
 function semi_discretisation_diffusion_1D(du,u,p,t)
 
-    @unpack D, D0, D_charact, Δxad_, bc_neumann = p
+    @unpack D, D0, D_charact, Δxad_, bc_neumann = p.domain
 
     CMg = @view u[:,1]
     CFe = @view u[:,2]

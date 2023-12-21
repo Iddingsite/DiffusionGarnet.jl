@@ -34,17 +34,19 @@ Follows the syntax of callback functions defined by DiffEqCallbacks.jl (https://
 """
 function update_diffusion_coef(integrator)
 
-    @unpack D0, P, T, time_update_ad, t_charact = integrator.p
+    @unpack D0, P, T, time_update_ad, t_charact = integrator.p.domain
 
     # find the index of the time_update_ad that is equal to t
     index = findfirst(x -> x == integrator.t, time_update_ad)
+
+    #! integrator.opts.callback
 
     # update diffusion coefficients
     if index !== nothing
         D_update!(D0, T[index], P[index])
 
         if integrator.t ≠ 0.0
-            println("New temperature and pressure: $(T[index]) °C and $(P[index]) kbar, updated at $(round((integrator.t * t_charact), digits=2)) Myr")
+            println("New temperature and pressure: $(T[index]) °C and $(P[index]) kbar, updated at $(round((integrator.t * t_charact), digits=2)) Myr.")
         end
     end
 end
