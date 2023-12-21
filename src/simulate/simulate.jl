@@ -24,7 +24,7 @@ function simulate(domain::Domain1D; callback=nothing, path_save=nothing, progres
 
     p = (domain = domain, path_save = path_save)
 
-    @unpack tfinal_ad, u0 = domain
+    @unpack tfinal_ad, u0 = p.domain
 
     t = [0, tfinal_ad]
 
@@ -45,7 +45,7 @@ function simulate(domain::DomainSpherical; callback=nothing, path_save=nothing, 
 
     p = (domain = domain, path_save = path_save)
 
-    @unpack tfinal_ad, u0 = domain
+    @unpack tfinal_ad, u0 = p.domain
 
     t = [0, tfinal_ad]
 
@@ -66,7 +66,7 @@ function simulate(domain::Domain2D; callback=nothing, path_save=nothing, progres
 
     p = (domain = domain, path_save = path_save)
 
-    @unpack tfinal_ad, u0 = domain
+    @unpack tfinal_ad, u0 = p.domain
 
     t = [0.0, tfinal_ad]
 

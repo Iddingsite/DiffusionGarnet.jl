@@ -329,12 +329,14 @@ end
     function Domain2D(IC::InitialConditions2D, T::T1, P::T1, time_update::T1) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}}
         @unpack nx, ny, Δx, Δy, tfinal, Lx, CMg0, CFe0, CMn0 = IC
         similar(CMg0, (nx,ny))
+
+
         D0 = zeros(eltype(CMg0), 4)
         D_ini!(D0, T[1], P[1])  # compute initial diffusion coefficients
 
-        D = (DMgMg = similar(CMg0, (nx,ny)) .* 0, DMgFe = similar(CMg0, (nx,ny)) .* 0, DMgMn = similar(CMg0, (nx,ny)) .* 0, DFeMg = similar(CMg0, (nx,ny)) .* 0, DFeFe = similar(CMg0, (nx,ny)) .* 0, DFeMn = similar(CMg0, (nx,ny)) .* 0, DMnMg = similar(CMg0, (nx,ny)) .* 0, DMnFe = similar(CMg0, (nx,ny)) .* 0, DMnMn = similar(CMg0, (nx,ny)) .* 0)  # tensor of interdiffusion coefficients
+        D = (DMgMg = zeros(eltype(CMg0), (nx,ny)), DMgFe = zeros(eltype(CMg0), (nx,ny)), DMgMn = zeros(eltype(CMg0), (nx,ny)), DFeMg = zeros(eltype(CMg0), (nx,ny)), DFeFe = zeros(eltype(CMg0), (nx,ny)), DFeMn = zeros(eltype(CMg0), (nx,ny)), DMnMg = zeros(eltype(CMg0), (nx,ny)), DMnFe = zeros(eltype(CMg0), (nx,ny)), DMnMn = zeros(eltype(CMg0), (nx,ny)))  # tensor of interdiffusion coefficients
 
-        u0 = similar(CMg0, (nx, ny, 3)) .* 0
+        u0 = zeros(eltype(CMg0), (nx, ny, 3))
         u0[:, :, 1] .= CMg0
         u0[:, :, 2] .= CFe0
         u0[:, :, 3] .= CMn0
@@ -378,9 +380,9 @@ end
         D0 = zeros(eltype(CMg0), 4)
         D_ini!(D0, T[1], P[1])  # compute initial diffusion coefficients
 
-        D = (DMgMg = similar(CMg0, (nx, ny, nz)), DMgFe = similar(CMg0, (nx, ny, nz)), DMgMn = similar(CMg0, (nx, ny, nz)), DFeMg = similar(CMg0, (nx, ny, nz)), DFeFe = similar(CMg0, (nx, ny, nz)), DFeMn = similar(CMg0, (nx, ny, nz)), DMnMg = similar(CMg0, (nx, ny, nz)), DMnFe = similar(CMg0, (nx, ny, nz)), DMnMn = similar(CMg0, (nx, ny, nz)))  # tensor of interdiffusion coefficients
+        D = (DMgMg = zeros(eltype(CMg0), (nx, ny, nz)), DMgFe = zeros(eltype(CMg0), (nx, ny, nz)), DMgMn = zeros(eltype(CMg0), (nx, ny, nz)), DFeMg = zeros(eltype(CMg0), (nx, ny, nz)), DFeFe = zeros(eltype(CMg0), (nx, ny, nz)), DFeMn = zeros(eltype(CMg0), (nx, ny, nz)), DMnMg = zeros(eltype(CMg0), (nx, ny, nz)), DMnFe = zeros(eltype(CMg0), (nx, ny, nz)), DMnMn = zeros(eltype(CMg0), (nx, ny, nz)))  # tensor of interdiffusion coefficients
 
-        u0 = similar(CMg0, (nx, ny, nz, 3))
+        u0 = zeros(eltype(CMg0), (nx, ny, nz, 3))
         u0[:, :, :, 1] .= CMg0
         u0[:, :, :, 2] .= CFe0
         u0[:, :, :, 3] .= CMn0

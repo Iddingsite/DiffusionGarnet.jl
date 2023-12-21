@@ -185,10 +185,10 @@ end
     @test domainSph.D0[1] ≈ 151880.41527919917
     @test domain1D.D0[1] ≈ 151880.41527919917
 
-    CMg = DelimitedFiles.readdlm("./Data/2D/Xprp_LR.txt", '\t', '\n', header=false)
-    CFe = DelimitedFiles.readdlm("./Data/2D/Xalm_LR.txt", '\t', '\n', header=false)
-    CMn = DelimitedFiles.readdlm("./Data/2D/Xsps_LR.txt", '\t', '\n', header=false)
-    grt_boundary = DelimitedFiles.readdlm("./Data/2D/Contour_LR.txt", '\t', '\n', header=false)
+    CMg = DelimitedFiles.readdlm("./Data/2D/Xprp.txt", '\t', '\n', header=false)
+    CFe = DelimitedFiles.readdlm("./Data/2D/Xalm.txt", '\t', '\n', header=false)
+    CMn = DelimitedFiles.readdlm("./Data/2D/Xsps.txt", '\t', '\n', header=false)
+    grt_boundary = DelimitedFiles.readdlm("./Data/2D/Contour.txt", '\t', '\n', header=false)
 
     Lx = 900.0u"µm"
     Ly = 900.0u"µm"
@@ -208,8 +208,8 @@ end
     @unpack time_update_ad = domain2D
     update_diffusion_coef_call = PresetTimeCallback(time_update_ad, update_diffusion_coef)
 
-    sol_2D = simulate(domain2D; callback=update_diffusion_coef_call, progressbar=true)
-    sol_2D = simulate(domain2D; progressbar=true)
+    sol_2D = simulate(domain2D; callback=update_diffusion_coef_call, progressbar=false)
+    sol_2D = simulate(domain2D; progressbar=false)
 
     T=600  # in °C
     P=3  # in kbar
