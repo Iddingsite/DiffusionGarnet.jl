@@ -1,21 +1,21 @@
 # DiffusionGarnet.jl
 
- Garnet is a mineral commonly used in metamorphic petrology to better understand geological processes as it is present in various different rock types. This mineral commonly shows a wide spread of compositional zoning that has been interpreted as recording ranges of pressure (P) and temperature (T) conditions. Modelling diffusion processes can help to better understand this zoning and better constrain the pressure-temperature-time (PTt) conditions of the metamorphic event of interest.
+Garnet is a mineral commonly used in metamorphic petrology to better understand geological processes, as it occurs in a variety of different rock types. This mineral often exhibits a wide range of compositional zoning, which has been interpreted as recording ranges of pressure (P) and temperature (T) conditions. Modelling diffusion processes can help to better understand this zoning and better constrain the pressure-temperature-time (PTt) conditions of the metamorphic event of interest.
 
-DiffusionGarnet is a Julia package that can be used to model coupled diffusion of major elements on real garnet data. It currently supports 1D and spherical coordinates for evenly spaced data and is soon to be extended to support 2D and 3D coordinates.
+DiffusionGarnet is a Julia package that can be used to model coupled diffusion of major elements on real garnet data. It currently supports 1D, spherical and 2D coordinates for evenly spaced data and is soon to be extended to support 3D coordinates.
 
 ## Installation
 
 DiffusionGarnet may be installed directly from the REPL:
 ```julia-repl
 julia>]
-  pkg> add https://github.com/Iddingsite/DiffusionGarnet.jl
+  pkg> add DiffusionGarnet
   pkg> test DiffusionGarnet
 ```
 
 ## Quick Start
 
-DiffusionGarnet requires input data for the initial Mg, Fe and Mn mass fractions. 
+DiffusionGarnet requires input data for the initial Mg, Fe and Mn molar fractions.
 
 ```julia
 # load the data of your choice (here from the text file located in https://github.com/Iddingsite/DiffusionGarnet.jl/tree/main/examples/1D, place it in the same folder as where you are running the code)
@@ -29,7 +29,7 @@ distance = data[:, 1]
 Lx = (data[end,1] - data[1,1])u"µm"  # length in x of the model
 tfinal = 15u"Myr"  # total time of the model
 
-# define the initial conditions in 1D of your problem
+# define the initial conditions in 1D of your problem in that order
 IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
 
 # define the PT conditions
