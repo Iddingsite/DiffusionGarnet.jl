@@ -2,7 +2,6 @@
 
 [![Build Status](https://github.com/Iddingsite/DiffusionGarnet.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/Iddingsite/DiffusionGarnet.jl/actions/workflows/CI.yml)
 [![][docs-dev-img]][docs-dev-url]
-[![][docs-dev-img]][docs-stable-url]
 [![DOI](https://zenodo.org/badge/680108566.svg)](https://zenodo.org/badge/latestdoi/680108566)
 
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
