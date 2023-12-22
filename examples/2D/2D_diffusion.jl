@@ -1,38 +1,31 @@
 using DiffusionGarnet
-
-println(Threads.nthreads())
-
-const USE_GPU = false
-@static if USE_GPU
-    @init_parallel_stencil(CUDA, Float64, 2);
-else
-    @init_parallel_stencil(Threads, Float64, 2);
-end
-
+using DelimitedFiles
+using Plots
+using ProgressBars
 
 cd(@__DIR__)
+println("Number of threads: $(Threads.nthreads())")
 
 Mg0 = DelimitedFiles.readdlm("Xprp.txt", '\t', '\n', header=false)
 Fe0 = DelimitedFiles.readdlm("Xalm.txt", '\t', '\n', header=false)
 Mn0 = DelimitedFiles.readdlm("Xsps.txt", '\t', '\n', header=false)
 Ca0 = DelimitedFiles.readdlm("Xgrs.txt", '\t', '\n', header=false)
-grt_boundary = DelimitedFiles.readdlm("Contour_HR.txt", '\t', '\n', header=false)
+grt_boundary = DelimitedFiles.readdlm("contour_Grt.txt", '\t', '\n', header=false)
 
 Lx = 9000.0u"µm"
 Ly = 9000.0u"µm"
 tfinal = 1.0u"Myr"
 T = 900u"°C"
 P = 0.6u"GPa"
+
 IC2D = InitialConditions2D(Mg0, Fe0, Mn0, Lx, Ly, tfinal; grt_boundary = grt_boundary)
 domain2D = Domain(IC2D, T, P)
 
 sol = simulate(domain2D)
+# 377.768768 seconds (16.12 M allocations: 15.863 GiB, 10.96% gc time, 5.41% compilation time)
 
 @unpack tfinal_ad, t_charact = domain2D
-
 distance = LinRange(0, ustrip(u"µm", Lx), size(Mg0,1))
-
-using ProgressBars
 
 println("Plotting...")
 anim = @animate for i = tqdm(LinRange(0, tfinal_ad, 20))

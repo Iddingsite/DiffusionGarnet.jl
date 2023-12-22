@@ -1,6 +1,10 @@
 using DiffusionGarnet
+using DelimitedFiles
+using Plots
 
-const data = DelimitedFiles.readdlm("./examples/1D/Data_Grt_1D.txt", '\t', '\n', header=true)[1]
+cd(@__DIR__)
+
+const data = DelimitedFiles.readdlm("Data_Grt_1D.txt", '\t', '\n', header=true)[1]
 
 const Mg0 = data[:, 4]
 const Fe0 = data[:, 2]

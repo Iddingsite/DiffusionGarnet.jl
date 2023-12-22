@@ -52,7 +52,7 @@ function stencil_diffusion_spherical!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δr
                         DMnMn[ix] / r_ad[ix] * (CMn[ix+1]-CMn[ix-1]) * Δrad_
         end
 
-        # solve singularities
+        # solve singularities (equivalent to homogeneous Neumann BC)
         if ix == 1
             dtCMg[ix] = 6 * DMgMg[ix] * (CMg[ix+1]-CMg[ix]) / (Δrad)^2 +
                         6 * DMgFe[ix] * (CFe[ix+1]-CFe[ix]) / (Δrad)^2 +

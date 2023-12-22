@@ -1,24 +1,27 @@
 using DiffusionGarnet
+using DelimitedFiles
+using Plots
 
-const data = DelimitedFiles.readdlm("./examples/Spherical/Data_Grt_1D.txt", '\t', '\n', header=true)[1]
+cd(@__DIR__)
 
-const Mg0 = reverse(data[1:size(data,1)÷2, 4])
-const Fe0 = reverse(data[1:size(data,1)÷2, 2])
-const Mn0 = reverse(data[1:size(data,1)÷2, 3])
-const Ca0 = reverse(data[1:size(data,1)÷2, 5])
-const distance = data[1:size(data,1)÷2, 1]
-const Lx = (data[size(data,1)÷2,1] - data[1,1])u"µm"
-const tfinal = 15u"Myr"
+data = DelimitedFiles.readdlm("Data_Grt_Sph.txt", '\t', '\n', header=true)[1]
 
-ICSph = InitialConditionsSpherical(Mg0, Fe0, Mn0, Lx, tfinal)
+Mg0 = data[:, 4]
+Fe0 = data[:, 2]
+Mn0 = data[:, 3]
+Ca0 = data[:, 5]
+distance = data[:, 1]
+Lr = (data[end,1] - data[1,1])u"µm"
+tfinal = 15u"Myr"
 
-const T = 900u"°C"
-const P = 0.6u"GPa"
+ICSph = InitialConditionsSpherical(Mg0, Fe0, Mn0, Lr, tfinal)
+
+T = 900u"°C"
+P = 0.6u"GPa"
 
 DomainSph = Domain(ICSph, T, P)
 
 sol_sph = simulate(DomainSph)
-
 
 @unpack tfinal_ad, t_charact = DomainSph
 
@@ -41,5 +44,5 @@ anim = @animate for i = LinRange(0, tfinal_ad, 100)
 end every 1
 
 println("Now, generating the gif...")
-gif(anim, "./examples/Spherical/Grt_Spherical.gif", fps = 7)
+gif(anim, "./Grt_Spherical.gif", fps = 7)
 println("...Done!")

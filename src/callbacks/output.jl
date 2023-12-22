@@ -185,7 +185,7 @@ function hdf5_timestep(u, dt, tcurrent, path_hdf5)
         t["Mg"]["Mg"] = column_to_row(CMg)
         t["Fe"]["Fe"] = column_to_row(CFe)
         t["Mn"]["Mn"] = column_to_row(CMn)
-        t["Ca"]["Ca"] = column_to_row(1 .- CMg .- CFe .- CMn)
+        t["Ca"]["Ca"] = column_to_row(replace!((1 .- CMg .- CFe .- CMn), 1=>0))
     end
 end
 

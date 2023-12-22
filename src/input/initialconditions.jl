@@ -167,11 +167,12 @@ function InitialConditionsSpherical(CMg0::AbstractArray{<:Real, 1}, CFe0::Abstra
 end
 
 """
-    InitialConditions2D(CMg0::Array{<:Real, 2}, CFe0::Array{<:Real, 2}, CMn0::Array{<:Real, 2}, Lx::Unitful.Length, Ly::Unitful.Length, tfinal::Unitful.Time)
+    InitialConditions2D(CMg0::Array{<:Real, 2}, CFe0::Array{<:Real, 2}, CMn0::Array{<:Real, 2}, Lx::Unitful.Length, Ly::Unitful.Length, tfinal::Unitful.Time; grt_boundary::Array{<:Real, 2}=zeros(eltype(CMg0), size(CMg0)...))
 
 Return a structure containing the initial conditions for a 2D diffusion problem. CMg0, CFe0 and CMn0 need to be in molar fraction. Convert `Lx`, `Ly` and `tfinal` to µm, µm and Myr respectively.
+grt_boundary is a matrix of the same size as CMg0, CFe0 and CMn0. It is a binary matrix with 1 where the contour of the garnet is present and 0 otherwise. It is used to apply the Dirichlet boundary condition in the model. If not provided, it is equal to zero everywhere.
 """
-function InitialConditions2D(CMg0::AbstractArray{<:Real, 2}, CFe0::AbstractArray{<:Real, 2}, CMn0::AbstractArray{<:Real, 2}, Lx::Unitful.Length, Ly::Unitful.Length, tfinal::Unitful.Time; grt_boundary::AbstractArray{<:Real, 2}=similar(CMg0) .* 0.0)
+function InitialConditions2D(CMg0::AbstractArray{<:Real, 2}, CFe0::AbstractArray{<:Real, 2}, CMn0::AbstractArray{<:Real, 2}, Lx::Unitful.Length, Ly::Unitful.Length, tfinal::Unitful.Time; grt_boundary::AbstractArray{<:Real, 2}=zeros(eltype(CMg0), size(CMg0)...))
     InitialConditions2D(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"µm", Ly)), convert(Float64,ustrip(u"Myr", tfinal)), grt_boundary)
 end
 

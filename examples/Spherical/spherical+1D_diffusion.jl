@@ -1,28 +1,30 @@
 using DiffusionGarnet
+using DelimitedFiles
+using Plots
 
-const data = DelimitedFiles.readdlm("./examples/Spherical/Data_Grt_1D.txt", '\t', '\n', header=true)[1]
+cd(@__DIR__)
 
-const Mg0 = reverse(data[1:size(data,1)÷2, 4])
-const Fe0 = reverse(data[1:size(data,1)÷2, 2])
-const Mn0 = reverse(data[1:size(data,1)÷2, 3])
-const Ca0 = reverse(data[1:size(data,1)÷2, 5])
-const distance = data[1:size(data,1)÷2, 1]
-const Lx = (data[size(data,1)÷2,1] - data[1,1])u"µm"
-const tfinal = 15u"Myr"
+data = DelimitedFiles.readdlm("Data_Grt_Sph.txt", '\t', '\n', header=true)[1]
+
+Mg0 = data[:, 4]
+Fe0 = data[:, 2]
+Mn0 = data[:, 3]
+Ca0 = data[:, 5]
+distance = data[:, 1]
+Lr = (data[end,1] - data[1,1])u"µm"
+tfinal = 15u"Myr"
 
 ICSph = InitialConditionsSpherical(Mg0, Fe0, Mn0, Lx, tfinal)
+IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
 
-const T = 900u"°C"
-const P = 0.6u"GPa"
+T = 900u"°C"
+P = 0.6u"GPa"
 
 DomainSph = Domain(ICSph, T, P)
-
-IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
 Domain1D = Domain(IC1D, T, P; bc_neumann = (true, false))
 
 sol_sph = simulate(DomainSph)
 sol_1D = simulate(Domain1D)
-
 
 @unpack tfinal_ad, t_charact = DomainSph
 
