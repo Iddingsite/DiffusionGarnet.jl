@@ -1,9 +1,9 @@
-# Diffusion in 1D
+# [Diffusion in 1D](@id 1D_diffusion)
 
-DiffusionGarnet expects the user to provide real natural data for modelling major element diffusion in garnet. Note that the profiles need to be evenly spaced. A set of example data can be found in the repository of the package in the [examples section](https://github.com/Iddingsite/DiffusionGarnet.jl/tree/main/examples/1D) for 1D profile called `Data_grt_1D.txt`.
+DiffusionGarnet expects the user to provide real natural data for modelling major element diffusion in garnet. Note that the profiles must be evenly spaced. A set of example data can be found in the repository of the package in the [1D examples section](https://github.com/Iddingsite/DiffusionGarnet.jl/tree/main/examples/1D) for 1D profile called `Data_grt_1D.txt`.
 This is what we will use for this tutorial.
 
-First, we will load the data, which should be in the same folder as your running session:
+First, we will load the data, which should be in the same folder as your current session:
 
 ```julia
 using DiffusionGarnet  # this can take a while
@@ -64,9 +64,15 @@ This can be achieved with the function `simulate()`:
 sol = simulate(domain1D)
 ```
 
-`simulate()` is using the package [DifferentialEquations.jl](https://docs.sciml.ai/DiffEqDocs/stable/) behind the hood to solve efficiently our problem. The `sol` variable is the common solution type from this package and more information can be found [here](https://docs.sciml.ai/DiffEqDocs/stable/basics/solution/). It basically holds all the information from our simulation.
+which output the time spent on the solver, for example, on the second run:
 
-We can now plot the solutions of our problem. Note that for plotting the timestep, we need to dimensionalise back the time from the model, using the characteristic time `t_charact` defined in `domain1D`.
+```
+  0.399870 seconds (31.93 k allocations: 18.212 MiB)
+```
+
+`simulate()` uses the [DifferentialEquations.jl](https://docs.sciml.ai/DiffEqDocs/stable/) package behind the hood to solve our problem efficiently. The returned variable `sol` is the common solution type from this package and more information can be found [here](https://docs.sciml.ai/DiffEqDocs/stable/basics/solution/). It basically holds all the information from our simulation.
+
+We can now plot the solution to our problem.
 
 ```julia
 # extract characteristic time to convert back to dimensional time
@@ -92,12 +98,16 @@ anim = @animate for i = LinRange(0, tfinal_ad, 100)
 end every 1
 
 println("Now, generating the gif...")
-gif(anim, "./Grt_1D_test.gif", fps = 7)
+gif(anim, "Grt_1D_test.gif", fps = 7)
 println("...Done!")
 ```
+
+!!! note
+    To plot the timestep, we need to dimensionalise the time back from the model, using the characteristic time `t_charact` defined in `domain1D`.
+
 
 Here is the resulting gif obtained:
 
 ![1D diffusion profil of a garnet](./assets/img/Grt_1D.gif)
 
-It represents the compositional evolution of a 1D profile through a garnet grain with homogeneous dirichlet boundaries on both sides.
+It shows the compositional evolution of a 1D profile through a garnet grain with homogeneous Dirichlet boundaries on both sides.

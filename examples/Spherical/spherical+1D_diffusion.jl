@@ -11,10 +11,10 @@ Fe0 = data[:, 2]
 Mn0 = data[:, 3]
 Ca0 = data[:, 5]
 distance = data[:, 1]
-Lr = (data[end,1] - data[1,1])u"µm"
+Lr = Lx = (data[end,1] - data[1,1])u"µm"
 tfinal = 15u"Myr"
 
-ICSph = InitialConditionsSpherical(Mg0, Fe0, Mn0, Lx, tfinal)
+ICSph = InitialConditionsSpherical(Mg0, Fe0, Mn0, Lr, tfinal)
 IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
 
 T = 900u"°C"
@@ -52,5 +52,5 @@ anim = @animate for i = LinRange(0, tfinal_ad, 100)
 end every 1
 
 println("Now, generating the gif...")
-gif(anim, "./examples/Spherical/Grt_Spherical+1D.gif", fps = 7)
+gif(anim, "Grt_Spherical+1D.gif", fps = 7)
 println("...Done!")
