@@ -64,7 +64,7 @@ This can be achieved with the function `simulate()`:
 sol = simulate(domain1D)
 ```
 
-`simulate()` is using the package (DifferentialEquations.jl)[https://docs.sciml.ai/DiffEqDocs/stable/] behind the hood to solve efficiently our problem. The `sol` variable is the common solution type from this package and more information can be found (here)[https://docs.sciml.ai/DiffEqDocs/stable/basics/solution/]. It basically holds all the information from our simulation.
+`simulate()` is using the package [DifferentialEquations.jl](https://docs.sciml.ai/DiffEqDocs/stable/) behind the hood to solve efficiently our problem. The `sol` variable is the common solution type from this package and more information can be found [here](https://docs.sciml.ai/DiffEqDocs/stable/basics/solution/). It basically holds all the information from our simulation.
 
 We can now plot the solutions of our problem. Note that for plotting the timestep, we need to dimensionalise back the time from the model, using the characteristic time `t_charact` defined in `domain1D`.
 
