@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Diffusion in 1D · DiffusionGarnet.jl</title><meta name="title" content="Diffusion in 1D · DiffusionGarnet.jl"/><meta property="og:title" content="Diffusion in 1D · DiffusionGarnet.jl"/><meta property="twitter:title" content="Diffusion in 1D · DiffusionGarnet.jl"/><meta name="description" content="Documentation for DiffusionGarnet.jl."/><meta property="og:description" content="Documentation for DiffusionGarnet.jl."/><meta property="twitter:description" content="Documentation for DiffusionGarnet.jl."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">DiffusionGarnet.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><span class="tocitem">Tutorials</span><ul><li class="is-active"><a class="tocitem" href>Diffusion in 1D</a></li></ul></li><li><a class="tocitem" href="../reference/">Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li class="is-active"><a href>Diffusion in 1D</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Diffusion in 1D</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/Iddingsite/DiffusionGarnet.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/Iddingsite/DiffusionGarnet.jl/blob/main/docs/src/diffusion_1D.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Diffusion-in-1D"><a class="docs-heading-anchor" href="#Diffusion-in-1D">Diffusion in 1D</a><a id="Diffusion-in-1D-1"></a><a class="docs-heading-anchor-permalink" href="#Diffusion-in-1D" title="Permalink"></a></h1><p>DiffusionGarnet expects the user to provide real natural data for modelling major element diffusion in garnet. Note that the profiles need to be evenly spaced. A set of example data can be found in the repository of the package in the <a href="https://github.com/Iddingsite/DiffusionGarnet.jl/tree/main/examples/1D">examples section</a> for 1D profile called <code>Data_grt_1D.txt</code>. This is what we will use for this tutorial.</p><p>First, we will load the data, which should be in the same folder as your running session:</p><pre><code class="language-julia hljs">using DiffusionGarnet  # this can take a while
+using DelimitedFiles
+# load the data of your choice (here from the text file located in https://github.com/Iddingsite/DiffusionGarnet.jl/tree/main/examples/1D, place it in the same folder as where you are running the code)
+data = DelimitedFiles.readdlm(&quot;./Data_Grt_1D.txt&quot;, &#39;\t&#39;, &#39;\n&#39;, header=true)[1]
+
+Mg0 = data[:, 4]  # load initial Mg mole fraction
+Fe0 = data[:, 2]  # load initial Fe mole fraction
+Mn0 = data[:, 3]  # load initial Mn mole fraction
+Ca0 = data[:, 5]  # load initial Ca mole fraction
+distance = data[:, 1]</code></pre><p>We can visualize our data:</p><pre><code class="language-julia hljs">using Plots
+
+l = @layout [a ; b]
+
+p1 = plot(distance, Fe0, label=&quot;Fe initial&quot;, linestyle = :dash, linewidth=1, dpi=200, title = &quot;Initial conditions&quot;, legend=:outerbottomright, linecolor=1,xlabel = &quot;Distance (µm)&quot;, ylabel=&quot;Molar fraction&quot;)
+
+p2 = plot(distance, Mg0, label=&quot;Mg initial&quot;, linestyle = :dash, linewidth=1, dpi=200,legend=:outerbottomright,linecolor=2,xlabel = &quot;Distance (µm)&quot;)
+p2 = plot!(distance, Mn0, label=&quot;Mn initial&quot;, linestyle = :dash, linewidth=1, linecolor=3)
+p2 = plot!(distance, Ca0, label=&quot;Ca initial&quot;, linestyle = :dash, linewidth=1, linecolor=4, ylabel=&quot;Molar fraction&quot;)
+
+plot(p1, p2, layout = l)</code></pre><p>which output:</p><p><img src="../assets/img/1D_IC.png" alt="Initial conditions."/></p><p>Then, we will define 2 structures that DiffusionGarnet requires, which will contain all the information it needs to run a simulation.</p><pre><code class="language-julia hljs">Lx = (data[end,1] - data[1,1])u&quot;µm&quot;  # length in x of the model, here in µm
+tfinal = 15u&quot;Myr&quot;  # total time of the model, here in Myr
+
+# define the initial conditions in 1D of your problem in that order.
+IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
+
+# define the pressure and temperature conditions of diffusion
+T = 900u&quot;°C&quot;
+P = 0.6u&quot;GPa&quot;
+
+# define a Domain struct containing the definition of our problem and nondimensionalised variables
+domain1D = Domain(IC1D, T, P)</code></pre><p>Note that <code>Lx</code>, <code>tfinal</code>, <code>T</code> and <code>P</code> need to contain units, following the syntax of the package <a href="https://painterqubits.github.io/Unitful.jl/stable/">Unitful</a>. This allows the user to specify the units that suit their problem.  <code>Domain1D</code> contains all the information that DiffusionGarnet needs to solve our coupled diffusion problem, at 900 °C and 0.6 GPa for a duration of 15 Myr.</p><p>This can be achieved with the function <code>simulate()</code>:</p><pre><code class="language-julia hljs"># solve the problem using DifferentialEquations.jl
+sol = simulate(domain1D)</code></pre><p><code>simulate()</code> is using the package <a href="https://docs.sciml.ai/DiffEqDocs/stable/">DifferentialEquations.jl</a> behind the hood to solve efficiently our problem. The <code>sol</code> variable is the common solution type from this package and more information can be found <a href="https://docs.sciml.ai/DiffEqDocs/stable/basics/solution/">here</a>. It basically holds all the information from our simulation.</p><p>We can now plot the solutions of our problem. Note that for plotting the timestep, we need to dimensionalise back the time from the model, using the characteristic time <code>t_charact</code> defined in <code>domain1D</code>.</p><pre><code class="language-julia hljs"># extract characteristic time to convert back to dimensional time
+@unpack tfinal_ad, t_charact = domain1D
+
+anim = @animate for i = LinRange(0, tfinal_ad, 100)
+    l = @layout [a ; b]
+
+    p1 = plot(distance, Fe0, label=&quot;Fe initial&quot;, linestyle = :dash, linewidth=1, dpi=200, title = &quot;Timestep = $(round(((i)* t_charact);digits=2)) Ma&quot;, legend=:outerbottomright, linecolor=1,xlabel = &quot;Distance (µm)&quot;)
+    p1 = plot!(distance, sol(i)[:,2], label=&quot;Fe&quot;,linecolor=1, linewidth=1)
+
+
+    p2 = plot(distance, Mg0, label=&quot;Mg initial&quot;, linestyle = :dash, linewidth=1, dpi=200,legend=:outerbottomright,linecolor=2,xlabel = &quot;Distance (µm)&quot;)
+    p2 = plot!(distance, Mn0, label=&quot;Mn initial&quot;, linestyle = :dash, linewidth=1, linecolor=3)
+    p2 = plot!(distance, Ca0, label=&quot;Ca initial&quot;, linestyle = :dash, linewidth=1, linecolor=4)
+    p2 = plot!(distance, sol(i)[:,1], label=&quot;Mg&quot;,linecolor=2, linewidth=1)
+
+    p2 = plot!(distance, sol(i)[:,3], label=&quot;Mn&quot;, linecolor=3, linewidth=1)
+
+    p2 = plot!(distance, 1 .- sol(i)[:,1] .- sol(i)[:,2] .- sol(i)[:,3], label=&quot;Ca&quot;, linecolor=4, linewidth=1)
+
+    plot(p1, p2, layout = l)
+end every 1
+
+println(&quot;Now, generating the gif...&quot;)
+gif(anim, &quot;./Grt_1D_test.gif&quot;, fps = 7)
+println(&quot;...Done!&quot;)</code></pre><p>Here is the resulting gif obtained:</p><p><img src="../assets/img/Grt_1D.gif" alt="1D diffusion profil of a garnet"/></p><p>It represents the compositional evolution of a 1D profile through a garnet grain with homogeneous dirichlet boundaries on both sides.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../reference/">Reference »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="auto">Automatic (OS)</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.2.1 on <span class="colophon-date" title="Friday 22 December 2023 17:18">Friday 22 December 2023</span>. Using Julia version 1.9.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
