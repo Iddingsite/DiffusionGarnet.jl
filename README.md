@@ -14,6 +14,10 @@ It is build on top of the [DifferentialEquations.jl](https://github.com/SciML/Di
 ### Quick start
 
 ```julia
+using DiffusionGarnet
+using DelimitedFiles
+using Plots
+
 # load the data of your choice (here from the text file located in https://github.com/Iddingsite/DiffusionGarnet.jl/tree/main/examples/1D, place it in the same folder as where you are running the code)
 data = DelimitedFiles.readdlm("./Data_Grt_1D.txt", '\t', '\n', header=true)[1]
 
