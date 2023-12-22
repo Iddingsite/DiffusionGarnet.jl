@@ -1,10 +1,11 @@
 using DiffusionGarnet
 using DelimitedFiles
+using Plots
 
 cd(@__DIR__)
 
 # load the data of your choice (here from the text file located in https://github.com/Iddingsite/DiffusionGarnet.jl/tree/main/examples/1D, place it in the same folder as where you are running the code)
-const data = DelimitedFiles.readdlm("./Data_Grt_1D.txt", '\t', '\n', header=true)[1]
+const data = DelimitedFiles.readdlm("Data_Grt_1D.txt", '\t', '\n', header=true)[1]
 
 const Mg0 = data[:, 4]
 const Fe0 = data[:, 2]
