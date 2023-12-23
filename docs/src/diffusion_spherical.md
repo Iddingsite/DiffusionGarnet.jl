@@ -37,7 +37,7 @@ p2 = plot!(distance, Ca0, label="Ca initial", linestyle = :dash, linewidth=1, li
 plot(p1, p2, layout = l)
 ```
 
-which output:
+which outputs:
 
 ![Initial conditions.](./assets/img/Sph_IC.png)
 

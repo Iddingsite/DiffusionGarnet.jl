@@ -9,7 +9,7 @@ First, we will load the data, which should be in the same folder as your current
 using DiffusionGarnet  # this can take a while
 using DelimitedFiles
 # load the data of your choice (here from the text file located in https://github.com/Iddingsite/DiffusionGarnet.jl/tree/main/examples/1D, place it in the same folder as where you are running the code)
-data = DelimitedFiles.readdlm("./Data_Grt_1D.txt", '\t', '\n', header=true)[1]
+data = DelimitedFiles.readdlm("Data_Grt_1D.txt", '\t', '\n', header=true)[1]
 
 Mg0 = data[:, 4]  # load initial Mg mole fraction
 Fe0 = data[:, 2]  # load initial Fe mole fraction
@@ -34,11 +34,11 @@ p2 = plot!(distance, Ca0, label="Ca initial", linestyle = :dash, linewidth=1, li
 plot(p1, p2, layout = l)
 ```
 
-which output:
+which outputs:
 
 ![Initial conditions.](./assets/img/1D_IC.png)
 
-Then, we will define 2 structures that DiffusionGarnet requires, which will contain all the information it needs to run a simulation.
+Then, we will define 2 structures from the constructors [`InitialConditions1D`](https://iddingsite.github.io/DiffusionGarnet.jl/dev/reference/#DiffusionGarnet.InitialConditions1D-Tuple{AbstractVector{%3C:Real},%20AbstractVector{%3C:Real},%20AbstractVector{%3C:Real},%20Union{Quantity{T,%20%F0%9D%90%8B,%20U},%20Level{L,%20S,%20Quantity{T,%20%F0%9D%90%8B,%20U}}%20where%20{L,%20S}}%20where%20{T,%20U},%20Union{Quantity{T,%20%F0%9D%90%93,%20U},%20Level{L,%20S,%20Quantity{T,%20%F0%9D%90%93,%20U}}%20where%20{L,%20S}}%20where%20{T,%20U}}) and [`Domain`](https://iddingsite.github.io/DiffusionGarnet.jl/dev/reference/#DiffusionGarnet.Domain), which will contain all the information DiffusionGarnet needs to run a simulation.
 
 ```julia
 Lx = (data[end,1] - data[1,1])u"µm"  # length in x of the model, here in µm
@@ -66,7 +66,7 @@ This can be achieved with the function `simulate()`:
 sol = simulate(domain1D)
 ```
 
-which output the time spent on the solver, for example, on the second run:
+which outputs the time spent on the solver, for example, on the second run:
 
 ```
   0.399870 seconds (31.93 k allocations: 18.212 MiB)

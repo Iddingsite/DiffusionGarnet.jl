@@ -21,7 +21,7 @@ julia> println("Number of threads: $(Base.Threads.nthreads())")
 16
 ```
 
-which output the current number of threads used in the Julia session (here 16).
+which outputs the current number of threads used in the Julia session (here 16).
 
 !!! tip
     The degree of parallelisation that can be achieved increases with the number of threads available.
@@ -73,7 +73,7 @@ p4 = heatmap(distance, distance, Ca0, label="Ca", dpi=200, title="Ca", clim=(0, 
 plot(p1, p2, p3, p4, layout = l , plot_title="Initial conditions")
 ```
 
-which output:
+which outputs:
 
 ![Initial conditions 2D.](./assets/img/2D_IC.png)
 
