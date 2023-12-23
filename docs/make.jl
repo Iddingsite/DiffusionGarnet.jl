@@ -9,8 +9,10 @@ makedocs(;
                 "Home" => "index.md"
                 "Tutorials" => Any["Diffusion in 1D Cartesian coordinates" => "diffusion_1D.md",
                 "Diffusion in spherical coordinates" => "diffusion_spherical.md",
-                "Diffusion in 2D Cartesian coordinates on CPU" => "diffusion_2D.md"]
-                # "Callbacks" => "callbacks.md"
+                "Diffusion in 2D Cartesian coordinates on CPU" => "diffusion_2D.md"
+                ]
+                "Callbacks" => Any["Updating PT conditions" => "updating_PT.md",
+                "Saving output" => "saving_output.md"]
                 "Reference" => "reference.md"
                ],
 )
