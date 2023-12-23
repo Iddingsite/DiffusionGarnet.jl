@@ -19,7 +19,7 @@ using DelimitedFiles
 using Plots
 
 # load the data of your choice (here from the text file located in https://github.com/Iddingsite/DiffusionGarnet.jl/tree/main/examples/1D, place it in the same folder as where you are running the code)
-data = DelimitedFiles.readdlm("./Data_Grt_1D.txt", '\t', '\n', header=true)[1]
+data = DelimitedFiles.readdlm("Data_Grt_1D.txt", '\t', '\n', header=true)[1]
 
 Mg0 = data[:, 4]
 Fe0 = data[:, 2]
@@ -67,7 +67,7 @@ anim = @animate for i = LinRange(0, tfinal_ad, 100)
 end every 1
 
 println("Now, generating the gif...")
-gif(anim, "./Grt_1D_test.gif", fps = 7)
+gif(anim, "Grt_1D.gif", fps = 7)
 println("...Done!")
 ```
 
