@@ -1,4 +1,4 @@
-# [Diffusion in 1D](@id 1D_diffusion)
+# [Diffusion in 1D Cartesian coordinates](@id 1D_diffusion)
 
 DiffusionGarnet expects the user to provide real natural data for modelling major element diffusion in garnet. Note that the profiles must be evenly spaced. A set of example data can be found in the repository of the package in the [1D examples section](https://github.com/Iddingsite/DiffusionGarnet.jl/tree/main/examples/1D) for 1D profile called `Data_grt_1D.txt`.
 This is what we will use for this tutorial.
@@ -55,7 +55,9 @@ P = 0.6u"GPa"
 domain1D = Domain(IC1D, T, P)
 ```
 
-Note that `Lx`, `tfinal`, `T` and `P` need to contain units, following the syntax of the package [Unitful](https://painterqubits.github.io/Unitful.jl/stable/). This allows the user to specify the units that suit their problem. 
+!!! note
+    `Lx`, `tfinal`, `T` and `P` need to contain units, following the syntax of the package [Unitful](https://painterqubits.github.io/Unitful.jl/stable/). This allows the user to specify the units that suit their problem.
+
 `Domain1D` contains all the information that DiffusionGarnet needs to solve our coupled diffusion problem, at 900 °C and 0.6 GPa for a duration of 15 Myr.
 
 This can be achieved with the function `simulate()`:
