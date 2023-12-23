@@ -5,22 +5,22 @@ using Plots
 cd(@__DIR__)
 
 # load the data of your choice (here from the text file located in https://github.com/Iddingsite/DiffusionGarnet.jl/tree/main/examples/1D, place it in the same folder as where you are running the code)
-const data = DelimitedFiles.readdlm("Data_Grt_1D.txt", '\t', '\n', header=true)[1]
+data = DelimitedFiles.readdlm("Data_Grt_1D.txt", '\t', '\n', header=true)[1]
 
-const Mg0 = data[:, 4]
-const Fe0 = data[:, 2]
-const Mn0 = data[:, 3]
-const Ca0 = data[:, 5]
-const distance = data[:, 1]
-const Lx = (data[end,1] - data[1,1])u"µm"
-const tfinal = 1u"Myr"
+Mg0 = data[:, 4]
+Fe0 = data[:, 2]
+Mn0 = data[:, 3]
+Ca0 = data[:, 5]
+distance = data[:, 1]
+Lx = (data[end,1] - data[1,1])u"µm"
+tfinal = 1u"Myr"
 
 # define the initial conditions in 1D of your problem
 IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
 
 # define the PT conditions
-const T = 900u"°C"
-const P = 0.6u"GPa"
+T = 900u"°C"
+P = 0.6u"GPa"
 
 # define a Domain struct containing the definition of your problem
 domain1D = Domain(IC1D, T, P)

@@ -103,7 +103,7 @@ end
 
     domain1D = Domain(IC1D, T, P)
 
-    sol = simulate(domain1D; progressbar=false)
+    sol = simulate(domain1D; progress=false)
 
     @test norm(sum.(sol[end][:,1] .+ sol[end][:,2] .+ sol[end][:,3])) ≈ 28.64886878627501
 end
@@ -130,7 +130,7 @@ end
 
     domainSph = Domain(ICSph, T, P)
 
-    sol = simulate(domainSph; progressbar=false)
+    sol = simulate(domainSph; progress=false)
 
     @test norm(sum.(sol[end][:,1] .+ sol[end][:,2] .+ sol[end][:,3])) ≈ 20.268803083443927
 end
@@ -153,7 +153,7 @@ end
     IC2D = InitialConditions2D(CMg, CFe, CMn, Lx, Ly, tfinal; grt_boundary = grt_boundary)
     domain2D = Domain(IC2D, T, P)
 
-    sol = simulate(domain2D; progressbar=false)
+    sol = simulate(domain2D; progress=false)
 
     @test norm(sol[end][:,:,1]) ≈ 12.783357041653609
 
@@ -202,14 +202,14 @@ end
 
     update_diffusion_coef_call = PresetTimeCallback(time_update_ad, update_diffusion_coef)
 
-    sol_sph = simulate(domainSph; callback=update_diffusion_coef_call, progressbar=false)
-    sol_1D = simulate(domain1D; callback=update_diffusion_coef_call, progressbar=false)
+    sol_sph = simulate(domainSph; callback=update_diffusion_coef_call, progress=false)
+    sol_1D = simulate(domain1D; callback=update_diffusion_coef_call, progress=false)
 
     @unpack time_update_ad = domain2D
     update_diffusion_coef_call = PresetTimeCallback(time_update_ad, update_diffusion_coef)
 
-    sol_2D = simulate(domain2D; callback=update_diffusion_coef_call, progressbar=false)
-    sol_2D = simulate(domain2D; progressbar=false)
+    sol_2D = simulate(domain2D; callback=update_diffusion_coef_call, progress=false)
+    sol_2D = simulate(domain2D; progress=false)
 
     T=600  # in °C
     P=3  # in kbar
@@ -257,13 +257,13 @@ end
 
     save_data_callback = PresetTimeCallback(ustrip.(time_save) ./ domain1D.t_charact, save_data)
 
-    sol_1D = simulate(domain1D; callback=save_data_callback, path_save=(@__DIR__) * "/Grt_1D.h5", progressbar=false)
+    sol_1D = simulate(domain1D; callback=save_data_callback, path_save=(@__DIR__) * "/Grt_1D.h5", progress=false)
 
-    sol_sph = simulate(domainSph; callback=save_data_callback, path_save=(@__DIR__) * "/Grt_Sph.h5", progressbar=false)
+    sol_sph = simulate(domainSph; callback=save_data_callback, path_save=(@__DIR__) * "/Grt_Sph.h5", progress=false)
 
     save_data_callback = PresetTimeCallback(ustrip.(time_save) ./ domain2D.t_charact, save_data)
 
-    sol_2D = simulate(domain2D; callback=save_data_callback, path_save=(@__DIR__) * "/Grt_2D.h5", progressbar=false)
+    sol_2D = simulate(domain2D; callback=save_data_callback, path_save=(@__DIR__) * "/Grt_2D.h5", progress=false)
 
     h5open("./Grt_1D.h5", "r") do file
         @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"]) == IC1D.CMg0

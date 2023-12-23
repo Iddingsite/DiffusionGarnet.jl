@@ -33,8 +33,6 @@ anim = @animate for i = tqdm(LinRange(0, tfinal_ad, 20))
     time = round(i*t_charact;digits=2)
 
     l = @layout [a b ; c d ]
-    Ca_ini = 1 .- sol(0)[:,:,1] .- sol(0)[:,:,2] .- sol(0)[:,:,3]
-    replace!(Ca_ini, 1=>0)
     Ca = 1 .- sol(i)[:,:,1] .- sol(i)[:,:,2] .- sol(i)[:,:,3]
     replace!(Ca, 1=>0)
 
@@ -43,7 +41,7 @@ anim = @animate for i = tqdm(LinRange(0, tfinal_ad, 20))
     p3 = heatmap(distance, distance, sol(i)[:,:,3], label="Mn", dpi=200, title="Mn", clim=(0, maximum(sol(0)[:,:,3])), xlabel= "Distance (µm)", ylabel= "Distance (µm)")
     p4 = heatmap(distance, distance, Ca, label="Ca", dpi=200, title="Ca", clim=(0, 0.1), xlabel= "Distance (µm)")
 
-    plot(p1, p2, p3, p4, layout = l , plot_title="Total Time = $(time) Ma, T=$(round(ustrip.(u"°C", T); digits=2)) °C")
+    plot(p1, p2, p3, p4, layout = l , plot_title="Total Time = $(time) Ma")
 end every 1
 
 println("...Done!")
