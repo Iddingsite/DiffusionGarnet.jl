@@ -1,5 +1,7 @@
 <h1> <img src="docs/src/assets/logo.png" alt="DiffusionGarnet.jl" width="50"> DiffusionGarnet.jl </h1>
-<img width="400px" src="docs/src/assets/logo.png"/>  DiffusionGarnet.jl
+<img width="200px" src="docs/src/assets/logo.png"/>  
+
+# DiffusionGarnet.jl
 
 
 
