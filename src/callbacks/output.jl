@@ -1,4 +1,3 @@
-using HDF5
 
 @inline function column_to_row(array)
     permutedims(array, reverse(1:ndims(array)))

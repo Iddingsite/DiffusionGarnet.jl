@@ -94,7 +94,8 @@ end
             # grid = (x=x' .* @ones(ny), y= (@ones(nx))' .* y)
 
             # define when grt is present
-            grt_position = similar(CMg0) .* 0
+            # grt_position = similar(CMg0) .* 0
+            grt_position = zeros(eltype(CMg0), size(CMg0)...)
             # create a binary matrix with 1 where grt is present. 0 otherwise. This depends on if CMg0, CFe0 and CMn0 are equal to 0 or not
             grt_position .= (CMg0 .≠ 0) .& (CFe0 .≠ 0) .& (CMn0 .≠ 0)
 
@@ -213,8 +214,8 @@ function D_ini!(D0,T,P)
     D0 .= [DMg, DFe, DMn, DCa] .* (365.25 * 24 * 3600 * 1e6)  # in years
 end
 
-@with_kw struct Domain1D{T1, T2, T3} <: Domain
-    IC::InitialConditions1D
+@with_kw struct Domain1D{T1, T2, T3, T4} <: Domain
+    IC::T4
     T::T1
     P::T1
     time_update::T1
@@ -229,7 +230,7 @@ end
     tfinal_ad::T2
     time_update_ad::T1
     bc_neumann::T3
-    function Domain1D(IC::InitialConditions1D, T::T1, P::T1, time_update::T1, bc_neumann::T2) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}, T2 <: Tuple}
+    function Domain1D(IC::InitialConditions1D, T::T1, P::T1, time_update::T1, bc_neumann::T3) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}, T3 <: Tuple}
 
         #check that T, P and time_update have the same size
         if size(T, 1) != size(P, 1) || size(T, 1) != size(time_update, 1)
@@ -238,7 +239,7 @@ end
 
         @unpack nx, Δx, tfinal, Lx, CMg0, CFe0, CMn0 = IC
 
-        T3 = eltype(CMg0)
+        T2 = eltype(CMg0)
 
         D0 = zeros(T3, 4)
         D_ini!(D0, T[1], P[1])  # compute initial diffusion coefficients
@@ -257,12 +258,15 @@ end
         Δxad_ = 1 / (Δx / L_charact)  # inverse of nondimensionalised Δx
         tfinal_ad = tfinal / t_charact  # nondimensionalised total time
         time_update_ad = time_update ./ t_charact  # nondimensionalised time update
-        new{T1, T3, T2}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, u0, tfinal_ad, time_update_ad, bc_neumann)
+
+        T4 = typeof(IC)
+
+        new{T1, T2, T3, T4}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, u0, tfinal_ad, time_update_ad, bc_neumann)
     end
 end
 
-@with_kw struct DomainSpherical{T1, T2} <: Domain
-    IC::InitialConditionsSpherical
+@with_kw struct DomainSpherical{T1, T2, T3} <: Domain
+    IC::T3
     T::T1
     P::T1
     time_update::T1
@@ -308,12 +312,15 @@ end
         r_ad = r ./ L_charact  # nondimensionalised radius
         tfinal_ad = tfinal / t_charact  # nondimensionalised total time
         time_update_ad = time_update ./ t_charact  # nondimensionalised time update
-        new{T1, T2}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δrad, Δrad_, r_ad, u0, tfinal_ad, time_update_ad)
+
+        T3 = typeof(IC)
+
+        new{T1, T2, T3}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δrad, Δrad_, r_ad, u0, tfinal_ad, time_update_ad)
     end
 end
 
-@with_kw struct Domain2D{T1, T2, T3, T4, T5} <: Domain
-    IC::InitialConditions2D
+@with_kw struct Domain2D{T1, T2, T3, T4, T5, T6} <: Domain
+    IC::T6
     T::T1
     P::T1
     time_update::T1
@@ -354,13 +361,14 @@ end
         T3 = typeof(D0)
         T4 = typeof(D)
         T5 = typeof(u0)
+        T6 = typeof(IC)
 
-        new{T1, T2, T3, T4, T5}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, Δyad_, u0, tfinal_ad, time_update_ad)
+        new{T1, T2, T3, T4, T5, T6}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, Δyad_, u0, tfinal_ad, time_update_ad)
     end
 end
 
-@with_kw struct Domain3D{T1, T2, T3, T4, T5} <: Domain
-    IC::InitialConditions3D
+@with_kw struct Domain3D{T1, T2, T3, T4, T5, T6} <: Domain
+    IC::T6
     T::T1
     P::T1
     time_update::T1
@@ -402,8 +410,9 @@ end
         T3 = typeof(D0)
         T4 = typeof(D)
         T5 = typeof(u0)
+        T6 = typeof(IC)
 
-        new{T1, T2, T3, T4, T5}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, Δyad_, Δzad_, u0, tfinal_ad, time_update_ad)
+        new{T1, T2, T3, T4, T5, T6}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, Δyad_, Δzad_, u0, tfinal_ad, time_update_ad)
     end
 end
 

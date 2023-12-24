@@ -2,7 +2,7 @@
 
 When dealing with 2D or especially 3D data, it can be impractical or even impossible to keep every timestep in memory, as the RAM on a single machine can quickly become saturated. It may then be relevant to save certain timesteps of interest to disk for later post-processing. DiffusionGarnet has a built-in function for this purpose, using a callback function based on the [DiffEqCallbacks](https://docs.sciml.ai/DiffEqCallbacks/stable/) package to produce HDF5 files.
 
-[HDF5](https://www.hdfgroup.org/solutions/hdf5/) is a data format designed to store and organise large amount of data and is thus suitable for numerical modelling.
+[HDF5](https://www.hdfgroup.org/solutions/hdf5/) is a data format designed to store and organise large amount of data. 
 
 As an example, we will use the data from the [Diffusion in 2D Cartesian coordinates on CPU](@ref 2D_diffusion_CPU) tutorial.
 

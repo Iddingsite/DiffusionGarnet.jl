@@ -5,14 +5,14 @@ using Reexport: @reexport
 @reexport using Parameters
 @reexport using Unitful
 @reexport using DiffEqCallbacks: PresetTimeCallback
+
 using Logging: global_logger
 using TerminalLoggers: TerminalLogger
-
 using OrdinaryDiffEq: ODEProblem, solve, ROCK2
 using ParallelStencil
-using Preferences: @set_preferences!, @load_preference
+using Preferences
+using HDF5: h5open, create_group, attributes
 using DelimitedFiles
-using BenchmarkTools: @btime
 using Plots
 
 # initialise ParallelStencil (Thx AlbertDeMontserrat!)
@@ -37,7 +37,6 @@ function __init__()
     # initialise global logger for OrdinaryDiffEq
     global_logger(TerminalLogger())
 
-    # @require ParallelStencil = "94395366-693c-11ea-3b26-d9b7aac5d958" include("Discretisation/2D/semi_discretisation_2D.jl")
 end
 
 
