@@ -30,7 +30,7 @@ function simulate(domain::Domain1D; callback=nothing, path_save=nothing, progres
 
     prob = ODEProblem(semi_discretisation_diffusion_1D, u0, t, p)
 
-    @time sol = solve(prob, ROCK2(), progress=progress, progress_steps=1, save_start=true, abstol=1e-6,reltol=1e-6, callback=callback)
+    sol = @time solve(prob, ROCK2(), progress=progress, progress_steps=1, save_start=true, abstol=1e-6,reltol=1e-6, callback=callback)
 
     return sol
 end
@@ -51,7 +51,7 @@ function simulate(domain::DomainSpherical; callback=nothing, path_save=nothing, 
 
     prob = ODEProblem(semi_discretisation_diffusion_spherical, u0, t, p)
 
-    @time sol = solve(prob, ROCK2(), progress=progress, progress_steps=1, save_start=true, abstol=1e-6,reltol=1e-6, callback=callback)
+    sol = @time solve(prob, ROCK2(), progress=progress, progress_steps=1, save_start=true, abstol=1e-6,reltol=1e-6, callback=callback)
 
     return sol
 end
@@ -72,7 +72,7 @@ function simulate(domain::Domain2D; callback=nothing, path_save=nothing, progres
 
     prob = ODEProblem(semi_discretisation_diffusion_2D, u0, t, p)
 
-    @time sol = solve(prob, ROCK2(), progress=progress, progress_steps=1, save_start=true, abstol=1e-6,reltol=1e-6, save_everystep = save_everystep, callback=callback)
+    sol = @time solve(prob, ROCK2(), progress=progress, progress_steps=1, save_start=true, abstol=1e-6,reltol=1e-6, save_everystep = save_everystep, callback=callback)
 
     return sol
 end

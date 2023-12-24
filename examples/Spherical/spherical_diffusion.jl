@@ -44,5 +44,5 @@ anim = @animate for i = LinRange(0, tfinal_ad, 100)
 end every 1
 
 println("Now, generating the gif...")
-gif(anim, "./Grt_Spherical.gif", fps = 7)
+gif(anim, "Grt_Spherical.gif", fps = 7)
 println("...Done!")

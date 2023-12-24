@@ -1,20 +1,18 @@
 module DiffusionGarnet
 
-using Reexport
+using Reexport: @reexport
 
 @reexport using Parameters
 @reexport using Unitful
-@reexport using DiffEqCallbacks
-@reexport using Logging: global_logger
-@reexport using TerminalLoggers: TerminalLogger
-# @reexport using ParallelStencil
+@reexport using DiffEqCallbacks: PresetTimeCallback
+using Logging: global_logger
+using TerminalLoggers: TerminalLogger
 
-using OrdinaryDiffEq
-using Symbolics
+using OrdinaryDiffEq: ODEProblem, solve, ROCK2
 using ParallelStencil
-using Preferences
+using Preferences: @set_preferences!, @load_preference
 using DelimitedFiles
-using BenchmarkTools
+using BenchmarkTools: @btime
 using Plots
 
 # initialise ParallelStencil (Thx AlbertDeMontserrat!)

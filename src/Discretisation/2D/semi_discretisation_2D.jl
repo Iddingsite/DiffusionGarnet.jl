@@ -17,16 +17,17 @@ import Base.@propagate_inbounds
             DMnMg[iy,ix] = (      - D0[3] * CMn[iy,ix] / sum_D(CMg,CFe,CMn,D0,ix,iy) * (D0[1] - D0[end])) / D_charact
             DMnFe[iy,ix] = (      - D0[3] * CMn[iy,ix] / sum_D(CMg,CFe,CMn,D0,ix,iy) * (D0[2] - D0[end])) / D_charact
             DMnMn[iy,ix] = (D0[3] - D0[3] * CMn[iy,ix] / sum_D(CMg,CFe,CMn,D0,ix,iy) * (D0[3] - D0[end])) / D_charact
-        else
-            DMgMg[iy,ix] = 0.0
-            DMgFe[iy,ix] = 0.0
-            DMgMn[iy,ix] = 0.0
-            DFeMg[iy,ix] = 0.0
-            DFeFe[iy,ix] = 0.0
-            DFeMn[iy,ix] = 0.0
-            DMnMg[iy,ix] = 0.0
-            DMnFe[iy,ix] = 0.0
-            DMnMn[iy,ix] = 0.0
+        # no need, as they are already equal to zero
+        # else
+        #     DMgMg[iy,ix] = 0.0
+        #     DMgFe[iy,ix] = 0.0
+        #     DMgMn[iy,ix] = 0.0
+        #     DFeMg[iy,ix] = 0.0
+        #     DFeFe[iy,ix] = 0.0
+        #     DFeMn[iy,ix] = 0.0
+        #     DMnMg[iy,ix] = 0.0
+        #     DMnFe[iy,ix] = 0.0
+        #     DMnMn[iy,ix] = 0.0
         end
     end
 
