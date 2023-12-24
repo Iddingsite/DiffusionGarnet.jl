@@ -1,6 +1,6 @@
 # [Diffusion in 2D Cartesian coordinates on CPU](@id 2D_diffusion_CPU)
 
-From chemical maps (e.g. obtained by microprobe or SEM), we can acquire 2D composition of garnet. Assuming an initial composition, we can diffuse this garnet grain.
+From chemical maps (e.g. obtained by microprobe or SEM), we can acquire 2D composition of garnet. Assuming an initial composition, we can diffuse a garnet grain major element composition.
 
 When dealing with 2D or 3D data, the question of performance comes into play. It is important to write performant code that scales well. To help us with this, DiffusionGarnet internally uses the package [ParallelStencil.jl](https://github.com/omlins/ParallelStencil.jl), which allows to write high-level code for parallel high-performance stencil computation on both GPUs and CPUs. We will focus on CPUs in this tutorial, as they are easier to set up, but significant performance gains can be expected on GPUs.
 
