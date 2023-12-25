@@ -8,7 +8,7 @@ This package can be used as a teaching tool or for research purposes.
 
 ## Installation
 
-DiffusionGarnet.jl is a [registered package](http://pkg.julialang.org) and may be installed directly from the REPL:
+DiffusionGarnet.jl is a registered package and may be installed directly from the REPL:
 
 ```julia-repl
 julia>]
