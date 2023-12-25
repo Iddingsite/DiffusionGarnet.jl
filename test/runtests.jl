@@ -286,13 +286,13 @@ end
     end
 
     h5open("./Grt_2D.h5", "r") do file
-        @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"])' == IC2D.CMg0
-        @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"])' == IC2D.CFe0
-        @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"])' == IC2D.CMn0
-        @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"])' == 1 .- IC2D.CMg0 .- IC2D.CFe0 .- IC2D.CMn0
-        @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"])' == sol_2D[end][:,:,1]
-        @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"])' == sol_2D[end][:,:,2]
-        @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"])' == sol_2D[end][:,:,3]
+        @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"]) == IC2D.CMg0
+        @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"]) == IC2D.CFe0
+        @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"]) == IC2D.CMn0
+        @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"]) == 1 .- IC2D.CMg0 .- IC2D.CFe0 .- IC2D.CMn0
+        @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"]) == sol_2D[end][:,:,1]
+        @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"]) == sol_2D[end][:,:,2]
+        @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"]) == sol_2D[end][:,:,3]
     end
 
     # delete files "Grt_1D.h5" and "Grt_Sph.h5" if it exists

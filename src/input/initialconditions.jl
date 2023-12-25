@@ -241,10 +241,10 @@ end
 
         T2 = eltype(CMg0)
 
-        D0 = zeros(T3, 4)
+        D0 = zeros(T2, 4)
         D_ini!(D0, T[1], P[1])  # compute initial diffusion coefficients
 
-        D = (DMgMg = zeros(T3, nx), DMgFe = zeros(T3, nx), DMgMn = zeros(T3, nx), DFeMg = zeros(T3, nx), DFeFe = zeros(T3, nx), DFeMn = zeros(T3, nx), DMnMg = zeros(T3, nx), DMnFe = zeros(T3, nx), DMnMn = zeros(T3, nx))  # tensor of interdiffusion coefficients
+        D = (DMgMg = zeros(T2, nx), DMgFe = zeros(T2, nx), DMgMn = zeros(T2, nx), DFeMg = zeros(T2, nx), DFeFe = zeros(T2, nx), DFeMn = zeros(T2, nx), DMnMg = zeros(T2, nx), DMnFe = zeros(T2, nx), DMnMn = zeros(T2, nx))  # tensor of interdiffusion coefficients
 
         u0 = similar(CMg0, (nx, 3))
         u0[:,1] .= CMg0
@@ -293,7 +293,7 @@ end
 
         T2 = eltype(CMg0)
 
-        D0::Vector{T2} = zeros(4)
+        D0 = zeros(T2, 4)
         D_ini!(D0, T[1], P[1])  # compute initial diffusion coefficients
 
         D = (DMgMg = zeros(T2, nr), DMgFe = zeros(T2, nr), DMgMn = zeros(T2, nr), DFeMg = zeros(T2, nr), DFeFe = zeros(T2, nr), DFeMn = zeros(T2, nr), DMnMg = zeros(T2, nr), DMnFe = zeros(T2, nr), DMnMn = zeros(T2, nr))  # tensor of interdiffusion coefficients
