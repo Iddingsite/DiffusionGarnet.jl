@@ -16,6 +16,13 @@ makedocs(;
                 ]
                 "List of functions" => "reference.md"
                ],
+        format = Documenter.HTML(; mathengine=
+        Documenter.MathJax3(Dict(  # use MathJax3 as engine for latex (to be able to reference equations)
+            :loader => Dict("load" => ["[tex]/physics"]),
+            :tex => Dict(
+                "inlineMath" => [["\$","\$"], ["\\(","\\)"]],
+                "tags" => "ams",
+            )))),
 )
 
 deploydocs(;

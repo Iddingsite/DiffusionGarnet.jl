@@ -51,18 +51,17 @@ function stencil_diffusion_spherical!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δr
                         DMnFe[ix] / r_ad[ix] * (CFe[ix+1]-CFe[ix-1]) * Δrad_ +
                         DMnMn[ix] / r_ad[ix] * (CMn[ix+1]-CMn[ix-1]) * Δrad_
         end
-
-        # solve singularities (equivalent to homogeneous Neumann BC)
+        # solve singularities (equivalent to homogeneous Neumann BC), see Versypt, A. N. F., & Braatz, R. D. (2014). Analysis of finite difference discretization schemes for diffusion in spheres with variable diffusivity. Computers & chemical engineering, 71, 241-252.
         if ix == 1
-            dtCMg[ix] = 6 * DMgMg[ix] * (CMg[ix+1]-CMg[ix]) / (Δrad)^2 +
-                        6 * DMgFe[ix] * (CFe[ix+1]-CFe[ix]) / (Δrad)^2 +
-                        6 * DMgMn[ix] * (CMn[ix+1]-CMn[ix]) / (Δrad)^2
-            dtCFe[ix] = 6 * DFeMg[ix] * (CMg[ix+1]-CMg[ix]) / (Δrad)^2 +
-                        6 * DFeFe[ix] * (CFe[ix+1]-CFe[ix]) / (Δrad)^2 +
-                        6 * DFeMn[ix] * (CMn[ix+1]-CMn[ix]) / (Δrad)^2
-            dtCMn[ix] = 6 * DMnMg[ix] * (CMg[ix+1]-CMg[ix]) / (Δrad)^2 +
-                        6 * DMnFe[ix] * (CFe[ix+1]-CFe[ix]) / (Δrad)^2 +
-                        6 * DMnMn[ix] * (CMn[ix+1]-CMn[ix]) / (Δrad)^2
+            dtCMg[ix] = (6 * DMgMg[ix] * (CMg[ix+1]-CMg[ix])) / (Δrad^2) +
+                        (6 * DMgFe[ix] * (CFe[ix+1]-CFe[ix])) / (Δrad^2) +
+                        (6 * DMgMn[ix] * (CMn[ix+1]-CMn[ix])) / (Δrad^2)
+            dtCFe[ix] = (6 * DFeMg[ix] * (CMg[ix+1]-CMg[ix])) / (Δrad^2) +
+                        (6 * DFeFe[ix] * (CFe[ix+1]-CFe[ix])) / (Δrad^2) +
+                        (6 * DFeMn[ix] * (CMn[ix+1]-CMn[ix])) / (Δrad^2)
+            dtCMn[ix] = (6 * DMnMg[ix] * (CMg[ix+1]-CMg[ix])) / (Δrad^2) +
+                        (6 * DMnFe[ix] * (CFe[ix+1]-CFe[ix])) / (Δrad^2) +
+                        (6 * DMnMn[ix] * (CMn[ix+1]-CMn[ix])) / (Δrad^2)
         end
     end
 end
