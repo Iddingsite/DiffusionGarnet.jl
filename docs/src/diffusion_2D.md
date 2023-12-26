@@ -131,4 +131,5 @@ Here is the resulting gif:
 
 ![2D diffusion of a garnet](./assets/img/Grt_2D.gif)
 
-Note that 2D modelling ignores the effect of the third dimension on diffusion and is equivalent to considering the garnet grain to be cylindrical rather than spherical.
+!!! note
+    2D modelling ignores the effect of the third dimension on diffusion and is equivalent to considering the garnet grain to be cylindrical rather than spherical.
