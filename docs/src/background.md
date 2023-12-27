@@ -4,7 +4,7 @@
 
 Garnet is a mineral commonly used in metamorphic petrology to better understand geological processes, as it occurs in a variety of rock types. This mineral often exhibits a wide range of compositional zoning, which can be interpreted as recording ranges of pressure and temperature (PT) conditions. Modelling diffusion processes can help to better understand this zoning and better constrain the pressure-temperature-time (PTt) conditions of the metamorphic event of interest.
 
-Major element diffusion in garnet is described by a coupled multicomponent system between four poles: Mg, Fe, Mn and Ca. This can be expressed by a system of parabolic partial differential equations following Fick's first law of diffusion:
+Major element diffusion in garnet is described by a coupled multicomponent system between four poles: Mg, Fe, Mn and Ca. This can be expressed by a system of parabolic partial differential equations (PDEs) following Fick's first law of diffusion:
 
 ```math
 \begin{equation}
@@ -17,7 +17,7 @@ Major element diffusion in garnet is described by a coupled multicomponent syste
 
 with ``C_i`` the molar fraction of the ``i^{th}`` pole of garnet, ``n`` the total number of poles, and ``\textbf{D}_{ij}`` the interdiffusion coefficient tensor.
 
-For a system of ``n`` components, only ``n-1`` equations are needed, as the sum of the molar fractions of all components is equal to 1. Thus, Ca is made dependent on the other concentrations.
+For a system of ``n`` components, only ``n-1`` equations are needed, as the sum of the molar fractions of all components is equal to 1. Thus, Ca is made dependent on the other concentrations and (1) is made up of three coupled PDEs.
 
 According to Lasaga (1979) [[1]](@ref refs), ``\textbf{D}_{ij}`` can be defined, assuming an ideal system for garnet, with:
 
