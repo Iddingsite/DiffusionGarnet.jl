@@ -6,9 +6,9 @@ on:
       - main # update to match your development branch (master, main, dev, trunk, ...)
     tags: '*'
   pull_request:
-
 jobs:
   build:
+    name: Documentation
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -18,12 +18,12 @@ jobs:
       - uses: julia-actions/setup-julia@latest
         with:
           version: '1'
-      - name: Install dependencies
-        run: |
-          julia --project=docs/ -e '
-            using Pkg
-            Pkg.develop(PackageSpec(path=pwd()))
-            Pkg.instantiate()'
+      #- name: Install dependencies
+      #  run: |
+      #    julia --project=docs/ -e '
+      #      using Pkg
+      #      Pkg.develop(PackageSpec(path=pwd()))
+      #      Pkg.instantiate()'
       # - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-docdeploy@v1
       - name: Build and deploy
