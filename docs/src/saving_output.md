@@ -167,4 +167,4 @@ julia> hf5 = h5open("Grt_2D.h5")
 julia> close(hf5)  # close the HDF5 file
 ```
 
-We can see that the HDF5 file holds some general information about the model, such as characteristic variables, the dimensions of the model and the three timesteps with the four major element compositions.
+We can see that the HDF5 file contains some general information about the model as attributes (🏷️), such as characteristic values or the dimensions and the total time of the model. In addition, the three timesteps are stored as groups (📂) with the composition in Ca, Fe, Mg and Mn.
