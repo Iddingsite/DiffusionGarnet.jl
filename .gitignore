@@ -4,3 +4,6 @@ Manifest.toml
 *.jl.mem
 docs/build/
 .vscode/
+*.h5
+*.hdf5
+*.xdmf

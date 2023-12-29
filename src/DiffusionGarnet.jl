@@ -11,7 +11,7 @@ using TerminalLoggers: TerminalLogger
 using OrdinaryDiffEq: ODEProblem, solve, ROCK2
 using ParallelStencil
 using Preferences
-using HDF5: h5open, create_group, attributes
+using HDF5: h5open, create_group, attributes, read_attribute
 using DelimitedFiles
 using Plots
 
@@ -53,6 +53,7 @@ end
 include("input/initialconditions.jl")
 include("callbacks/update_diffusion_coef_TP.jl")
 include("callbacks/output.jl")
+include("callbacks/output_paraview.jl")
 include("Discretisation/1D/semi_discretisation_1D.jl")
 include("Discretisation/2D/semi_discretisation_2D.jl")
 include("Discretisation/Spherical/semi_discretisation_spherical.jl")
@@ -63,6 +64,6 @@ export D_ini!, Domain
 export semi_discretisation_diffusion_1D, semi_discretisation_diffusion_spherical, semi_discretisation_diffusion_2D, Diffusion_coef_2D!, stencil_diffusion_2D!
 export simulate
 export update_diffusion_coef
-export hdf5_initial_conditions, hdf5_timestep, save_data
+export save_data, save_data_paraview
 
 end # module DiffusionGarnet
