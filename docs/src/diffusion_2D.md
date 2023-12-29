@@ -77,7 +77,7 @@ which outputs:
 
 ![Initial conditions 2D.](./assets/img/2D_IC.png)
 
-Like with [spherical](@ref sph_diffusion) or [1D Cartesian](@ref 1D_diffusion) coordinates, we need to define our `InitialConditions` and `Domain` structure, that will hold all the information of our model.
+Like with [spherical](@ref sph_diffusion) or [1D Cartesian](@ref 1D_diffusion) coordinates, we need to define our `InitialConditions` and `Domain` structures, that will hold all the information of our model.
 
 ```julia
 IC2D = InitialConditions2D(Mg0, Fe0, Mn0, Lx, Ly, tfinal; grt_boundary = grt_boundary)
