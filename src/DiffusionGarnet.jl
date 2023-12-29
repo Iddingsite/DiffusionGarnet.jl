@@ -64,7 +64,6 @@ export D_ini!, Domain
 export semi_discretisation_diffusion_1D, semi_discretisation_diffusion_spherical, semi_discretisation_diffusion_2D, Diffusion_coef_2D!, stencil_diffusion_2D!
 export simulate
 export update_diffusion_coef
-export hdf5_initial_conditions, hdf5_timestep, save_data
-export hdf5_initial_conditions_paraview, hdf5_timestep_paraview, save_data_paraview
+export save_data, save_data_paraview
 
 end # module DiffusionGarnet

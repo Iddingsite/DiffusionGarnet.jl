@@ -269,7 +269,7 @@ end
         @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"]) == IC1D.CMg0
         @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"]) == IC1D.CFe0
         @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"]) == IC1D.CMn0
-        @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"]) == 1 .- IC1D.CMg0 .- IC1D.CFe0 .- IC1D.CMn0
+        @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"]) == replace!((1 .- IC1D.CMg0 .- IC1D.CFe0 .- IC1D.CMn0), 1=>0)
         @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"]) == sol_1D[end][:,1]
         @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"]) == sol_1D[end][:,2]
         @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"]) == sol_1D[end][:,3]
@@ -279,7 +279,7 @@ end
         @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"]) == ICSph.CMg0
         @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"]) == ICSph.CFe0
         @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"]) == ICSph.CMn0
-        @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"]) == 1 .- ICSph.CMg0 .- ICSph.CFe0 .- ICSph.CMn0
+        @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"]) == replace!((1 .- ICSph.CMg0 .- ICSph.CFe0 .- ICSph.CMn0), 1=>0)
         @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"]) == sol_sph[end][:,1]
         @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"]) == sol_sph[end][:,2]
         @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"]) == sol_sph[end][:,3]
@@ -289,23 +289,46 @@ end
         @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"]) == IC2D.CMg0
         @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"]) == IC2D.CFe0
         @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"]) == IC2D.CMn0
-        @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"]) == 1 .- IC2D.CMg0 .- IC2D.CFe0 .- IC2D.CMn0
+        @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"]) == replace!((1 .- IC2D.CMg0 .- IC2D.CFe0 .- IC2D.CMn0), 1=>0)
         @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"]) == sol_2D[end][:,:,1]
         @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"]) == sol_2D[end][:,:,2]
         @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"]) == sol_2D[end][:,:,3]
     end
 
     # delete files "Grt_1D.h5" and "Grt_Sph.h5" if it exists
-    if isfile("./Grt_1D.h5")
-        rm("./Grt_1D.h5")
+    if isfile("Grt_1D.h5")
+        rm("Grt_1D.h5")
     end
 
-    if isfile("./Grt_Sph.h5")
-        rm("./Grt_Sph.h5")
+    if isfile("Grt_Sph.h5")
+        rm("Grt_Sph.h5")
     end
 
-    if isfile("./Grt_2D.h5")
-        rm("./Grt_2D.h5")
+    if isfile("Grt_2D.h5")
+        rm("Grt_2D.h5")
+    end
+
+    save_data_callback = PresetTimeCallback(ustrip.(time_save) ./ domain2D.t_charact, save_data_paraview)
+
+    sol_2D = simulate(domain2D; callback=save_data_callback, path_save=(@__DIR__) * "/Grt_2D.h5", progress=false)
+
+    h5open("./Grt_2D.h5", "r") do file
+        @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"])' == IC2D.CMg0
+        @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"])' == IC2D.CFe0
+        @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"])' == IC2D.CMn0
+        @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"])' == replace!((1 .- IC2D.CMg0 .- IC2D.CFe0 .- IC2D.CMn0), 1=>0)
+        @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"])' == sol_2D[end][:,:,1]
+        @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"])' == sol_2D[end][:,:,2]
+        @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"])' == sol_2D[end][:,:,3]
+    end
+
+    # delete files if it exists
+    if isfile("Grt_2D.h5")
+        rm("Grt_2D.h5")
+    end
+
+    if isfile("Grt_2D.xdmf")
+        rm("Grt_2D.xdmf")
     end
 
 end

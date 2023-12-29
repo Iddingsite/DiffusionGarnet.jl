@@ -123,7 +123,7 @@ function hdf5_initial_conditions(IC::InitialConditions2D, Domain::Domain2D, path
         t0["Mg"]["Mg"] = IC.CMg0
         t0["Fe"]["Fe"] = IC.CFe0
         t0["Mn"]["Mn"] = IC.CMn0
-        t0["Ca"]["Ca"] = 1 .- IC.CMg0 .- IC.CFe0 .- IC.CMn0
+        t0["Ca"]["Ca"] = replace!((1 .- IC.CMg0 .- IC.CFe0 .- IC.CMn0), 1=>0)
         t0["GrtPosition"]["GrtPosition"] = IC.grt_position
         t0["GrtBoundary"]["GrtBoundary"] = IC.grt_boundary
     end
