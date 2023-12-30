@@ -79,8 +79,6 @@ This output:
 
 ```julia
 Data saved at 0.0 Myr.
-Data saved at 0.1 Myr.
-Data saved at 0.2 Myr.
 Data saved at 0.5 Myr.
 Data saved at 1.0 Myr.
 352.464431 seconds (17.47 M allocations: 1.789 GiB, 0.15% gc time, 4.01% compilation time)
