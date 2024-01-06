@@ -76,3 +76,24 @@ function simulate(domain::Domain2D; callback=nothing, path_save=nothing, progres
 
     return sol
 end
+
+"""
+    simulate(domain::Domain3D; callback=nothing, progressbar=true)
+
+Solve the coupled diffusion equation in 3D. Save only the first and last timestep in the output solution type variable.
+
+"""
+function simulate(domain::Domain3D; callback=nothing, path_save=nothing, progress=true, save_everystep=false)
+
+    p = (domain = domain, path_save = path_save)
+
+    @unpack tfinal_ad, u0 = p.domain
+
+    t = [0.0, tfinal_ad]
+
+    prob = ODEProblem(semi_discretisation_diffusion_3D, u0, t, p)
+
+    sol = @time solve(prob, ROCK2(), progress=progress, progress_steps=1, save_start=true, abstol=1e-6,reltol=1e-6, save_everystep = save_everystep, callback=callback)
+
+    return sol
+end

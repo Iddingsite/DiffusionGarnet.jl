@@ -19,7 +19,7 @@ abstract type Domain end
             error("Length should be positive.")
         elseif tfinal <= 0
             error("Total time should be positive.")
-        elseif size(CMg0, 1) != size(CFe0, 1) || size(CMg0, 1) != size(CMn0, 1)
+        elseif size(CMg0, 1) ≠ size(CFe0, 1) || size(CMg0, 1) ≠ size(CMn0, 1)
             error("Initial conditions should have the same size.")
         else
             nx = size(CMg0, 1)
@@ -47,7 +47,7 @@ end
             error("Length should be positive.")
         elseif tfinal <= 0
             error("Total time should be positive.")
-        elseif size(CMg0, 1) != size(CFe0, 1) || size(CMg0, 1) != size(CMn0, 1)
+        elseif size(CMg0, 1) ≠ size(CFe0, 1) || size(CMg0, 1) ≠ size(CMn0, 1)
             error("Initial conditions should have the same size.")
         else
             nr = size(CMg0, 1)
@@ -81,7 +81,7 @@ end
             error("Length should be positive.")
         elseif tfinal <= 0
             error("Total time should be positive.")
-        elseif size(CMg0, 1) != size(CFe0, 1) || size(CMg0, 1) != size(CMn0, 1) || size(CMg0, 2) != size(CFe0, 2) || size(CMg0, 2) != size(CMn0, 2)
+        elseif size(CMg0, 1) ≠ size(CFe0, 1) || size(CMg0, 1) ≠ size(CMn0, 1) || size(CMg0, 2) ≠ size(CFe0, 2) || size(CMg0, 2) ≠ size(CMn0, 2)
             error("Initial conditions should have the same size.")
         else
             nx = size(CMg0, 1)
@@ -94,8 +94,7 @@ end
             # grid = (x=x' .* @ones(ny), y= (@ones(nx))' .* y)
 
             # define when grt is present
-            # grt_position = similar(CMg0) .* 0
-            grt_position = zeros(eltype(CMg0), size(CMg0)...)
+            grt_position = zeros(eltype(grt_boundary), size(CMg0)...)
             # create a binary matrix with 1 where grt is present. 0 otherwise. This depends on if CMg0, CFe0 and CMn0 are equal to 0 or not
             grt_position .= (CMg0 .≠ 0) .& (CFe0 .≠ 0) .& (CMn0 .≠ 0)
 
@@ -124,13 +123,15 @@ end
     x::StepRangeLen
     y::StepRangeLen
     z::StepRangeLen
+    grt_position::T1
+    grt_boundary::T1
     tfinal::T2
-    function InitialConditions3D(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, Ly::T2, Lz::T2, tfinal::T2) where {T1 <: AbstractArray{<:Real, 3}, T2 <: Float64}
+    function InitialConditions3D(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, Ly::T2, Lz::T2, tfinal::T2, grt_boundary::T1) where {T1 <: AbstractArray{<:Real, 3}, T2 <: Float64}
         if Lx <= 0 || Ly <= 0 || Lz <= 0
             error("Length should be positive.")
         elseif tfinal <= 0
             error("Total time should be positive.")
-        elseif size(CMg0, 1) != size(CFe0, 1) || size(CMg0, 1) != size(CMn0, 1) || size(CMg0, 2) != size(CFe0, 2) || size(CMg0, 2) != size(CMn0, 2) || size(CMg0, 3) != size(CFe0, 3) || size(CMg0, 3) != size(CMn0, 3)
+        elseif size(CMg0, 1) ≠ size(CFe0, 1) || size(CMg0, 1) ≠ size(CMn0, 1) || size(CMg0, 2) ≠ size(CFe0, 2) || size(CMg0, 2) ≠ size(CMn0, 2) || size(CMg0, 3) ≠ size(CFe0, 3) || size(CMg0, 3) ≠ size(CMn0, 3)
             error("Initial conditions should have the same size.")
         elseif maximum(sum.(CMg0.+ CFe0.+ CMn0)) > 1
             error("Initial conditions should be in molar fraction.")
@@ -144,7 +145,13 @@ end
             x = range(0, length=nx, stop= Lx)
             y = range(0, length=ny, stop= Ly)
             z = range(0, length=nz, stop= Lz)
-            new{T1, T2}(CMg0, CFe0, CMn0, nx, ny, nz, Lx, Ly, Lz, Δx, Δy, Δz, x, y, z, tfinal)
+
+            # define when grt is present
+            grt_position = zeros(eltype(grt_boundary), size(CMg0)...)
+            # create a binary matrix with 1 where grt is present. 0 otherwise. This depends on if CMg0, CFe0 and CMn0 are equal to 0 or not
+            grt_position .= (CMg0 .≠ 0) .& (CFe0 .≠ 0) .& (CMn0 .≠ 0)
+
+            new{T1, T2}(CMg0, CFe0, CMn0, nx, ny, nz, Lx, Ly, Lz, Δx, Δy, Δz, x, y, z, grt_position, grt_boundary, tfinal)
         end
     end
 end
@@ -182,8 +189,8 @@ end
 
 Return a structure containing the initial conditions for a 3D diffusion problem. CMg0, CFe0 and CMn0 need to be in molar fraction. Convert `Lx`, `Ly`, `Lz` and `tfinal` to µm, µm, µm and Myr respectively.
 """
-function InitialConditions3D(CMg0::AbstractArray{<:Real, 3}, CFe0::AbstractArray{<:Real, 3}, CMn0::AbstractArray{<:Real, 3}, Lx::Unitful.Length, Ly::Unitful.Length, Lz::Unitful.Length, tfinal::Unitful.Time)
-    InitialConditions3D(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"µm", Ly)), convert(Float64,ustrip(u"µm", Lz)), convert(Float64,ustrip(u"Myr", tfinal)))
+function InitialConditions3D(CMg0::AbstractArray{<:Real, 3}, CFe0::AbstractArray{<:Real, 3}, CMn0::AbstractArray{<:Real, 3}, Lx::Unitful.Length, Ly::Unitful.Length, Lz::Unitful.Length, tfinal::Unitful.Time; grt_boundary::AbstractArray{<:Real, 3}=zeros(eltype(CMg0), size(CMg0)...))
+    InitialConditions3D(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"µm", Ly)), convert(Float64,ustrip(u"µm", Lz)), convert(Float64,ustrip(u"Myr", tfinal)), grt_boundary)
 end
 
 
@@ -233,7 +240,7 @@ end
     function Domain1D(IC::InitialConditions1D, T::T1, P::T1, time_update::T1, bc_neumann::T3) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}, T3 <: Tuple}
 
         #check that T, P and time_update have the same size
-        if size(T, 1) != size(P, 1) || size(T, 1) != size(time_update, 1)
+        if size(T, 1) ≠ size(P, 1) || size(T, 1) ≠ size(time_update, 1)
             error("T, P and time_update should have the same size.")
         end
 
@@ -285,7 +292,7 @@ end
     function DomainSpherical(IC::InitialConditionsSpherical, T::T1, P::T1, time_update::T1) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}}
 
         #check that T, P and time_update have the same size
-        if size(T, 1) != size(P, 1) || size(T, 1) != size(time_update, 1)
+        if size(T, 1) ≠ size(P, 1) || size(T, 1) ≠ size(time_update, 1)
             error("T, P and time_update should have the same size.")
         end
 

@@ -1,34 +1,32 @@
-function hdf5_initial_conditions(IC::InitialConditions1D, Domain::Domain1D, path_hdf5)
-
+function hdf5_initial_conditions(IC::InitialConditions1D, Domain::Domain1D, path_hdf5::String)
     h5open(path_hdf5, "w") do file
         g = create_group(file, "Diffusion_Grt") # create a group
 
-        attributes(g)["LengthX(µm)"] = IC.Lx
-        attributes(g)["Dx(µm)"] = IC.Δx
-        attributes(g)["Nx"] = IC.nx
-        attributes(g)["TotalTime(Myr)"] = IC.tfinal
-        attributes(g)["Coordinates"] = "1D Cartesian"
-        attributes(g)["CharacteristicLength"] =  Domain.L_charact
-        attributes(g)["CharacteristicDiffusionCoefficient"] =  Domain.D_charact
-        attributes(g)["CharacteristicTime"] =  Domain.t_charact
+        # Set attributes for group g
+        attrs_values = (
+            ("LengthX(µm)", IC.Lx),
+            ("Dx(µm)", IC.Δx),
+            ("Nx", IC.nx),
+            ("TotalTime(Myr)", IC.tfinal),
+            ("Coordinates", "1D Cartesian"),
+            ("CharacteristicLength", Domain.L_charact),
+            ("CharacteristicDiffusionCoefficient", Domain.D_charact),
+            ("CharacteristicTime", Domain.t_charact)
+        )
+        for (attr, value) in attrs_values
+            attributes(g)[attr] = value
+        end
 
         t0 = create_group(file, "Diffusion_Grt/t$(lpad("0", 4, "0"))") # create a group
         attributes(t0)["Time(Myr)"] = 0
-        create_group(t0, "Mg")
-        create_group(t0, "Fe")
-        create_group(t0, "Mn")
-        create_group(t0, "Ca")
 
-        # describe type of data
-        attributes(t0["Mg"])["DataType"] = "Scalar"
-        attributes(t0["Fe"])["DataType"] = "Scalar"
-        attributes(t0["Mn"])["DataType"] = "Scalar"
-        attributes(t0["Ca"])["DataType"] = "Scalar"
-
-        attributes(t0["Mg"])["Center"] = "Node"
-        attributes(t0["Fe"])["Center"] = "Node"
-        attributes(t0["Mn"])["Center"] = "Node"
-        attributes(t0["Ca"])["Center"] = "Node"
+        # Create groups and set attributes for each group
+        groups = ("Mg", "Fe", "Mn", "Ca")
+        for group in groups
+            grp = create_group(t0, group)
+            attributes(grp)["DataType"] = "Scalar"
+            attributes(grp)["Center"] = "Node"
+        end
 
         t0["Mg"]["Mg"] = IC.CMg0
         t0["Fe"]["Fe"] = IC.CFe0
@@ -37,37 +35,36 @@ function hdf5_initial_conditions(IC::InitialConditions1D, Domain::Domain1D, path
     end
 end
 
-function hdf5_initial_conditions(IC::InitialConditionsSpherical, Domain::DomainSpherical, path_hdf5)
 
+function hdf5_initial_conditions(IC::InitialConditionsSpherical, Domain::DomainSpherical, path_hdf5::String)
     h5open(path_hdf5, "w") do file
         g = create_group(file, "Diffusion_Grt") # create a group
 
-        attributes(g)["Radius(µm)"] = IC.Lr
-        attributes(g)["Dr(µm)"] = IC.Δr
-        attributes(g)["Nr"] = IC.nr
-        attributes(g)["TotalTime(Myr)"] = IC.tfinal
-        attributes(g)["Coordinates"] = "Spherical"
-        attributes(g)["CharacteristicLength"] =  Domain.L_charact
-        attributes(g)["CharacteristicDiffusionCoefficient"] =  Domain.D_charact
-        attributes(g)["CharacteristicTime"] =  Domain.t_charact
+        # Set attributes for group g
+        attrs_values = (
+            ("Radius(µm)", IC.Lr),
+            ("Dr(µm)", IC.Δr),
+            ("Nr", IC.nr),
+            ("TotalTime(Myr)", IC.tfinal),
+            ("Coordinates", "Spherical"),
+            ("CharacteristicLength", Domain.L_charact),
+            ("CharacteristicDiffusionCoefficient", Domain.D_charact),
+            ("CharacteristicTime", Domain.t_charact)
+        )
+        for (attr, value) in attrs_values
+            attributes(g)[attr] = value
+        end
 
         t0 = create_group(file, "Diffusion_Grt/t$(lpad("0", 4, "0"))") # create a group
         attributes(t0)["Time(Myr)"] = 0
-        create_group(t0, "Mg")
-        create_group(t0, "Fe")
-        create_group(t0, "Mn")
-        create_group(t0, "Ca")
 
-        # describe type of data
-        attributes(t0["Mg"])["DataType"] = "Scalar"
-        attributes(t0["Fe"])["DataType"] = "Scalar"
-        attributes(t0["Mn"])["DataType"] = "Scalar"
-        attributes(t0["Ca"])["DataType"] = "Scalar"
-
-        attributes(t0["Mg"])["Center"] = "Node"
-        attributes(t0["Fe"])["Center"] = "Node"
-        attributes(t0["Mn"])["Center"] = "Node"
-        attributes(t0["Ca"])["Center"] = "Node"
+        # Create groups and set attributes for each group
+        groups = ("Mg", "Fe", "Mn", "Ca")
+        for group in groups
+            grp = create_group(t0, group)
+            attributes(grp)["DataType"] = "Scalar"
+            attributes(grp)["Center"] = "Node"
+        end
 
         t0["Mg"]["Mg"] = IC.CMg0
         t0["Fe"]["Fe"] = IC.CFe0
@@ -82,43 +79,84 @@ function hdf5_initial_conditions(IC::InitialConditions2D, Domain::Domain2D, path
     h5open(path_hdf5, "w") do file
         g = create_group(file, "Diffusion_Grt") # create a group
 
-        attributes(g)["LengthX(µm)"] = IC.Lx
-        attributes(g)["LengthY(µm)"] = IC.Ly
-        attributes(g)["Dx(µm)"] = IC.Δx
-        attributes(g)["Dy(µm)"] = IC.Δy
-        attributes(g)["Nx"] = IC.nx
-        attributes(g)["Ny"] = IC.ny
-        attributes(g)["TotalTime(Myr)"] = IC.tfinal
-        attributes(g)["Coordinates"] = "2D Cartesian"
-        attributes(g)["CharacteristicLength"] =  Domain.L_charact
-        attributes(g)["CharacteristicDiffusionCoefficient"] =  Domain.D_charact
-        attributes(g)["CharacteristicTime"] =  Domain.t_charact
+        # Set attributes for group g
+        attrs_values = (
+            ("LengthX(µm)", IC.Lx),
+            ("LengthY(µm)", IC.Ly),
+            ("Dx(µm)", IC.Δx),
+            ("Dy(µm)", IC.Δy),
+            ("Nx", IC.nx),
+            ("Ny", IC.ny),
+            ("TotalTime(Myr)", IC.tfinal),
+            ("Coordinates", "2D Cartesian"),
+            ("CharacteristicLength", Domain.L_charact),
+            ("CharacteristicDiffusionCoefficient", Domain.D_charact),
+            ("CharacteristicTime", Domain.t_charact)
+        )
+        for (attr, value) in attrs_values
+            attributes(g)[attr] = value
+        end
 
         t0 = create_group(file, "Diffusion_Grt/t$(lpad("0", 4, "0"))") # create a group
         attributes(t0)["Time(Myr)"] = 0
         attributes(t0)["Temperature(°C)"] = Domain.T[1]
         attributes(t0)["Pressure(GPa)"] = Domain.P[1]
-        create_group(t0, "Mg")
-        create_group(t0, "Fe")
-        create_group(t0, "Mn")
-        create_group(t0, "Ca")
-        create_group(t0, "GrtPosition")
-        create_group(t0, "GrtBoundary")
 
-        # describe type of data
-        attributes(t0["Mg"])["DataType"] = "Scalar"
-        attributes(t0["Fe"])["DataType"] = "Scalar"
-        attributes(t0["Mn"])["DataType"] = "Scalar"
-        attributes(t0["Ca"])["DataType"] = "Scalar"
-        attributes(t0["GrtPosition"])["DataType"] = "Scalar"
-        attributes(t0["GrtBoundary"])["DataType"] = "Scalar"
+        # Create groups and set attributes for each group
+        groups = ("Mg", "Fe", "Mn", "Ca", "GrtPosition", "GrtBoundary")
+        for group in groups
+            grp = create_group(t0, group)
+            attributes(grp)["DataType"] = "Scalar"
+            attributes(grp)["Center"] = "Node"
+        end
 
-        attributes(t0["Mg"])["Center"] = "Node"
-        attributes(t0["Fe"])["Center"] = "Node"
-        attributes(t0["Mn"])["Center"] = "Node"
-        attributes(t0["Ca"])["Center"] = "Node"
-        attributes(t0["GrtPosition"])["Center"] = "Node"
-        attributes(t0["GrtBoundary"])["Center"] = "Node"
+        t0["Mg"]["Mg"] = IC.CMg0
+        t0["Fe"]["Fe"] = IC.CFe0
+        t0["Mn"]["Mn"] = IC.CMn0
+        t0["Ca"]["Ca"] = replace!((1 .- IC.CMg0 .- IC.CFe0 .- IC.CMn0), 1=>0)
+        t0["GrtPosition"]["GrtPosition"] = IC.grt_position
+        t0["GrtBoundary"]["GrtBoundary"] = IC.grt_boundary
+    end
+end
+
+function hdf5_initial_conditions(IC::InitialConditions3D, Domain::Domain3D, path_hdf5)
+
+    h5open(path_hdf5, "w") do file
+        g = create_group(file, "Diffusion_Grt") # create a group
+
+        # Set attributes for group g
+        attrs_values = (
+            ("LengthX(µm)", IC.Lx),
+            ("LengthY(µm)", IC.Ly),
+            ("LengthZ(µm)", IC.Lz),
+            ("Dx(µm)", IC.Δx),
+            ("Dy(µm)", IC.Δy),
+            ("Dz(µm)", IC.Δz),
+            ("Nx", IC.nx),
+            ("Ny", IC.ny),
+            ("Nz", IC.nz),
+            ("TotalTime(Myr)", IC.tfinal),
+            ("Coordinates", "3D Cartesian"),
+            ("CharacteristicLength", Domain.L_charact),
+            ("CharacteristicDiffusionCoefficient", Domain.D_charact),
+            ("CharacteristicTime", Domain.t_charact)
+        )
+        for (attr, value) in attrs_values
+            attributes(g)[attr] = value
+        end
+
+        t0 = create_group(file, "Diffusion_Grt/t$(lpad("0", 4, "0"))") # create a group
+        attributes(t0)["Time(Myr)"] = 0
+        attributes(t0)["Temperature(°C)"] = Domain.T[1]
+        attributes(t0)["Pressure(GPa)"] = Domain.P[1]
+
+        # Create groups and set attributes for each group
+        groups = ("Mg", "Fe", "Mn", "Ca", "GrtPosition", "GrtBoundary")
+        for group in groups
+            grp = create_group(t0, group)
+            attributes(grp)["DataType"] = "Scalar"
+            attributes(grp)["Center"] = "Node"
+        end
 
         t0["Mg"]["Mg"] = IC.CMg0
         t0["Fe"]["Fe"] = IC.CFe0
@@ -130,29 +168,13 @@ function hdf5_initial_conditions(IC::InitialConditions2D, Domain::Domain2D, path
 end
 
 
-function view_u(u::T1) where {T1 <: AbstractArray{<:Real, 2}}
+function view_u(u::T1) where {T1 <: AbstractArray{<:Real, N}} where N
 
-    CMg = @view u[:,1]
-    CFe = @view u[:,2]
-    CMn = @view u[:,3]
+    indices = ntuple(d -> :, N-1)
 
-    return CMg, CFe, CMn
-end
-
-function view_u(u::T1) where {T1 <: AbstractArray{<:Real, 3}}
-
-    CMg = @view u[:,:,1]
-    CFe = @view u[:,:,2]
-    CMn = @view u[:,:,3]
-
-    return CMg, CFe, CMn
-end
-
-function view_u(u::T1) where {T1 <: AbstractArray{<:Real, 4}}
-
-    CMg = @view u[:,:,:,1]
-    CFe = @view u[:,:,:,2]
-    CMn = @view u[:,:,:,3]
+    CMg = @view u[indices..., 1]
+    CFe = @view u[indices..., 2]
+    CMn = @view u[indices..., 3]
 
     return CMg, CFe, CMn
 end
@@ -170,21 +192,14 @@ function hdf5_timestep(u, dt, tcurrent, path_hdf5)
         t = create_group(file, "Diffusion_Grt/t$(lpad(string(n), 4, "0"))") # create a group
         attributes(t)["Time(Myr)"] = tcurrent
         attributes(t)["CurrentDt(Myr)"] = dt
-        create_group(t, "Mg")
-        create_group(t, "Fe")
-        create_group(t, "Mn")
-        create_group(t, "Ca")
 
-        # describe type of data
-        attributes(t["Mg"])["DataType"] = "Scalar"
-        attributes(t["Fe"])["DataType"] = "Scalar"
-        attributes(t["Mn"])["DataType"] = "Scalar"
-        attributes(t["Ca"])["DataType"] = "Scalar"
-
-        attributes(t["Mg"])["Center"] = "Node"
-        attributes(t["Fe"])["Center"] = "Node"
-        attributes(t["Mn"])["Center"] = "Node"
-        attributes(t["Ca"])["Center"] = "Node"
+        # Create groups and set attributes for each group
+        groups = ("Mg", "Fe", "Mn", "Ca")
+        for group in groups
+            grp = create_group(t, group)
+            attributes(grp)["DataType"] = "Scalar"
+            attributes(grp)["Center"] = "Node"
+        end
 
         t["Mg"]["Mg"] = CMg
         t["Fe"]["Fe"] = CFe

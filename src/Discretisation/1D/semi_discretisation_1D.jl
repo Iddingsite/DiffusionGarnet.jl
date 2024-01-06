@@ -32,17 +32,17 @@ function stencil_diffusion_1D!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δxad_, bc
     @propagate_inbounds @inline neumann_left(D, C, ix, Δxad_) = - D[ix] * (C[ix]-C[ix+1]) * Δxad_
     @propagate_inbounds @inline neumann_right(D, C, ix, Δxad_) = D[ix] * (C[ix-1]-C[ix]) * Δxad_
 
+    @propagate_inbounds @inline function update_dtC(dtC, D1, D2, D3, C1, C2, C3, ix, Δxad_)
+        dtC[ix] = (qx(D1,C1,ix,Δxad_) - qx(D1,C1,ix-1,Δxad_)) * Δxad_ +
+                  (qx(D2,C2,ix,Δxad_) - qx(D2,C2,ix-1,Δxad_)) * Δxad_ +
+                  (qx(D3,C3,ix,Δxad_) - qx(D3,C3,ix-1,Δxad_)) * Δxad_
+    end
+
     @inbounds for ix in eachindex(dtCMg)
         if ix > 1 && ix < size(dtCMg, 1)
-            dtCMg[ix] = (qx(DMgMg,CMg,ix,Δxad_) - qx(DMgMg,CMg,ix-1,Δxad_)) * Δxad_ +
-                        (qx(DMgFe,CFe,ix,Δxad_) - qx(DMgFe,CFe,ix-1,Δxad_)) * Δxad_ +
-                        (qx(DMgMn,CMn,ix,Δxad_) - qx(DMgMn,CMn,ix-1,Δxad_)) * Δxad_
-            dtCFe[ix] = (qx(DFeMg,CMg,ix,Δxad_) - qx(DFeMg,CMg,ix-1,Δxad_)) * Δxad_ +
-                        (qx(DFeFe,CFe,ix,Δxad_) - qx(DFeFe,CFe,ix-1,Δxad_)) * Δxad_ +
-                        (qx(DFeMn,CMn,ix,Δxad_) - qx(DFeMn,CMn,ix-1,Δxad_)) * Δxad_
-            dtCMn[ix] = (qx(DMnMg,CMg,ix,Δxad_) - qx(DMnMg,CMg,ix-1,Δxad_)) * Δxad_ +
-                        (qx(DMnFe,CFe,ix,Δxad_) - qx(DMnFe,CFe,ix-1,Δxad_)) * Δxad_ +
-                        (qx(DMnMn,CMn,ix,Δxad_) - qx(DMnMn,CMn,ix-1,Δxad_)) * Δxad_
+            update_dtC(dtCMg, DMgMg, DMgFe, DMgMn, CMg, CFe, CMn, ix, Δxad_)
+            update_dtC(dtCFe, DFeMg, DFeFe, DFeMn, CMg, CFe, CMn, ix, Δxad_)
+            update_dtC(dtCMn, DMnMg, DMnFe, DMnMn, CMg, CFe, CMn, ix, Δxad_)
         end
     end
 
