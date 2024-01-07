@@ -2,7 +2,7 @@
 """
     simulate(domain; callback=nothing, path_save=nothing, progress=true)
 
-Solve the coupled diffusion equations using finite differences for a given domain and return a solution type variable.
+Solve the coupled major element diffusion equations for a given domain using finite differences for the discretisation in space and return a solution type variable.
 
 The time discretisation is based on the ROCK2 method, a stabilized explicit method (Adbdulle and Medovikov, 2001 ; https://doi.org/10.1007/s002110100292) using OrdinaryDiffEq.jl.
 
@@ -19,7 +19,7 @@ function simulate end
 """
     simulate(domain::Domain1D; callback=nothing, path_save=nothing, progress=true, save_everystep=true)
 
-Solve the coupled diffusion equations in 1D. Save all timesteps in the output solution type variable by default.
+Solve the coupled major element diffusion equations in 1D. Save all timesteps in the output solution type variable by default.
 
 """
 function simulate(domain::Domain1D; callback=nothing, path_save=nothing, progress=true, save_everystep=true)
@@ -40,7 +40,7 @@ end
 """
     simulate(domain::DomainSpherical; callback=nothing, path_save=nothing, progress=true, save_everystep=true)
 
-Solve the coupled diffusion equation in spherical coordinates. Save all timesteps in the output solution type variable by default.
+Solve the coupled major element diffusion equations in spherical coordinates. Save all timesteps in the output solution type variable by default.
 """
 function simulate(domain::DomainSpherical; callback=nothing, path_save=nothing, progress=true, save_everystep=true)
 
@@ -60,7 +60,7 @@ end
 """
     simulate(domain::Domain2D; callback=nothing, path_save=nothing, progress=true, save_everystep=false)
 
-Solve the coupled diffusion equation in 2D. By default, save only the first and last timestep in the output solution type variable by default.
+Solve the coupled major element diffusion equations in 2D. By default, save only the first and last timestep in the output solution type variable by default.
 """
 function simulate(domain::Domain2D; callback=nothing, path_save=nothing, progress=true, save_everystep=false)
 
@@ -80,7 +80,7 @@ end
 """
     simulate(domain::Domain3D; callback=nothing, path_save=nothing, progressbar=true, save_everystep=false)
 
-Solve the coupled major element diffusion equation in 3D. Save only the first and last timestep in the output solution type variable by default.
+Solve the coupled major element diffusion equations in 3D. Save only the first and last timestep in the output solution type variable by default.
 
 """
 function simulate(domain::Domain3D; callback=nothing, path_save=nothing, progress=true, save_everystep=false)
