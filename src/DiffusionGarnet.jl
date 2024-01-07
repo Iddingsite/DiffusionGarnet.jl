@@ -53,10 +53,10 @@ include("input/initialconditions.jl")
 include("callbacks/update_diffusion_coef_TP.jl")
 include("callbacks/output.jl")
 include("callbacks/output_paraview.jl")
-include("discretisation/1D/semi_discretisation_1D.jl")
-include("discretisation/2D/semi_discretisation_2D.jl")
-include("discretisation/3D/semi_discretisation_3D.jl")
-include("discretisation/spherical/semi_discretisation_spherical.jl")
+include("Discretisation/1D/semi_discretisation_1D.jl")
+include("Discretisation/2D/semi_discretisation_2D.jl")
+include("Discretisation/3D/semi_discretisation_3D.jl")
+include("Discretisation/Spherical/semi_discretisation_spherical.jl")
 include("simulate/simulate.jl")
 
 export InitialConditions1D, InitialConditions2D, InitialConditions3D, InitialConditionsSpherical
@@ -66,4 +66,4 @@ export simulate
 export update_diffusion_coef
 export save_data, save_data_paraview
 
-end # module DiffusionGarnet
+end
