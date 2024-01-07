@@ -46,7 +46,7 @@ function update_diffusion_coef(integrator)
         D_update!(D0, T[index], P[index])
 
         if integrator.t ≠ 0.0
-            println("New temperature and pressure: $(T[index]) °C and $(P[index]) kbar, updated at $(round((integrator.t * t_charact), digits=2)) Myr.")
+            @info "New temperature and pressure: $(T[index]) °C and $(P[index]) kbar, updated at $(round((integrator.t * t_charact), digits=2)) Myr."
         end
     end
 end

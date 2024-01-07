@@ -2,7 +2,7 @@ module DiffusionGarnet
 
 using Reexport: @reexport
 
-@reexport using Parameters
+@reexport using Parameters: @unpack
 @reexport using Unitful
 @reexport using DiffEqCallbacks: PresetTimeCallback
 
@@ -39,7 +39,6 @@ function __init__()
 
 end
 
-
 let
     s = split(backend, "_")
     device = s[1]
@@ -54,14 +53,15 @@ include("input/initialconditions.jl")
 include("callbacks/update_diffusion_coef_TP.jl")
 include("callbacks/output.jl")
 include("callbacks/output_paraview.jl")
-include("Discretisation/1D/semi_discretisation_1D.jl")
-include("Discretisation/2D/semi_discretisation_2D.jl")
-include("Discretisation/Spherical/semi_discretisation_spherical.jl")
+include("discretisation/1D/semi_discretisation_1D.jl")
+include("discretisation/2D/semi_discretisation_2D.jl")
+include("discretisation/3D/semi_discretisation_3D.jl")
+include("discretisation/spherical/semi_discretisation_spherical.jl")
 include("simulate/simulate.jl")
 
 export InitialConditions1D, InitialConditions2D, InitialConditions3D, InitialConditionsSpherical
 export D_ini!, Domain
-export semi_discretisation_diffusion_1D, semi_discretisation_diffusion_spherical, semi_discretisation_diffusion_2D, Diffusion_coef_2D!, stencil_diffusion_2D!
+export semi_discretisation_diffusion_1D, semi_discretisation_diffusion_spherical, semi_discretisation_diffusion_2D, semi_discretisation_diffusion_3D
 export simulate
 export update_diffusion_coef
 export save_data, save_data_paraview
