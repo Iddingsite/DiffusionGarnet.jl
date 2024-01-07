@@ -95,7 +95,7 @@ function hdf5_initial_conditions_paraview(IC::InitialConditions3D, Domain::Domai
 end
 
 
-function hdf5_timestep_paraview(u, dt, tcurrent, path_hdf5)
+function hdf5_timestep_paraview(u, dt, tcurrent, path_hdf5, IC)
 
     CMg, CFe, CMn = view_u(u)
 
@@ -109,7 +109,7 @@ function hdf5_timestep_paraview(u, dt, tcurrent, path_hdf5)
         attributes(t)["CurrentDt(Myr)"] = dt
 
         # Create groups and set attributes for each group
-        groups = ("Mg", "Fe", "Mn", "Ca")
+        groups = ("Mg", "Fe", "Mn", "Ca", "GrtPosition", "GrtBoundary")
         for group in groups
             grp = create_group(t, group)
             attributes(grp)["DataType"] = "Scalar"
@@ -120,6 +120,8 @@ function hdf5_timestep_paraview(u, dt, tcurrent, path_hdf5)
         t["Fe"]["Fe"] = column_to_row(CFe)
         t["Mn"]["Mn"] = column_to_row(CMn)
         t["Ca"]["Ca"] = column_to_row(replace!((1 .- CMg .- CFe .- CMn), 1=>0))
+        t["GrtPosition"]["GrtPosition"] = column_to_row(IC.grt_position)
+        t["GrtBoundary"]["GrtBoundary"] = column_to_row(IC.grt_boundary)
     end
 end
 
@@ -216,7 +218,7 @@ function save_data_paraview(integrator)
     @unpack path_save = integrator.p
 
     if integrator.t ≠ 0.0
-        hdf5_timestep_paraview(integrator.u, integrator.dt * t_charact, integrator.t * t_charact, path_save)
+        hdf5_timestep_paraview(integrator.u, integrator.dt * t_charact, integrator.t * t_charact, path_save, IC)
         XMDF_creation(path_save)
         @info "Data saved at $(round((integrator.t * t_charact), digits=2)) Myr."
     elseif integrator.t == 0.0
