@@ -60,29 +60,32 @@ end
     end
 end
 
-@with_kw struct InitialConditions2D{T1, T2, T3, T4} <: InitialConditions
+@with_kw struct InitialConditions2D{T1, T2, T3, T4, T5} <: InitialConditions
     CMg0::T1
     CFe0::T1
     CMn0::T1
     Lx::T2
     Ly::T2
-    nx::T3
-    ny::T3
+    nx::T4
+    ny::T4
     Δx::T2
     Δy::T2
-    x::T4
-    y::T4
-    grt_position::T1
-    grt_boundary::T1
+    x::T5
+    y::T5
+    grt_position::T3
+    grt_boundary::T3
     # grid::NamedTuple{(:x, :y), Tuple{AbstractArray{T2, 2}, AbstractArray{T2, 2}}}
     tfinal::T2
-    function InitialConditions2D(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, Ly::T2, tfinal::T2, grt_boundary::T1) where {T1 <: AbstractArray{<:Real, 2}, T2 <: Float64}
+    function InitialConditions2D(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, Ly::T2, tfinal::T2, grt_boundary::T3) where {T1 <: AbstractArray{<:Real, 2}, T2 <: Float64, T3 <: Union{AbstractArray{<:Real, 2}, AbstractArray{<:Bool, 2}}}
         if Lx <= 0 || Ly <= 0
             error("Length should be positive.")
         elseif tfinal <= 0
             error("Total time should be positive.")
         elseif size(CMg0, 1) ≠ size(CFe0, 1) || size(CMg0, 1) ≠ size(CMn0, 1) || size(CMg0, 2) ≠ size(CFe0, 2) || size(CMg0, 2) ≠ size(CMn0, 2)
             error("Initial conditions should have the same size.")
+        # check that grt_boundary is of the same size as CMg0, CFe0 and CMn0
+        elseif size(CMg0, 1) ≠ size(grt_boundary, 1) || size(CMg0, 2) ≠ size(grt_boundary, 2)
+            error("grt_boundary should have the same size as CMg0, CFe0 and CMn0.")
         else
             nx = size(CMg0, 1)
             ny = size(CMg0, 2)
@@ -98,43 +101,43 @@ end
             # create a binary matrix with 1 where grt is present. 0 otherwise. This depends on if CMg0, CFe0 and CMn0 are equal to 0 or not
             grt_position .= (CMg0 .≠ 0) .& (CFe0 .≠ 0) .& (CMn0 .≠ 0)
 
-            T3 = typeof(nx)
-            T4 = typeof(x)
+            T4 = typeof(nx)
+            T5 = typeof(x)
 
-            new{T1, T2, T3, T4}(CMg0, CFe0, CMn0, Lx, Ly, nx, ny, Δx, Δy, x, y, grt_position, grt_boundary, tfinal)
+            new{T1, T2, T3, T4, T5}(CMg0, CFe0, CMn0, Lx, Ly, nx, ny, Δx, Δy, x, y, grt_position, grt_boundary, tfinal)
         end
     end
 end
 
 
-@with_kw struct InitialConditions3D{T1 <: AbstractArray{<:Real, 3}, T2 <: Float64} <: InitialConditions
+@with_kw struct InitialConditions3D{T1, T2, T3, T4, T5} <: InitialConditions
     CMg0::T1
     CFe0::T1
     CMn0::T1
-    nx::Int
-    ny::Int
-    nz::Int
+    nx::T4
+    ny::T4
+    nz::T4
     Lx::T2
     Ly::T2
     Lz::T2
     Δx::T2
     Δy::T2
     Δz::T2
-    x::StepRangeLen
-    y::StepRangeLen
-    z::StepRangeLen
-    grt_position::T1
-    grt_boundary::T1
+    x::T5
+    y::T5
+    z::T5
+    grt_position::T3
+    grt_boundary::T3
     tfinal::T2
-    function InitialConditions3D(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, Ly::T2, Lz::T2, tfinal::T2, grt_boundary::T1) where {T1 <: AbstractArray{<:Real, 3}, T2 <: Float64}
+    function InitialConditions3D(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, Ly::T2, Lz::T2, tfinal::T2, grt_boundary::T3) where {T1 <: AbstractArray{<:Real, 3}, T2 <: Float64, T3 <: Union{AbstractArray{<:Real, 3}, AbstractArray{<:Bool, 3}}}
         if Lx <= 0 || Ly <= 0 || Lz <= 0
             error("Length should be positive.")
         elseif tfinal <= 0
             error("Total time should be positive.")
         elseif size(CMg0, 1) ≠ size(CFe0, 1) || size(CMg0, 1) ≠ size(CMn0, 1) || size(CMg0, 2) ≠ size(CFe0, 2) || size(CMg0, 2) ≠ size(CMn0, 2) || size(CMg0, 3) ≠ size(CFe0, 3) || size(CMg0, 3) ≠ size(CMn0, 3)
             error("Initial conditions should have the same size.")
-        elseif maximum(sum.(CMg0.+ CFe0.+ CMn0)) > 1
-            error("Initial conditions should be in molar fraction.")
+        elseif size(CMg0, 1) ≠ size(grt_boundary, 1) || size(CMg0, 2) ≠ size(grt_boundary, 2) || size(CMg0, 3) ≠ size(grt_boundary, 3)
+            error("grt_boundary should have the same size as CMg0, CFe0 and CMn0.")
         else
             nx = size(CMg0, 1)
             ny = size(CMg0, 2)
@@ -151,7 +154,10 @@ end
             # create a binary matrix with 1 where grt is present. 0 otherwise. This depends on if CMg0, CFe0 and CMn0 are equal to 0 or not
             grt_position .= (CMg0 .≠ 0) .& (CFe0 .≠ 0) .& (CMn0 .≠ 0)
 
-            new{T1, T2}(CMg0, CFe0, CMn0, nx, ny, nz, Lx, Ly, Lz, Δx, Δy, Δz, x, y, z, grt_position, grt_boundary, tfinal)
+            T4 = typeof(nx)
+            T5 = typeof(x)
+
+            new{T1, T2, T3, T4, T5}(CMg0, CFe0, CMn0, nx, ny, nz, Lx, Ly, Lz, Δx, Δy, Δz, x, y, z, grt_position, grt_boundary, tfinal)
         end
     end
 end
@@ -180,16 +186,17 @@ end
 Return a structure containing the initial conditions for a 2D diffusion problem. CMg0, CFe0 and CMn0 need to be in molar fraction. Convert `Lx`, `Ly` and `tfinal` to µm, µm and Myr respectively.
 grt_boundary is a matrix of the same size as CMg0, CFe0 and CMn0. It is a binary matrix with 1 where the contour of the garnet is present and 0 otherwise. It is used to apply the Dirichlet boundary condition in the model. If not provided, it is equal to zero everywhere.
 """
-function InitialConditions2D(CMg0::AbstractArray{<:Real, 2}, CFe0::AbstractArray{<:Real, 2}, CMn0::AbstractArray{<:Real, 2}, Lx::Unitful.Length, Ly::Unitful.Length, tfinal::Unitful.Time; grt_boundary::AbstractArray{<:Real, 2}=zeros(eltype(CMg0), size(CMg0)...))
+function InitialConditions2D(CMg0::AbstractArray{<:Real, 2}, CFe0::AbstractArray{<:Real, 2}, CMn0::AbstractArray{<:Real, 2}, Lx::Unitful.Length, Ly::Unitful.Length, tfinal::Unitful.Time; grt_boundary::Union{AbstractArray{<:Real, 2}, AbstractArray{<:Bool, 2}}=zeros(Bool, size(CMg0)...))
     InitialConditions2D(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"µm", Ly)), convert(Float64,ustrip(u"Myr", tfinal)), grt_boundary)
 end
 
 """
-    InitialConditions3D(CMg0::AbstractArray{<:Real, 3}, CFe0::AbstractArray{<:Real, 3}, CMn0::AbstractArray{<:Real, 3}, Lx::Unitful.Length, Ly::Unitful.Length, Lz::Unitful.Length, tfinal::Unitful.Time)
+    InitialConditions3D(CMg0::AbstractArray{<:Real, 3}, CFe0::AbstractArray{<:Real, 3}, CMn0::AbstractArray{<:Real, 3}, Lx::Unitful.Length, Ly::Unitful.Length, Lz::Unitful.Length, tfinal::Unitful.Time; grt_boundary::Union{AbstractArray{<:Real, 3}, AbstractArray{<:Bool, 3}}=zeros(Bool, size(CMg0)...))
 
 Return a structure containing the initial conditions for a 3D diffusion problem. CMg0, CFe0 and CMn0 need to be in molar fraction. Convert `Lx`, `Ly`, `Lz` and `tfinal` to µm, µm, µm and Myr respectively.
+grt_boundary is a matrix of the same size as CMg0, CFe0 and CMn0. It is a binary matrix with 1 where the contour of the garnet is present and 0 otherwise. It is used to apply the Dirichlet boundary condition in the model. If not provided, it is equal to zero everywhere.
 """
-function InitialConditions3D(CMg0::AbstractArray{<:Real, 3}, CFe0::AbstractArray{<:Real, 3}, CMn0::AbstractArray{<:Real, 3}, Lx::Unitful.Length, Ly::Unitful.Length, Lz::Unitful.Length, tfinal::Unitful.Time; grt_boundary::AbstractArray{<:Real, 3}=zeros(eltype(CMg0), size(CMg0)...))
+function InitialConditions3D(CMg0::AbstractArray{<:Real, 3}, CFe0::AbstractArray{<:Real, 3}, CMn0::AbstractArray{<:Real, 3}, Lx::Unitful.Length, Ly::Unitful.Length, Lz::Unitful.Length, tfinal::Unitful.Time; grt_boundary::Union{AbstractArray{<:Real, 3}, AbstractArray{<:Bool, 3}}=zeros(Bool, size(CMg0)...))
     InitialConditions3D(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"µm", Ly)), convert(Float64,ustrip(u"µm", Lz)), convert(Float64,ustrip(u"Myr", tfinal)), grt_boundary)
 end
 

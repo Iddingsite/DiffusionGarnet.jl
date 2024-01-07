@@ -66,7 +66,7 @@ end
             update_dtC(dtCMn, DMnMg, DMnFe, DMnMn, CMg, CFe, CMn, ix, iy, iz, Δxad_, Δyad_, Δzad_)
 
             # first order Neumann if inclusions
-            # left
+            # west
             if position_Grt[iy,ix-1,iz] == 0.0
                 dtCMg[iy,ix,iz] -= - qx(DMgMg,CMg,ix-1,iy,iz,Δxad_) * Δxad_ -
                                   qx(DMgFe,CFe,ix-1,iy,iz,Δxad_) * Δxad_ -
@@ -78,7 +78,7 @@ end
                                   qx(DMnFe,CFe,ix-1,iy,iz,Δxad_) * Δxad_ -
                                   qx(DMnMn,CMn,ix-1,iy,iz,Δxad_) * Δxad_
             end
-            # right
+            # east
             if position_Grt[iy,ix+1,iz] == 0.0
                 dtCMg[iy,ix,iz] -= qx(DMgMg,CMg,ix,iy,iz,Δxad_) * Δxad_ +
                                 qx(DMgFe,CFe,ix,iy,iz,Δxad_) * Δxad_ +
@@ -90,7 +90,7 @@ end
                                 qx(DMnFe,CFe,ix,iy,iz,Δxad_) * Δxad_ +
                                 qx(DMnMn,CMn,ix,iy,iz,Δxad_) * Δxad_
             end
-            # bottom
+            # south
             if position_Grt[iy-1,ix,iz] == 0.0
                 dtCMg[iy,ix,iz] -= - qy(DMgMg,CMg,ix,iy-1,iz,Δyad_) * Δyad_ -
                                   qy(DMgFe,CFe,ix,iy-1,iz,Δyad_) * Δyad_ -
@@ -102,7 +102,7 @@ end
                                   qy(DMnFe,CFe,ix,iy-1,iz,Δyad_) * Δyad_ -
                                   qy(DMnMn,CMn,ix,iy-1,iz,Δyad_) * Δyad_
             end
-            # top
+            # north
             if position_Grt[iy+1,ix,iz] == 0.0
                 dtCMg[iy,ix,iz] -= qy(DMgMg,CMg,ix,iy,iz,Δyad_) * Δyad_ +
                                 qy(DMgFe,CFe,ix,iy,iz,Δyad_) * Δyad_ +
@@ -114,6 +114,7 @@ end
                                 qy(DMnFe,CFe,ix,iy,iz,Δyad_) * Δyad_ +
                                 qy(DMnMn,CMn,ix,iy,iz,Δyad_) * Δyad_
             end
+            # bottom
             if position_Grt[iy,ix,iz-1] == 0.0
                 dtCMg[iy,ix,iz] -= - qz(DMgMg,CMg,ix,iy,iz-1,Δzad_) * Δzad_ -
                                   qz(DMgFe,CFe,ix,iy,iz-1,Δzad_) * Δzad_ -
@@ -125,6 +126,7 @@ end
                                   qz(DMnFe,CFe,ix,iy,iz-1,Δzad_) * Δzad_ -
                                   qz(DMnMn,CMn,ix,iy,iz-1,Δzad_) * Δzad_
             end
+            # top
             if position_Grt[iy,ix,iz+1] == 0.0
                 dtCMg[iy,ix,iz] -= qz(DMgMg,CMg,ix,iy,iz,Δzad_) * Δzad_ +
                                 qz(DMgFe,CFe,ix,iy,iz,Δzad_) * Δzad_ +
@@ -137,7 +139,7 @@ end
                                 qz(DMnMn,CMn,ix,iy,iz,Δzad_) * Δzad_
             end
 
-        # if point is an inclusion
+        # if point is an inclusion or matrix
         else
             dtCMg[iy,ix,iz] = 0.0
             dtCFe[iy,ix,iz] = 0.0

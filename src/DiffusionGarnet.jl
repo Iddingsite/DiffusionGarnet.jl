@@ -2,7 +2,7 @@ module DiffusionGarnet
 
 using Reexport: @reexport
 
-@reexport using Parameters
+@reexport using Parameters: @unpack
 @reexport using Unitful
 @reexport using DiffEqCallbacks: PresetTimeCallback
 

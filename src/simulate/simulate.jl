@@ -57,12 +57,12 @@ function simulate(domain::DomainSpherical; callback=nothing, path_save=nothing, 
 end
 
 """
-    simulate(domain::Domain2D; callback=nothing, progressbar=true)
+    simulate(domain::Domain2D; callback=nothing, path_save=nothing, progress=true, save_everystep=false)
 
-Solve the coupled diffusion equation in 2D. Save only the first and last timestep in the output solution type variable.
+Solve the coupled diffusion equation in 2D. By default, save only the first and last timestep in the output solution type variable.
 
 """
-function simulate(domain::Domain2D; callback=nothing, path_save=nothing, progress=true, save_everystep=true)
+function simulate(domain::Domain2D; callback=nothing, path_save=nothing, progress=true, save_everystep=false)
 
     p = (domain = domain, path_save = path_save)
 
@@ -78,9 +78,9 @@ function simulate(domain::Domain2D; callback=nothing, path_save=nothing, progres
 end
 
 """
-    simulate(domain::Domain3D; callback=nothing, progressbar=true)
+    simulate(domain::Domain3D; callback=nothing, path_save=nothing, progressbar=true, save_everystep=false)
 
-Solve the coupled diffusion equation in 3D. Save only the first and last timestep in the output solution type variable.
+Solve the coupled major element diffusion equation in 3D. Save only the first and last timestep in the output solution type variable.
 
 """
 function simulate(domain::Domain3D; callback=nothing, path_save=nothing, progress=true, save_everystep=false)

@@ -8,50 +8,42 @@ function hdf5_initial_conditions_paraview(IC::InitialConditions2D, Domain::Domai
     h5open(path_hdf5, "w") do file
         g = create_group(file, "Diffusion_Grt") # create a group
 
-        attributes(g)["LengthX(µm)"] = IC.Lx
-        attributes(g)["LengthY(µm)"] = IC.Ly
-        attributes(g)["Dx(µm)"] = IC.Δx
-        attributes(g)["Dy(µm)"] = IC.Δy
-        attributes(g)["Nx"] = IC.nx
-        attributes(g)["Ny"] = IC.ny
-        attributes(g)["TotalTime(Myr)"] = IC.tfinal
-        attributes(g)["Coordinates"] = "2D Cartesian"
-        attributes(g)["CharacteristicLength"] =  Domain.L_charact
-        attributes(g)["CharacteristicDiffusionCoefficient"] =  Domain.D_charact
-        attributes(g)["CharacteristicTime"] =  Domain.t_charact
+        # Set attributes for group g
+        attrs_values = (
+            ("LengthX(µm)", IC.Lx),
+            ("LengthY(µm)", IC.Ly),
+            ("Dx(µm)", IC.Δx),
+            ("Dy(µm)", IC.Δy),
+            ("Nx", IC.nx),
+            ("Ny", IC.ny),
+            ("TotalTime(Myr)", IC.tfinal),
+            ("Coordinates", "2D Cartesian"),
+            ("CharacteristicLength", Domain.L_charact),
+            ("CharacteristicDiffusionCoefficient", Domain.D_charact),
+            ("CharacteristicTime", Domain.t_charact)
+        )
+        for (attr, value) in attrs_values
+            attributes(g)[attr] = value
+        end
 
         t0 = create_group(file, "Diffusion_Grt/t$(lpad("0", 4, "0"))") # create a group
         attributes(t0)["Time(Myr)"] = 0
         attributes(t0)["Temperature(°C)"] = Domain.T[1]
         attributes(t0)["Pressure(GPa)"] = Domain.P[1]
-        create_group(t0, "Mg")
-        create_group(t0, "Fe")
-        create_group(t0, "Mn")
-        create_group(t0, "Ca")
-        create_group(t0, "GrtPosition")
-        create_group(t0, "GrtBoundary")
-
-        # describe type of data
-        attributes(t0["Mg"])["DataType"] = "Scalar"
-        attributes(t0["Fe"])["DataType"] = "Scalar"
-        attributes(t0["Mn"])["DataType"] = "Scalar"
-        attributes(t0["Ca"])["DataType"] = "Scalar"
-        attributes(t0["GrtPosition"])["DataType"] = "Scalar"
-        attributes(t0["GrtBoundary"])["DataType"] = "Scalar"
-
-        attributes(t0["Mg"])["Center"] = "Node"
-        attributes(t0["Fe"])["Center"] = "Node"
-        attributes(t0["Mn"])["Center"] = "Node"
-        attributes(t0["Ca"])["Center"] = "Node"
-        attributes(t0["GrtPosition"])["Center"] = "Node"
-        attributes(t0["GrtBoundary"])["Center"] = "Node"
+        # Create groups and set attributes for each group
+        groups = ("Mg", "Fe", "Mn", "Ca", "GrtPosition", "GrtBoundary")
+        for group in groups
+            grp = create_group(t0, group)
+            attributes(grp)["DataType"] = "Scalar"
+            attributes(grp)["Center"] = "Node"
+        end
 
         t0["Mg"]["Mg"] = column_to_row(IC.CMg0)
         t0["Fe"]["Fe"] = column_to_row(IC.CFe0)
         t0["Mn"]["Mn"] = column_to_row(IC.CMn0)
         t0["Ca"]["Ca"] = column_to_row(replace!((1 .- IC.CMg0 .- IC.CFe0 .- IC.CMn0), 1=>0))
-        t0["GrtPosition"]["GrtPosition"] = IC.grt_position
-        t0["GrtBoundary"]["GrtBoundary"] = IC.grt_boundary
+        t0["GrtPosition"]["GrtPosition"] = column_to_row(IC.grt_position)
+        t0["GrtBoundary"]["GrtBoundary"] = column_to_row(IC.grt_boundary)
     end
 end
 
@@ -60,53 +52,45 @@ function hdf5_initial_conditions_paraview(IC::InitialConditions3D, Domain::Domai
   h5open(path_hdf5, "w") do file
       g = create_group(file, "Diffusion_Grt") # create a group
 
-      attributes(g)["LengthX(µm)"] = IC.Lx
-      attributes(g)["LengthY(µm)"] = IC.Ly
-      attributes(g)["LengthZ(µm)"] = IC.Lz
-      attributes(g)["Dx(µm)"] = IC.Δx
-      attributes(g)["Dy(µm)"] = IC.Δy
-      attributes(g)["Dz(µm)"] = IC.Δz
-      attributes(g)["Nx"] = IC.nx
-      attributes(g)["Ny"] = IC.ny
-      attributes(g)["Nz"] = IC.nz
-      attributes(g)["TotalTime(Myr)"] = IC.tfinal
-      attributes(g)["Coordinates"] = "3D Cartesian"
-      attributes(g)["CharacteristicLength"] =  Domain.L_charact
-      attributes(g)["CharacteristicDiffusionCoefficient"] =  Domain.D_charact
-      attributes(g)["CharacteristicTime"] =  Domain.t_charact
+      # Set attributes for group g
+      attrs_values = (
+          ("LengthX(µm)", IC.Lx),
+          ("LengthY(µm)", IC.Ly),
+          ("LengthZ(µm)", IC.Lz),
+          ("Dx(µm)", IC.Δx),
+          ("Dy(µm)", IC.Δy),
+          ("Dz(µm)", IC.Δz),
+          ("Nx", IC.nx),
+          ("Ny", IC.ny),
+          ("Nz", IC.nz),
+          ("TotalTime(Myr)", IC.tfinal),
+          ("Coordinates", "3D Cartesian"),
+          ("CharacteristicLength", Domain.L_charact),
+          ("CharacteristicDiffusionCoefficient", Domain.D_charact),
+          ("CharacteristicTime", Domain.t_charact)
+      )
+      for (attr, value) in attrs_values
+          attributes(g)[attr] = value
+      end
 
       t0 = create_group(file, "Diffusion_Grt/t$(lpad("0", 4, "0"))") # create a group
       attributes(t0)["Time(Myr)"] = 0
       attributes(t0)["Temperature(°C)"] = Domain.T[1]
       attributes(t0)["Pressure(GPa)"] = Domain.P[1]
-      create_group(t0, "Mg")
-      create_group(t0, "Fe")
-      create_group(t0, "Mn")
-      create_group(t0, "Ca")
-      create_group(t0, "GrtPosition")
-      create_group(t0, "GrtBoundary")
-
-      # describe type of data
-      attributes(t0["Mg"])["DataType"] = "Scalar"
-      attributes(t0["Fe"])["DataType"] = "Scalar"
-      attributes(t0["Mn"])["DataType"] = "Scalar"
-      attributes(t0["Ca"])["DataType"] = "Scalar"
-      attributes(t0["GrtPosition"])["DataType"] = "Scalar"
-      attributes(t0["GrtBoundary"])["DataType"] = "Scalar"
-
-      attributes(t0["Mg"])["Center"] = "Node"
-      attributes(t0["Fe"])["Center"] = "Node"
-      attributes(t0["Mn"])["Center"] = "Node"
-      attributes(t0["Ca"])["Center"] = "Node"
-      attributes(t0["GrtPosition"])["Center"] = "Node"
-      attributes(t0["GrtBoundary"])["Center"] = "Node"
+      # Create groups and set attributes for each group
+      groups = ("Mg", "Fe", "Mn", "Ca", "GrtPosition", "GrtBoundary")
+      for group in groups
+          grp = create_group(t0, group)
+          attributes(grp)["DataType"] = "Scalar"
+          attributes(grp)["Center"] = "Node"
+      end
 
       t0["Mg"]["Mg"] = column_to_row(IC.CMg0)
       t0["Fe"]["Fe"] = column_to_row(IC.CFe0)
       t0["Mn"]["Mn"] = column_to_row(IC.CMn0)
       t0["Ca"]["Ca"] = column_to_row(replace!((1 .- IC.CMg0 .- IC.CFe0 .- IC.CMn0), 1=>0))
-      t0["GrtPosition"]["GrtPosition"] = IC.grt_position
-      t0["GrtBoundary"]["GrtBoundary"] = IC.grt_boundary
+      t0["GrtPosition"]["GrtPosition"] = column_to_row(IC.grt_position)
+      t0["GrtBoundary"]["GrtBoundary"] = column_to_row(IC.grt_boundary)
   end
 end
 
@@ -156,10 +140,10 @@ function XMDF_creation(path_hdf5)
     open(xdmf_file_path, "w") do file
         # write header
         write(file, "<?xml version=\"1.0\" ?>
-    <!DOCTYPE Xdmf SYSTEM \"Xdmf.dtd\" []>
-    <Xdmf Version=\"3.0\">
-      <Domain>
-        <Grid Name=\"CellTime\" GridType=\"Collection\" CollectionType=\"Temporal\">")
+<!DOCTYPE Xdmf SYSTEM \"Xdmf.dtd\" []>
+<Xdmf Version=\"3.0\">
+  <Domain>
+    <Grid Name=\"CellTime\" GridType=\"Collection\" CollectionType=\"Temporal\">")
 
         # extract Nz, Ny, Nx
         nz = haskey(attributes(Grt), "Nz") ? read_attribute(Grt, "Nz") : 0
@@ -174,21 +158,21 @@ function XMDF_creation(path_hdf5)
         # write timesteps
         for(i, t) in enumerate(Grt)
             write(file, "
-          <Grid Name=\"mesh$(string(i-1))\" GridType=\"Uniform\">
-            <Time Value=\"$(read_attribute(t,"Time(Myr)"))\" />
-            <!-- provide Nz, Ny, Nx -->
-            <Topology TopologyType=\"3DCoRectMesh\" NumberOfElements=\"$nz $ny $nx\"/>
-            <Geometry GeometryType=\"ORIGIN_DXDYDZ\">
-              <!-- Oz,Oy,Ox + Dz,Dy,Dx-->
-              <DataItem DataType=\"Float\" Dimensions=\"3\" Format=\"XML\">
-              <!-- where start origins -->
-                0.0 0.0 0.0
-              </DataItem>
-              <DataItem DataType=\"Float\" Dimensions=\"3\" Format=\"XML\">
-                <!-- dz input.dy input.dx -->
-                $dz $dy $dx
-              </DataItem>
-            </Geometry>")
+      <Grid Name=\"mesh$(string(i-1))\" GridType=\"Uniform\">
+        <Time Value=\"$(read_attribute(t,"Time(Myr)"))\" />
+        <!-- provide Nz, Ny, Nx -->
+        <Topology TopologyType=\"3DCoRectMesh\" NumberOfElements=\"$nz $ny $nx\"/>
+        <Geometry GeometryType=\"ORIGIN_DXDYDZ\">
+          <!-- Oz,Oy,Ox + Dz,Dy,Dx-->
+          <DataItem DataType=\"Float\" Dimensions=\"3\" Format=\"XML\">
+          <!-- where start origins -->
+            0.0 0.0 0.0
+          </DataItem>
+          <DataItem DataType=\"Float\" Dimensions=\"3\" Format=\"XML\">
+            <!-- dz input.dy input.dx -->
+            $dz $dy $dx
+          </DataItem>
+        </Geometry>")
 
             timestep = keys(Grt)[i]  # t0000, t0001, t0002, ...
 
@@ -196,30 +180,36 @@ function XMDF_creation(path_hdf5)
                 element = keys(t)[j]  # Ca, Mg, Fe or Mn
 
                 write(file, "
-            <Attribute Name=\"$(element)\" AttributeType=\"Scalar\" Center=\"Node\">
-              <!-- provide Nz, Ny, Nx -->
-              <DataItem Dimensions=\"$nz $ny $nx\" NumberType=\"Float\" Precision=\"4\" Format=\"HDF\">
-                $(hdf5_file_name):/Diffusion_Grt/$(timestep)/$(element)/$(element)
-              </DataItem>
-            </Attribute>")
+        <Attribute Name=\"$(element)\" AttributeType=\"Scalar\" Center=\"Node\">
+          <!-- provide Nz, Ny, Nx -->
+          <DataItem Dimensions=\"$nz $ny $nx\" NumberType=\"Float\" Precision=\"4\" Format=\"HDF\">
+            $(hdf5_file_name):/Diffusion_Grt/$(timestep)/$(element)/$(element)
+          </DataItem>
+        </Attribute>")
             end
 
             # close timestep
             write(file, "
-          </Grid>")
+      </Grid>")
         end
 
         # write footer of xdmf file
         write(file, "
-        </Grid>
-      </Domain>
-    </Xdmf>")
+    </Grid>
+  </Domain>
+</Xdmf>")
     end
 
     close(hdf)
 end
 
+"""
+    save_data_paraview(integrator)
 
+Callback function used to save data to an HDF5 file and produce an XMDF file. XMDF files can be used to read data on software like Paraview.
+
+Note that data are saved in row major format. For column major, use save_data().
+"""
 function save_data_paraview(integrator)
 
     @unpack IC, t_charact = integrator.p.domain

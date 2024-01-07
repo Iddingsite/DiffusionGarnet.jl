@@ -208,7 +208,11 @@ function hdf5_timestep(u, dt, tcurrent, path_hdf5)
     end
 end
 
+"""
+    save_data(integrator)
 
+Callback function used to save data to an HDF5 file. Save initial conditions if integrator.t ≠ 0.0, otherwise save current conditions.
+"""
 function save_data(integrator)
 
     @unpack IC, t_charact = integrator.p.domain
@@ -216,9 +220,9 @@ function save_data(integrator)
 
     if integrator.t ≠ 0.0
         hdf5_timestep(integrator.u, integrator.dt * t_charact, integrator.t * t_charact, path_save)
-        println("Data saved at $(round((integrator.t * t_charact), digits=2)) Myr.")
+        @info "Data saved at $(round((integrator.t * t_charact), digits=2)) Myr."
     elseif integrator.t == 0.0
         hdf5_initial_conditions(IC, integrator.p.domain, path_save)
-        println("Data saved at $(round((integrator.t * t_charact), digits=2)) Myr.")
+        @info "Data saved at $(round((integrator.t * t_charact), digits=2)) Myr."
     end
 end

@@ -1,6 +1,8 @@
 using DiffusionGarnet
 using Test
 using DelimitedFiles
+using JLD2
+using LinearAlgebra: norm
 
 @testset "initial conditions" begin
     # 1D, test geometry.jl
@@ -83,9 +85,6 @@ end
 
 @testset "1D diffusion" begin
 
-    using LinearAlgebra: norm
-
-
     data = DelimitedFiles.readdlm("./Data/1D/Data_Grt_1D.txt", '\t', '\n', header=true)[1]
 
     Mg0 = data[:, 4]
@@ -153,10 +152,31 @@ end
     IC2D = InitialConditions2D(CMg, CFe, CMn, Lx, Ly, tfinal; grt_boundary = grt_boundary)
     domain2D = Domain(IC2D, T, P)
 
-    sol = simulate(domain2D; progress=false)
+    sol = simulate(domain2D; save_everystep=false, progress=false)
 
     @test norm(sol[end][:,:,1]) ≈ 12.783357041653609
+end
 
+@testset "3D Diffusion" begin
+
+    # use JLD2 to load data
+    file = jldopen("./Data/3D/3D_data.jld2", "r")
+    @unpack Mg0, Fe0, Mn0, Ca0, grt_boundary = file
+    close(file)
+
+    Lx = 9000.0u"µm"
+    Ly = 9000.0u"µm"
+    Lz = 9000.0u"µm"
+    tfinal = 0.2u"Myr"
+    T = 900u"°C"
+    P = 0.6u"GPa"
+
+    IC3D = InitialConditions3D(Mg0, Fe0, Mn0, Lx, Ly, Lz, tfinal; grt_boundary = grt_boundary)
+    domain3D = Domain(IC3D, T, P)
+
+    sol = simulate(domain3D; save_everystep=false, progress=false);
+
+    @test norm(sol[end][:,:,:,1]) ≈ 371.1477084396848
 end
 
 
@@ -208,8 +228,7 @@ end
     @unpack time_update_ad = domain2D
     update_diffusion_coef_call = PresetTimeCallback(time_update_ad, update_diffusion_coef)
 
-    sol_2D = simulate(domain2D; callback=update_diffusion_coef_call, progress=false)
-    sol_2D = simulate(domain2D; progress=false)
+    sol_2D = simulate(domain2D; callback=update_diffusion_coef_call, progress=false, save_everystep=false)
 
     T=600  # in °C
     P=3  # in kbar
@@ -263,7 +282,7 @@ end
 
     save_data_callback = PresetTimeCallback(ustrip.(time_save) ./ domain2D.t_charact, save_data)
 
-    sol_2D = simulate(domain2D; callback=save_data_callback, path_save=(@__DIR__) * "/Grt_2D.h5", progress=false)
+    sol_2D = simulate(domain2D; callback=save_data_callback, path_save=(@__DIR__) * "/Grt_2D.h5", progress=false, save_everystep=false)
 
     h5open("./Grt_1D.h5", "r") do file
         @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"]) == IC1D.CMg0
@@ -310,7 +329,7 @@ end
 
     save_data_callback = PresetTimeCallback(ustrip.(time_save) ./ domain2D.t_charact, save_data_paraview)
 
-    sol_2D = simulate(domain2D; callback=save_data_callback, path_save=(@__DIR__) * "/Grt_2D.h5", progress=false)
+    sol_2D = simulate(domain2D; callback=save_data_callback, path_save=(@__DIR__) * "/Grt_2D.h5", progress=false, save_everystep=false)
 
     h5open("./Grt_2D.h5", "r") do file
         @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"])' == IC2D.CMg0

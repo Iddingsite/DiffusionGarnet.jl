@@ -1,4 +1,3 @@
-
 import Base.@propagate_inbounds
 
 @parallel_indices (iy, ix) function Diffusion_coef_2D!(DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn, CMg, CFe ,CMn, D0, D_charact, grt_position)
@@ -37,8 +36,8 @@ end
 
 @parallel_indices (iy, ix) function stencil_diffusion_2D!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn, position_Grt, Grt_boundaries, Δxad_, Δyad_)
 
-    @propagate_inbounds @inline av_D_x(D, ix, iy) = 0.5 * (D[iy,ix] + D[iy,ix+1])
-    @propagate_inbounds @inline av_D_y(D, ix, iy) = 0.5 * (D[iy,ix] + D[iy+1,ix])
+    @propagate_inbounds @inline av_D_x(D, ix, iy)       = 0.5 * (D[iy,ix] + D[iy,ix+1])
+    @propagate_inbounds @inline av_D_y(D, ix, iy)       = 0.5 * (D[iy,ix] + D[iy+1,ix])
     @propagate_inbounds @inline qx(D, C, ix, iy, Δxad_) = av_D_x(D, ix, iy) * (C[iy,ix+1]-C[iy,ix]) * Δxad_
     @propagate_inbounds @inline qy(D, C, ix, iy, Δyad_) = av_D_y(D, ix, iy) * (C[iy+1,ix]-C[iy,ix]) * Δyad_
 
@@ -107,7 +106,7 @@ end
                                 qy(DMnFe,CFe,ix,iy,Δyad_) * Δyad_ +
                                 qy(DMnMn,CMn,ix,iy,Δyad_) * Δyad_
             end
-        # if point is an inclusion
+        # if point is an inclusion or matrix
         else
             dtCMg[iy,ix] = 0.0
             dtCFe[iy,ix] = 0.0
@@ -133,7 +132,7 @@ end
 function semi_discretisation_diffusion_2D(du,u,p,t)
 
     @unpack D, D0, D_charact, Δxad_, Δyad_ = p.domain
-    @unpack grt_position, grt_boundary = p.domain.IC
+    @unpack grt_position, grt_boundary     = p.domain.IC
     DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn = D
 
     CMg = @view u[:,:,1]
