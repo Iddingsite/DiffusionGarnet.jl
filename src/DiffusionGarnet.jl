@@ -39,7 +39,6 @@ function __init__()
 
 end
 
-
 let
     s = split(backend, "_")
     device = s[1]

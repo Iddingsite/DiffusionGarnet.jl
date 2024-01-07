@@ -433,7 +433,7 @@ end
 """
     Domain(IC, T, P, time_update=0u"Myr")
 
-Return a struct containing the struct IC, the PT conditions `T` and `P`  and the nondimensionalised parameters of the problem. `time_update` can be used to update the PT conditions during the simulation. If so, `T` and `P` have to be of the same size as `time_update` and correspond to the values of PT to update to.
+Return a struct containing the struct `IC`, the PT conditions `T` and `P`  and the nondimensionalised parameters of the problem. `time_update` can be used to update the PT conditions during the simulation. If so, `T` and `P` have to be of the same size as `time_update` and correspond to the values of PT to update to.
 
 """
 function Domain end
@@ -450,7 +450,7 @@ end
 """
     Domain(IC::InitialConditionsSpherical, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr")
 
-When applied to spherical initial conditions, define corresponding spherical domain.
+When applied to spherical initial conditions, define corresponding spherical domain. Assume that the center of the grain is on the left side.
 """
 function Domain(IC::InitialConditionsSpherical, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr")
     DomainSpherical(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)))

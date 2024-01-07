@@ -211,7 +211,7 @@ end
 """
     save_data(integrator)
 
-Callback function used to save data to an HDF5 file. Save initial conditions if integrator.t ≠ 0.0, otherwise save current conditions.
+Callback function used to save major element compositions to an HDF5 file at a specific timestep.
 """
 function save_data(integrator)
 

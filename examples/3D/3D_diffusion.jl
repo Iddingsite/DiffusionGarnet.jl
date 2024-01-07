@@ -1,6 +1,4 @@
 using DiffusionGarnet
-using Plots
-using ProgressBars
 using JLD2
 
 cd(@__DIR__)

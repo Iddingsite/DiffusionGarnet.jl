@@ -12,7 +12,8 @@ makedocs(;
                 "Diffusion in spherical coordinates" => "diffusion_spherical.md",
                 "Diffusion in 2D Cartesian coordinates on CPU" => "diffusion_2D.md",
                 "Callbacks" => Any["Updating pressure and temperature conditions" => "updating_PT.md",
-                "Saving output as HDF5 files" => "saving_output.md"]
+                "Saving output as HDF5 files" => "saving_output.md"],
+                "Diffuion in 3D Cartesian coordinates on CPU" => "diffusion_3D.md"
                 ]
                 "List of functions" => "reference.md"
                ],

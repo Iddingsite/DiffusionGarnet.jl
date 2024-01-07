@@ -208,7 +208,7 @@ end
 
 Callback function used to save data to an HDF5 file and produce an XMDF file. XMDF files can be used to read data on software like Paraview.
 
-Note that data are saved in row major format. For column major, use save_data().
+Note that data are saved in row major format. For column major, use `save_data()` instead.
 """
 function save_data_paraview(integrator)
 
@@ -218,11 +218,11 @@ function save_data_paraview(integrator)
     if integrator.t ≠ 0.0
         hdf5_timestep_paraview(integrator.u, integrator.dt * t_charact, integrator.t * t_charact, path_save)
         XMDF_creation(path_save)
-        println("Data saved at $(round((integrator.t * t_charact), digits=2)) Myr.")
+        @info "Data saved at $(round((integrator.t * t_charact), digits=2)) Myr."
     elseif integrator.t == 0.0
         hdf5_initial_conditions_paraview(IC, integrator.p.domain, path_save)
         XMDF_creation(path_save)
-        println("Data saved at $(round((integrator.t * t_charact), digits=2)) Myr.")
+        @info "Data saved at $(round((integrator.t * t_charact), digits=2)) Myr."
     end
 
 end
