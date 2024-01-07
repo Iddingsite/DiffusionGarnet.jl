@@ -72,7 +72,7 @@ sol = simulate(Domain3D; callback=save_data_callback, path_save=path_save, save_
 Two files should have been created in the same folder as your current session: `Grt_3D.h5` and `Grt_3D.xdmf`. The first one is the HDF5 file containing the results of the simulation, and the second one is an XDMF file describing the HDF5 file. This last file can be opened with visualisation software programs, such as [Paraview](https://www.paraview.org/).
 
 !!! warning
-    For any pieces of visualisation software, make sure you are opening the XDMF file and not the HDF5 file. For [Paraview](https://www.paraview.org/), select the `XDMF Reader` as the reader when you open your data. Only Paraview was tested with this package, but other software should work as well.
+    For any visualisation software, make sure you open the XDMF file and not the HDF5 file. For [Paraview](https://www.paraview.org/), select the `XDMF Reader` as the reader when you open your data. Only Paraview has been tested with this package, but other software should work as well.
 
 
 
