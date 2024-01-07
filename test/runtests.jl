@@ -104,7 +104,7 @@ end
 
     sol = simulate(domain1D; progress=false)
 
-    @test norm(sum.(sol[end][:,1] .+ sol[end][:,2] .+ sol[end][:,3])) ≈ 28.64886878627501
+    @test norm(sum.(sol.u[end][:,1] .+ sol.u[end][:,2] .+ sol.u[end][:,3])) ≈ 28.64886878627501
 end
 
 @testset "Spherical diffusion" begin
@@ -131,7 +131,7 @@ end
 
     sol = simulate(domainSph; progress=false)
 
-    @test norm(sum.(sol[end][:,1] .+ sol[end][:,2] .+ sol[end][:,3])) ≈ 20.268803083443927
+    @test norm(sum.(sol.u[end][:,1] .+ sol.u[end][:,2] .+ sol.u[end][:,3])) ≈ 20.268803083443927
 end
 
 @testset "2D Diffusion" begin
@@ -154,7 +154,7 @@ end
 
     sol = simulate(domain2D; save_everystep=false, progress=false)
 
-    @test norm(sol[end][:,:,1]) ≈ 12.783357041653609
+    @test norm(sol.u[end][:,:,1]) ≈ 12.783357041653609
 end
 
 @testset "3D Diffusion" begin
@@ -176,7 +176,7 @@ end
 
     sol = simulate(domain3D; save_everystep=false, progress=false);
 
-    @test norm(sol[end][:,:,:,1]) ≈ 371.1477084396848
+    @test norm(sol.u[end][:,:,:,1]) ≈ 371.1477084396848
 end
 
 
@@ -289,9 +289,9 @@ end
         @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"]) == IC1D.CFe0
         @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"]) == IC1D.CMn0
         @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"]) == replace!((1 .- IC1D.CMg0 .- IC1D.CFe0 .- IC1D.CMn0), 1=>0)
-        @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"]) == sol_1D[end][:,1]
-        @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"]) == sol_1D[end][:,2]
-        @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"]) == sol_1D[end][:,3]
+        @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"]) == sol_1D.u[end][:,1]
+        @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"]) == sol_1D.u[end][:,2]
+        @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"]) == sol_1D.u[end][:,3]
     end
 
     h5open("./Grt_Sph.h5", "r") do file
@@ -299,9 +299,9 @@ end
         @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"]) == ICSph.CFe0
         @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"]) == ICSph.CMn0
         @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"]) == replace!((1 .- ICSph.CMg0 .- ICSph.CFe0 .- ICSph.CMn0), 1=>0)
-        @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"]) == sol_sph[end][:,1]
-        @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"]) == sol_sph[end][:,2]
-        @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"]) == sol_sph[end][:,3]
+        @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"]) == sol_sph.u[end][:,1]
+        @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"]) == sol_sph.u[end][:,2]
+        @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"]) == sol_sph.u[end][:,3]
     end
 
     h5open("./Grt_2D.h5", "r") do file
@@ -309,9 +309,9 @@ end
         @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"]) == IC2D.CFe0
         @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"]) == IC2D.CMn0
         @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"]) == replace!((1 .- IC2D.CMg0 .- IC2D.CFe0 .- IC2D.CMn0), 1=>0)
-        @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"]) == sol_2D[end][:,:,1]
-        @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"]) == sol_2D[end][:,:,2]
-        @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"]) == sol_2D[end][:,:,3]
+        @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"]) == sol_2D.u[end][:,:,1]
+        @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"]) == sol_2D.u[end][:,:,2]
+        @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"]) == sol_2D.u[end][:,:,3]
     end
 
     # delete files "Grt_1D.h5" and "Grt_Sph.h5" if it exists
@@ -336,9 +336,9 @@ end
         @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"])' == IC2D.CFe0
         @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"])' == IC2D.CMn0
         @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"])' == replace!((1 .- IC2D.CMg0 .- IC2D.CFe0 .- IC2D.CMn0), 1=>0)
-        @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"])' == sol_2D[end][:,:,1]
-        @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"])' == sol_2D[end][:,:,2]
-        @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"])' == sol_2D[end][:,:,3]
+        @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"])' == sol_2D.u[end][:,:,1]
+        @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"])' == sol_2D.u[end][:,:,2]
+        @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"])' == sol_2D.u[end][:,:,3]
     end
 
     # delete files if it exists
