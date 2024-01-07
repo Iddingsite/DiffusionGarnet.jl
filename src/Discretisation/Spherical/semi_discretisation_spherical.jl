@@ -30,26 +30,20 @@ function stencil_diffusion_spherical!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δr
 
     @propagate_inbounds @inline qx(D, C, ix, Δrad_) = 0.5 * (D[ix] + D[ix+1]) * (C[ix+1]-C[ix]) * Δrad_
 
+    @propagate_inbounds @inline function update_dtC(dtC, D1, D2, D3, C1, C2, C3, ix, Δrad_)
+        dtC[ix] = (qx(D1,C1,ix,Δrad_) - qx(D1,C1,ix-1,Δrad_)) * Δrad_ +
+                  (qx(D2,C2,ix,Δrad_) - qx(D2,C2,ix-1,Δrad_)) * Δrad_ +
+                  (qx(D3,C3,ix,Δrad_) - qx(D3,C3,ix-1,Δrad_)) * Δrad_ +
+                  D1[ix] / r_ad[ix] * (C1[ix+1]-C1[ix-1]) * Δrad_ +
+                  D2[ix] / r_ad[ix] * (C2[ix+1]-C2[ix-1]) * Δrad_ +
+                  D3[ix] / r_ad[ix] * (C3[ix+1]-C3[ix-1]) * Δrad_
+    end
+
     @inbounds for ix in eachindex(dtCMg)
         if ix > 1 && ix < size(dtCMg, 1)
-            dtCMg[ix] = (qx(DMgMg,CMg,ix,Δrad_) - qx(DMgMg,CMg,ix-1,Δrad_)) * Δrad_ +
-                        (qx(DMgFe,CFe,ix,Δrad_) - qx(DMgFe,CFe,ix-1,Δrad_)) * Δrad_ +
-                        (qx(DMgMn,CMn,ix,Δrad_) - qx(DMgMn,CMn,ix-1,Δrad_)) * Δrad_ +
-                        DMgMg[ix] / r_ad[ix] * (CMg[ix+1]-CMg[ix-1]) * Δrad_ +
-                        DMgFe[ix] / r_ad[ix] * (CFe[ix+1]-CFe[ix-1]) * Δrad_ +
-                        DMgMn[ix] / r_ad[ix] * (CMn[ix+1]-CMn[ix-1]) * Δrad_
-            dtCFe[ix] = (qx(DFeMg,CMg,ix,Δrad_) - qx(DFeMg,CMg,ix-1,Δrad_)) * Δrad_ +
-                        (qx(DFeFe,CFe,ix,Δrad_) - qx(DFeFe,CFe,ix-1,Δrad_)) * Δrad_ +
-                        (qx(DFeMn,CMn,ix,Δrad_) - qx(DFeMn,CMn,ix-1,Δrad_)) * Δrad_ +
-                        DFeMg[ix] / r_ad[ix] * (CMg[ix+1]-CMg[ix-1]) * Δrad_ +
-                        DFeFe[ix] / r_ad[ix] * (CFe[ix+1]-CFe[ix-1]) * Δrad_ +
-                        DFeMn[ix] / r_ad[ix] * (CMn[ix+1]-CMn[ix-1]) * Δrad_
-            dtCMn[ix] = (qx(DMnMg,CMg,ix,Δrad_) - qx(DMnMg,CMg,ix-1,Δrad_)) * Δrad_ +
-                        (qx(DMnFe,CFe,ix,Δrad_) - qx(DMnFe,CFe,ix-1,Δrad_)) * Δrad_ +
-                        (qx(DMnMn,CMn,ix,Δrad_) - qx(DMnMn,CMn,ix-1,Δrad_)) * Δrad_ +
-                        DMnMg[ix] / r_ad[ix] * (CMg[ix+1]-CMg[ix-1]) * Δrad_ +
-                        DMnFe[ix] / r_ad[ix] * (CFe[ix+1]-CFe[ix-1]) * Δrad_ +
-                        DMnMn[ix] / r_ad[ix] * (CMn[ix+1]-CMn[ix-1]) * Δrad_
+            update_dtC(dtCMg, DMgMg, DMgFe, DMgMn, CMg, CFe, CMn, ix, Δrad_)
+            update_dtC(dtCFe, DFeMg, DFeFe, DFeMn, CMg, CFe, CMn, ix, Δrad_)
+            update_dtC(dtCMn, DMnMg, DMnFe, DMnMn, CMg, CFe, CMn, ix, Δrad_)
         end
         # solve singularities (equivalent to homogeneous Neumann BC), see Versypt, A. N. F., & Braatz, R. D. (2014). Analysis of finite difference discretization schemes for diffusion in spheres with variable diffusivity. Computers & chemical engineering, 71, 241-252.
         if ix == 1

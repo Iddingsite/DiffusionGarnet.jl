@@ -10,7 +10,7 @@ Mg0 = DelimitedFiles.readdlm("Xprp.txt", '\t', '\n', header=false)
 Fe0 = DelimitedFiles.readdlm("Xalm.txt", '\t', '\n', header=false)
 Mn0 = DelimitedFiles.readdlm("Xsps.txt", '\t', '\n', header=false)
 Ca0 = DelimitedFiles.readdlm("Xgrs.txt", '\t', '\n', header=false)
-grt_boundary = DelimitedFiles.readdlm("contour_Grt.txt", '\t', '\n', header=false)
+grt_boundary = DelimitedFiles.readdlm("grt_boundary.txt", '\t', Int, '\n', header=false)
 
 Lx = 9000.0u"µm"
 Ly = 9000.0u"µm"
@@ -31,4 +31,3 @@ save_data_callback = PresetTimeCallback(time_save_ad, save_data_paraview)
 
 path_save = "Grt_2D.h5"  # chose the name and the path of the HDF5 output file (make sure to add .h5 or .hdf5 at the end)
 sol = simulate(domain2D; callback=save_data_callback, path_save=path_save, save_everystep=false);
-# 377.768768 seconds (16.12 M allocations: 15.863 GiB, 10.96% gc time, 5.41% compilation time)
