@@ -38,12 +38,12 @@ function hdf5_initial_conditions_paraview(IC::InitialConditions2D, Domain::Domai
             attributes(grp)["Center"] = "Node"
         end
 
-        t0["Mg"]["Mg"] = column_to_row(IC.CMg0)
-        t0["Fe"]["Fe"] = column_to_row(IC.CFe0)
-        t0["Mn"]["Mn"] = column_to_row(IC.CMn0)
-        t0["Ca"]["Ca"] = column_to_row(replace!((1 .- IC.CMg0 .- IC.CFe0 .- IC.CMn0), 1=>0))
-        t0["GrtPosition"]["GrtPosition"] = column_to_row(IC.grt_position)
-        t0["GrtBoundary"]["GrtBoundary"] = column_to_row(IC.grt_boundary)
+        t0["Mg"]["Mg"] = column_to_row(convert(Array{Float32}, IC.CMg0))
+        t0["Fe"]["Fe"] = column_to_row(convert(Array{Float32}, IC.CFe0))
+        t0["Mn"]["Mn"] = column_to_row(convert(Array{Float32}, IC.CMn0))
+        t0["Ca"]["Ca"] = column_to_row(convert(Array{Float32}, replace!((1 .- IC.CMg0 .- IC.CFe0 .- IC.CMn0), 1=>0)))
+        t0["GrtPosition"]["GrtPosition"] = column_to_row(convert(Array{Int32},IC.grt_position))
+        t0["GrtBoundary"]["GrtBoundary"] = column_to_row(convert(Array{Int32},IC.grt_boundary))
     end
 end
 
@@ -85,12 +85,12 @@ function hdf5_initial_conditions_paraview(IC::InitialConditions3D, Domain::Domai
           attributes(grp)["Center"] = "Node"
       end
 
-      t0["Mg"]["Mg"] = column_to_row(IC.CMg0)
-      t0["Fe"]["Fe"] = column_to_row(IC.CFe0)
-      t0["Mn"]["Mn"] = column_to_row(IC.CMn0)
-      t0["Ca"]["Ca"] = column_to_row(replace!((1 .- IC.CMg0 .- IC.CFe0 .- IC.CMn0), 1=>0))
-      t0["GrtPosition"]["GrtPosition"] = column_to_row(IC.grt_position)
-      t0["GrtBoundary"]["GrtBoundary"] = column_to_row(IC.grt_boundary)
+      t0["Mg"]["Mg"] = column_to_row(convert(Array{Float32}, IC.CMg0))
+      t0["Fe"]["Fe"] = column_to_row(convert(Array{Float32}, IC.CFe0))
+      t0["Mn"]["Mn"] = column_to_row(convert(Array{Float32}, IC.CMn0))
+      t0["Ca"]["Ca"] = column_to_row(convert(Array{Float32}, replace!((1 .- IC.CMg0 .- IC.CFe0 .- IC.CMn0), 1=>0)))
+      t0["GrtPosition"]["GrtPosition"] = column_to_row(convert(Array{Int32},IC.grt_position))
+      t0["GrtBoundary"]["GrtBoundary"] = column_to_row(convert(Array{Int32},IC.grt_boundary))
   end
 end
 
@@ -116,12 +116,12 @@ function hdf5_timestep_paraview(u, dt, tcurrent, path_hdf5, IC)
             attributes(grp)["Center"] = "Node"
         end
 
-        t["Mg"]["Mg"] = column_to_row(CMg)
-        t["Fe"]["Fe"] = column_to_row(CFe)
-        t["Mn"]["Mn"] = column_to_row(CMn)
-        t["Ca"]["Ca"] = column_to_row(replace!((1 .- CMg .- CFe .- CMn), 1=>0))
-        t["GrtPosition"]["GrtPosition"] = column_to_row(IC.grt_position)
-        t["GrtBoundary"]["GrtBoundary"] = column_to_row(IC.grt_boundary)
+        t["Mg"]["Mg"] = column_to_row(convert(Array{Float32}, CMg))
+        t["Fe"]["Fe"] = column_to_row(convert(Array{Float32}, CFe))
+        t["Mn"]["Mn"] = column_to_row(convert(Array{Float32}, CMn))
+        t["Ca"]["Ca"] = column_to_row(convert(Array{Float32}, replace!((1 .- CMg .- CFe .- CMn), 1=>0)))
+        t["GrtPosition"]["GrtPosition"] = column_to_row(convert(Array{Int32},IC.grt_position))
+        t["GrtBoundary"]["GrtBoundary"] = column_to_row(convert(Array{Int32},IC.grt_boundary))
     end
 end
 

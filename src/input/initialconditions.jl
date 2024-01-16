@@ -360,6 +360,10 @@ end
 
         D = (DMgMg = similar(CMg0, (nx,ny)), DMgFe = similar(CMg0, (nx,ny)), DMgMn = similar(CMg0, (nx,ny)), DFeMg = similar(CMg0, (nx,ny)), DFeFe = similar(CMg0, (nx,ny)), DFeMn = similar(CMg0, (nx,ny)), DMnMg = similar(CMg0, (nx,ny)), DMnFe = similar(CMg0, (nx,ny)), DMnMn = similar(CMg0, (nx,ny)))  # tensor of interdiffusion coefficients
 
+        for i in eachindex(D)
+            D[i] .= 0
+        end
+
         u0 = similar(CMg0, (nx, ny, 3))
         u0[:, :, 1] .= CMg0
         u0[:, :, 2] .= CFe0
@@ -406,6 +410,10 @@ end
         D_ini!(D0, T[1], P[1])  # compute initial diffusion coefficients
 
         D = (DMgMg = similar(CMg0, (nx, ny, nz)), DMgFe = similar(CMg0, (nx, ny, nz)), DMgMn = similar(CMg0, (nx, ny, nz)), DFeMg = similar(CMg0, (nx, ny, nz)), DFeFe = similar(CMg0, (nx, ny, nz)), DFeMn = similar(CMg0, (nx, ny, nz)), DMnMg = similar(CMg0, (nx, ny, nz)), DMnFe = similar(CMg0, (nx, ny, nz)), DMnMn = similar(CMg0, (nx, ny, nz)))  # tensor of interdiffusion coefficients
+
+        for i in eachindex(D)
+            D[i] .= 0
+        end
 
         u0 = similar(CMg0, (nx, ny, nz, 3))
         u0[:, :, :, 1] .= CMg0
