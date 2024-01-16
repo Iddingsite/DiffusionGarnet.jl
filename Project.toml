@@ -1,7 +1,7 @@
 name = "DiffusionGarnet"
 uuid = "d440471f-548d-4017-b306-a3be590dd0f0"
 authors = ["Hugo Dominguez <hugo.dominguez@unibe.ch>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
