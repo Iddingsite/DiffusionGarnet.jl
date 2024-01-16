@@ -5,7 +5,7 @@
 
 The 3D geometry of garnets can be obtained from computed tomography (CT) scans or other similar techniques. Combined with an initial composition, the full grain can be modelled with realistic geometry.
 
-In this tutorial, we will use fake geometry data and fake composition data with a low resolution and to get a reasonable runtime. The acquisition and processing of original data is beyond the scope of this tutorial and this package, and is left to the user. The goal of this tutorial is only to illustrate the use of DiffusionGarnet.jl in 3D Cartesian coordinates and show how to visualise the results.
+In this tutorial, we will use fake geometry data and fake composition data with a low resolution to get a reasonable runtime. The acquisition and processing of original data is beyond the scope of this tutorial and this package, and is left to the user. The goal of this tutorial is only to illustrate the use of DiffusionGarnet.jl in 3D Cartesian coordinates and show how to visualise the results.
 
 To do so, we will use a callback function to save the results of the simulation to disk at regular intervals to be able to visualize the results using the software [Paraview](https://www.paraview.org/).
 
