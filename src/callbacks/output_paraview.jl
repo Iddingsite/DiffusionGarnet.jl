@@ -162,17 +162,17 @@ function XMDF_creation(path_hdf5)
             write(file, "
       <Grid Name=\"mesh$(string(i-1))\" GridType=\"Uniform\">
         <Time Value=\"$(read_attribute(t,"Time(Myr)"))\" />
-        <!-- provide Nz, Ny, Nx -->
-        <Topology TopologyType=\"3DCoRectMesh\" NumberOfElements=\"$nz $ny $nx\"/>
+        <!-- provide Nx, Ny, Nz -->
+        <Topology TopologyType=\"3DCoRectMesh\" NumberOfElements=\"$nx $ny $nz\"/>
         <Geometry GeometryType=\"ORIGIN_DXDYDZ\">
-          <!-- Oz,Oy,Ox + Dz,Dy,Dx-->
+          <!-- Ox,Oy,Oz + Dx,Dy,Dz-->
           <DataItem DataType=\"Float\" Dimensions=\"3\" Format=\"XML\">
           <!-- where start origins -->
             0.0 0.0 0.0
           </DataItem>
           <DataItem DataType=\"Float\" Dimensions=\"3\" Format=\"XML\">
-            <!-- dz input.dy input.dx -->
-            $dz $dy $dx
+            <!-- dx dy dz -->
+            $dx $dy $dz
           </DataItem>
         </Geometry>")
 
@@ -183,8 +183,8 @@ function XMDF_creation(path_hdf5)
 
                 write(file, "
         <Attribute Name=\"$(element)\" AttributeType=\"Scalar\" Center=\"Node\">
-          <!-- provide Nz, Ny, Nx -->
-          <DataItem Dimensions=\"$nz $ny $nx\" NumberType=\"Float\" Precision=\"4\" Format=\"HDF\">
+          <!-- provide Nx, Ny, Nz -->
+          <DataItem Dimensions=\"$nx $ny $nz\" NumberType=\"Float\" Precision=\"4\" Format=\"HDF\">
             $(hdf5_file_name):/Diffusion_Grt/$(timestep)/$(element)/$(element)
           </DataItem>
         </Attribute>")
