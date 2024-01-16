@@ -97,7 +97,7 @@ end
             # grid = (x=x' .* @ones(ny), y= (@ones(nx))' .* y)
 
             # define when grt is present
-            grt_position = zeros(eltype(grt_boundary), size(CMg0)...)
+            grt_position = similar(grt_boundary)
             # create a binary matrix with 1 where grt is present. 0 otherwise. This depends on if CMg0, CFe0 and CMn0 are equal to 0 or not
             grt_position .= (CMg0 .≠ 0) .& (CFe0 .≠ 0) .& (CMn0 .≠ 0)
 
@@ -150,7 +150,7 @@ end
             z = range(0, length=nz, stop= Lz)
 
             # define when grt is present
-            grt_position = zeros(eltype(grt_boundary), size(CMg0)...)
+            grt_position = similar(grt_boundary)
             # create a binary matrix with 1 where grt is present. 0 otherwise. This depends on if CMg0, CFe0 and CMn0 are equal to 0 or not
             grt_position .= (CMg0 .≠ 0) .& (CFe0 .≠ 0) .& (CMn0 .≠ 0)
 
@@ -224,8 +224,10 @@ function D_ini!(D0,T,P)
     DMn = D0Mn * exp(- (Eₐ_Mn + (100 * (P-0.001) * ΔV⁺Mn)) / (R * (T+273.15)))  # in µm2 / s
     DCa = 0.5 * DFe
 
-
-    D0 .= [DMg, DFe, DMn, DCa] .* (365.25 * 24 * 3600 * 1e6)  # in years
+    D0[1] = DMg .* (365.25 * 24 * 3600 * 1e6)  # in Myr
+    D0[2] = DFe .* (365.25 * 24 * 3600 * 1e6)  # in Myr
+    D0[3] = DMn .* (365.25 * 24 * 3600 * 1e6)  # in Myr
+    D0[4] = DCa .* (365.25 * 24 * 3600 * 1e6)  # in Myr
 end
 
 @with_kw struct Domain1D{T1, T2, T3, T4} <: Domain
@@ -353,12 +355,12 @@ end
         similar(CMg0, (nx,ny))
 
 
-        D0 = zeros(eltype(CMg0), 4)
+        D0 = similar(CMg0, 4)
         D_ini!(D0, T[1], P[1])  # compute initial diffusion coefficients
 
-        D = (DMgMg = zeros(eltype(CMg0), (nx,ny)), DMgFe = zeros(eltype(CMg0), (nx,ny)), DMgMn = zeros(eltype(CMg0), (nx,ny)), DFeMg = zeros(eltype(CMg0), (nx,ny)), DFeFe = zeros(eltype(CMg0), (nx,ny)), DFeMn = zeros(eltype(CMg0), (nx,ny)), DMnMg = zeros(eltype(CMg0), (nx,ny)), DMnFe = zeros(eltype(CMg0), (nx,ny)), DMnMn = zeros(eltype(CMg0), (nx,ny)))  # tensor of interdiffusion coefficients
+        D = (DMgMg = similar(CMg0, (nx,ny)), DMgFe = similar(CMg0, (nx,ny)), DMgMn = similar(CMg0, (nx,ny)), DFeMg = similar(CMg0, (nx,ny)), DFeFe = similar(CMg0, (nx,ny)), DFeMn = similar(CMg0, (nx,ny)), DMnMg = similar(CMg0, (nx,ny)), DMnFe = similar(CMg0, (nx,ny)), DMnMn = similar(CMg0, (nx,ny)))  # tensor of interdiffusion coefficients
 
-        u0 = zeros(eltype(CMg0), (nx, ny, 3))
+        u0 = similar(CMg0, (nx, ny, 3))
         u0[:, :, 1] .= CMg0
         u0[:, :, 2] .= CFe0
         u0[:, :, 3] .= CMn0
@@ -400,12 +402,12 @@ end
     function Domain3D(IC::InitialConditions3D, T::T1, P::T1, time_update::T1) where {T1 <: Union{Float64, Array{Float64, 1}}}
         @unpack nx, ny, nz, Δx, Δy, Δz, tfinal, Lx, CMg0, CFe0, CMn0 = IC
 
-        D0 = zeros(eltype(CMg0), 4)
+        D0 = similar(CMg0, 4)
         D_ini!(D0, T[1], P[1])  # compute initial diffusion coefficients
 
-        D = (DMgMg = zeros(eltype(CMg0), (nx, ny, nz)), DMgFe = zeros(eltype(CMg0), (nx, ny, nz)), DMgMn = zeros(eltype(CMg0), (nx, ny, nz)), DFeMg = zeros(eltype(CMg0), (nx, ny, nz)), DFeFe = zeros(eltype(CMg0), (nx, ny, nz)), DFeMn = zeros(eltype(CMg0), (nx, ny, nz)), DMnMg = zeros(eltype(CMg0), (nx, ny, nz)), DMnFe = zeros(eltype(CMg0), (nx, ny, nz)), DMnMn = zeros(eltype(CMg0), (nx, ny, nz)))  # tensor of interdiffusion coefficients
+        D = (DMgMg = similar(CMg0, (nx, ny, nz)), DMgFe = similar(CMg0, (nx, ny, nz)), DMgMn = similar(CMg0, (nx, ny, nz)), DFeMg = similar(CMg0, (nx, ny, nz)), DFeFe = similar(CMg0, (nx, ny, nz)), DFeMn = similar(CMg0, (nx, ny, nz)), DMnMg = similar(CMg0, (nx, ny, nz)), DMnFe = similar(CMg0, (nx, ny, nz)), DMnMn = similar(CMg0, (nx, ny, nz)))  # tensor of interdiffusion coefficients
 
-        u0 = zeros(eltype(CMg0), (nx, ny, nz, 3))
+        u0 = similar(CMg0, (nx, ny, nz, 3))
         u0[:, :, :, 1] .= CMg0
         u0[:, :, :, 2] .= CFe0
         u0[:, :, :, 3] .= CMn0
