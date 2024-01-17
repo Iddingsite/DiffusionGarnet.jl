@@ -58,11 +58,11 @@ function simulate(domain::DomainSpherical; callback=nothing, path_save=nothing, 
 end
 
 """
-    simulate(domain::Domain2D; callback=nothing, path_save=nothing, progress=true, save_everystep=false)
+    simulate(domain::Domain2D; callback=nothing, path_save=nothing, progress=true, save_everystep=false, save_start=true)
 
 Solve the coupled major element diffusion equations in 2D. By default, save only the first and last timestep in the output solution type variable by default.
 """
-function simulate(domain::Domain2D; callback=nothing, path_save=nothing, progress=true, save_everystep=false)
+function simulate(domain::Domain2D; callback=nothing, path_save=nothing, progress=true, save_everystep=false, save_start=true)
 
     p = (domain = domain, path_save = path_save)
 
@@ -72,18 +72,18 @@ function simulate(domain::Domain2D; callback=nothing, path_save=nothing, progres
 
     prob = ODEProblem(semi_discretisation_diffusion_2D, u0, t, p)
 
-    sol = @time solve(prob, ROCK2(), progress=progress, progress_steps=1, save_start=true, abstol=1e-6,reltol=1e-6, save_everystep=save_everystep, callback=callback)
+    sol = @time solve(prob, ROCK2(), progress=progress, progress_steps=1, save_start=save_start, abstol=1e-6,reltol=1e-6, save_everystep=save_everystep, callback=callback)
 
     return sol
 end
 
 """
-    simulate(domain::Domain3D; callback=nothing, path_save=nothing, progressbar=true, save_everystep=false)
+    simulate(domain::Domain3D; callback=nothing, path_save=nothing, progressbar=true, save_everystep=false, save_start=true)
 
 Solve the coupled major element diffusion equations in 3D. Save only the first and last timestep in the output solution type variable by default.
 
 """
-function simulate(domain::Domain3D; callback=nothing, path_save=nothing, progress=true, save_everystep=false)
+function simulate(domain::Domain3D; callback=nothing, path_save=nothing, progress=true, save_everystep=false, save_start=true)
 
     p = (domain = domain, path_save = path_save)
 
@@ -93,7 +93,7 @@ function simulate(domain::Domain3D; callback=nothing, path_save=nothing, progres
 
     prob = ODEProblem(semi_discretisation_diffusion_3D, u0, t, p)
 
-    sol = @time solve(prob, ROCK2(), progress=progress, progress_steps=1, save_start=true, abstol=1e-6,reltol=1e-6, save_everystep=save_everystep, callback=callback)
+    sol = @time solve(prob, ROCK2(), progress=progress, progress_steps=1, save_start=save_start, abstol=1e-6,reltol=1e-6, save_everystep=save_everystep, callback=callback)
 
     return sol
 end
