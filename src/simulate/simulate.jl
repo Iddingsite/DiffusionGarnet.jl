@@ -28,7 +28,7 @@ function simulate(domain::Domain1D; callback=nothing, path_save=nothing, progres
 
     @unpack tfinal_ad, u0 = p.domain
 
-    t = [0, tfinal_ad]
+    t = (0, tfinal_ad)
 
     prob = ODEProblem(semi_discretisation_diffusion_1D, u0, t, p)
 
@@ -48,7 +48,7 @@ function simulate(domain::DomainSpherical; callback=nothing, path_save=nothing, 
 
     @unpack tfinal_ad, u0 = p.domain
 
-    t = [0, tfinal_ad]
+    t = (0, tfinal_ad)
 
     prob = ODEProblem(semi_discretisation_diffusion_spherical, u0, t, p)
 
@@ -68,7 +68,7 @@ function simulate(domain::Domain2D; callback=nothing, path_save=nothing, progres
 
     @unpack tfinal_ad, u0 = p.domain
 
-    t = [0.0, tfinal_ad]
+    t = (0.0, tfinal_ad)
 
     prob = ODEProblem(semi_discretisation_diffusion_2D, u0, t, p)
 
@@ -89,7 +89,7 @@ function simulate(domain::Domain3D; callback=nothing, path_save=nothing, progres
 
     @unpack tfinal_ad, u0 = p.domain
 
-    t = [0.0, tfinal_ad]
+    t = (0.0, tfinal_ad)
 
     prob = ODEProblem(semi_discretisation_diffusion_3D, u0, t, p)
 
