@@ -28,10 +28,10 @@ function hdf5_initial_conditions(IC::InitialConditions1D, Domain::Domain1D, path
             attributes(grp)["Center"] = "Node"
         end
 
-        t0["Mg"]["Mg"] = IC.CMg0
-        t0["Fe"]["Fe"] = IC.CFe0
-        t0["Mn"]["Mn"] = IC.CMn0
-        t0["Ca"]["Ca"] = 1 .- IC.CMg0 .- IC.CFe0 .- IC.CMn0
+        t0["Mg"]["Mg"] = convert(Array{Float32}, IC.CMg0)
+        t0["Fe"]["Fe"] = convert(Array{Float32}, IC.CFe0)
+        t0["Mn"]["Mn"] = convert(Array{Float32}, IC.CMn0)
+        t0["Ca"]["Ca"] = convert(Array{Float32}, replace!((1 .- IC.CMg0 .- IC.CFe0 .- IC.CMn0), 1=>0))
     end
 end
 
@@ -66,10 +66,10 @@ function hdf5_initial_conditions(IC::InitialConditionsSpherical, Domain::DomainS
             attributes(grp)["Center"] = "Node"
         end
 
-        t0["Mg"]["Mg"] = IC.CMg0
-        t0["Fe"]["Fe"] = IC.CFe0
-        t0["Mn"]["Mn"] = IC.CMn0
-        t0["Ca"]["Ca"] = 1 .- IC.CMg0 .- IC.CFe0 .- IC.CMn0
+        t0["Mg"]["Mg"] = convert(Array{Float32}, IC.CMg0)
+        t0["Fe"]["Fe"] = convert(Array{Float32}, IC.CFe0)
+        t0["Mn"]["Mn"] = convert(Array{Float32}, IC.CMn0)
+        t0["Ca"]["Ca"] = convert(Array{Float32}, replace!((1 .- IC.CMg0 .- IC.CFe0 .- IC.CMn0), 1=>0))
     end
 end
 
@@ -110,12 +110,12 @@ function hdf5_initial_conditions(IC::InitialConditions2D, Domain::Domain2D, path
             attributes(grp)["Center"] = "Node"
         end
 
-        t0["Mg"]["Mg"] = IC.CMg0
-        t0["Fe"]["Fe"] = IC.CFe0
-        t0["Mn"]["Mn"] = IC.CMn0
-        t0["Ca"]["Ca"] = replace!((1 .- IC.CMg0 .- IC.CFe0 .- IC.CMn0), 1=>0)
-        t0["GrtPosition"]["GrtPosition"] = IC.grt_position
-        t0["GrtBoundary"]["GrtBoundary"] = IC.grt_boundary
+        t0["Mg"]["Mg"] = convert(Array{Float32}, IC.CMg0)
+        t0["Fe"]["Fe"] = convert(Array{Float32}, IC.CFe0)
+        t0["Mn"]["Mn"] = convert(Array{Float32}, IC.CMn0)
+        t0["Ca"]["Ca"] = convert(Array{Float32}, replace!((1 .- IC.CMg0 .- IC.CFe0 .- IC.CMn0), 1=>0))
+        t0["GrtPosition"]["GrtPosition"] = convert(Array{Int32},IC.grt_position)
+        t0["GrtBoundary"]["GrtBoundary"] = convert(Array{Int32},IC.grt_boundary)
     end
 end
 
@@ -158,12 +158,12 @@ function hdf5_initial_conditions(IC::InitialConditions3D, Domain::Domain3D, path
             attributes(grp)["Center"] = "Node"
         end
 
-        t0["Mg"]["Mg"] = IC.CMg0
-        t0["Fe"]["Fe"] = IC.CFe0
-        t0["Mn"]["Mn"] = IC.CMn0
-        t0["Ca"]["Ca"] = replace!((1 .- IC.CMg0 .- IC.CFe0 .- IC.CMn0), 1=>0)
-        t0["GrtPosition"]["GrtPosition"] = IC.grt_position
-        t0["GrtBoundary"]["GrtBoundary"] = IC.grt_boundary
+        t0["Mg"]["Mg"] = convert(Array{Float32}, IC.CMg0)
+        t0["Fe"]["Fe"] = convert(Array{Float32}, IC.CFe0)
+        t0["Mn"]["Mn"] = convert(Array{Float32}, IC.CMn0)
+        t0["Ca"]["Ca"] = convert(Array{Float32}, replace!((1 .- IC.CMg0 .- IC.CFe0 .- IC.CMn0), 1=>0))
+        t0["GrtPosition"]["GrtPosition"] = convert(Array{Int32},IC.grt_position)
+        t0["GrtBoundary"]["GrtBoundary"] = convert(Array{Int32},IC.grt_boundary)
     end
 end
 
@@ -201,10 +201,10 @@ function hdf5_timestep(u, dt, tcurrent, path_hdf5)
             attributes(grp)["Center"] = "Node"
         end
 
-        t["Mg"]["Mg"] = CMg
-        t["Fe"]["Fe"] = CFe
-        t["Mn"]["Mn"] = CMn
-        t["Ca"]["Ca"] = replace!((1 .- CMg .- CFe .- CMn), 1=>0)
+        t["Mg"]["Mg"] = convert(Array{Float32}, CMg)
+        t["Fe"]["Fe"] = convert(Array{Float32}, CFe)
+        t["Mn"]["Mn"] = convert(Array{Float32}, CMn)
+        t["Ca"]["Ca"] = convert(Array{Float32}, replace!((1 .- CMg .- CFe .- CMn), 1=>0))
     end
 end
 

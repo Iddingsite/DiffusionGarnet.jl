@@ -285,33 +285,33 @@ end
     sol_2D = simulate(domain2D; callback=save_data_callback, path_save=(@__DIR__) * "/Grt_2D.h5", progress=false, save_everystep=false)
 
     h5open("./Grt_1D.h5", "r") do file
-        @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"]) == IC1D.CMg0
-        @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"]) == IC1D.CFe0
-        @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"]) == IC1D.CMn0
-        @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"]) == replace!((1 .- IC1D.CMg0 .- IC1D.CFe0 .- IC1D.CMn0), 1=>0)
-        @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"]) == sol_1D.u[end][:,1]
-        @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"]) == sol_1D.u[end][:,2]
-        @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"]) == sol_1D.u[end][:,3]
+        @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"]) == convert(Array{Float32}, IC1D.CMg0)
+        @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"]) == convert(Array{Float32}, IC1D.CFe0)
+        @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"]) == convert(Array{Float32}, IC1D.CMn0)
+        @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"]) == convert(Array{Float32}, replace!((1 .- IC1D.CMg0 .- IC1D.CFe0 .- IC1D.CMn0), 1=>0))
+        @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"]) == convert(Array{Float32}, sol_1D.u[end][:,1])
+        @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"]) == convert(Array{Float32}, sol_1D.u[end][:,2])
+        @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"]) == convert(Array{Float32}, sol_1D.u[end][:,3])
     end
 
     h5open("./Grt_Sph.h5", "r") do file
-        @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"]) == ICSph.CMg0
-        @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"]) == ICSph.CFe0
-        @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"]) == ICSph.CMn0
-        @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"]) == replace!((1 .- ICSph.CMg0 .- ICSph.CFe0 .- ICSph.CMn0), 1=>0)
-        @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"]) == sol_sph.u[end][:,1]
-        @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"]) == sol_sph.u[end][:,2]
-        @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"]) == sol_sph.u[end][:,3]
+        @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"]) == convert(Array{Float32}, ICSph.CMg0)
+        @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"]) == convert(Array{Float32}, ICSph.CFe0)
+        @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"]) == convert(Array{Float32}, ICSph.CMn0)
+        @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"]) == convert(Array{Float32}, replace!((1 .- ICSph.CMg0 .- ICSph.CFe0 .- ICSph.CMn0), 1=>0))
+        @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"]) == convert(Array{Float32}, sol_sph.u[end][:,1])
+        @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"]) == convert(Array{Float32}, sol_sph.u[end][:,2])
+        @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"]) == convert(Array{Float32}, sol_sph.u[end][:,3])
     end
 
     h5open("./Grt_2D.h5", "r") do file
-        @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"]) == IC2D.CMg0
-        @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"]) == IC2D.CFe0
-        @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"]) == IC2D.CMn0
-        @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"]) == replace!((1 .- IC2D.CMg0 .- IC2D.CFe0 .- IC2D.CMn0), 1=>0)
-        @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"]) == sol_2D.u[end][:,:,1]
-        @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"]) == sol_2D.u[end][:,:,2]
-        @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"]) == sol_2D.u[end][:,:,3]
+        @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"]) == convert(Array{Float32}, IC2D.CMg0)
+        @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"]) == convert(Array{Float32}, IC2D.CFe0)
+        @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"]) == convert(Array{Float32}, IC2D.CMn0)
+        @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"]) == convert(Array{Float32}, replace!((1 .- IC2D.CMg0 .- IC2D.CFe0 .- IC2D.CMn0), 1=>0))
+        @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"]) == convert(Array{Float32}, sol_2D.u[end][:,:,1])
+        @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"]) == convert(Array{Float32}, sol_2D.u[end][:,:,2])
+        @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"]) == convert(Array{Float32}, sol_2D.u[end][:,:,3])
     end
 
     # delete files "Grt_1D.h5" and "Grt_Sph.h5" if it exists
