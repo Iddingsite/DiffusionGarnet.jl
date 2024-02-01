@@ -28,4 +28,4 @@ save_data_callback = PresetTimeCallback(time_save_ad, save_data_paraview)
 
 path_save = "Grt_3D.h5"  # chose the name and the path of the HDF5 output file (make sure to add .h5 or .hdf5 at the end)
 
-sol = simulate(domain3D; callback=save_data_callback, path_save=path_save, save_everystep=false);
+sol = simulate(domain3D; callback=save_data_callback, path_save=path_save, save_everystep=false, progress=true, progress_steps=1);

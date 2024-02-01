@@ -21,8 +21,7 @@ P      = 0.6u"GPa"
 IC2D     = InitialConditions2D(Mg0, Fe0, Mn0, Lx, Ly, tfinal; grt_boundary = grt_boundary)
 domain2D = Domain(IC2D, T, P)
 
-sol = simulate(domain2D; save_everystep=true)
-# 377.768768 seconds (16.12 M allocations: 15.863 GiB, 10.96% gc time, 5.41% compilation time)
+sol = simulate(domain2D; save_everystep=true, progress=true, progress_steps=1)
 
 @unpack tfinal_ad, t_charact = domain2D
 

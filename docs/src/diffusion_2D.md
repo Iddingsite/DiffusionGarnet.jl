@@ -91,8 +91,9 @@ Using the function `simulate()` to solve our system:
 
 ```julia
 # solve the problem using DifferentialEquations.jl
-sol = simulate(Domain2D)
+sol = simulate(Domain2D, progress=true, progress_steps=1)
 ```
+We use here the arguments `progress=true` and `progress_steps=1` to display a progress bar during the calculation.
 
 !!! note
     The calculation can take some time, about 6 minutes on my machine with 16 threads.

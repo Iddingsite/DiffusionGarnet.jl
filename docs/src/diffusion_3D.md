@@ -63,7 +63,7 @@ We can now use the function `simulate()` to solve our system:
 
 ```julia
 # solve the problem using DifferentialEquations.jl
-sol = simulate(Domain3D; callback=save_data_callback, path_save=path_save, save_everystep=false)
+sol = simulate(Domain3D; callback=save_data_callback, path_save=path_save, save_everystep=false, progress=true, progress_steps=1)
 ```
 
 !!! note
