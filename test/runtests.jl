@@ -229,7 +229,7 @@ end
     update_diffusion_coef_call = PresetTimeCallback(time_update_ad, update_diffusion_coef)
 
     sol_2D = simulate(domain2D; callback=update_diffusion_coef_call, save_everystep=false, abstol=1e-6,reltol=1e-6)
-
+    print("hi")
     T=600  # in °C
     P=3  # in kbar
     D0 = zeros(Float64, 4)
