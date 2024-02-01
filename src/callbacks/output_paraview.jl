@@ -162,16 +162,16 @@ function XMDF_creation(path_hdf5)
             write(file, "
       <Grid Name=\"mesh$(string(i-1))\" GridType=\"Uniform\">
         <Time Value=\"$(read_attribute(t,"Time(Myr)"))\" />
-        <!-- provide Nx, Ny, Nz -->
+        <!-- provide Nz, Ny, Nx in row major -->
         <Topology TopologyType=\"3DCoRectMesh\" NumberOfElements=\"$nx $ny $nz\"/>
         <Geometry GeometryType=\"ORIGIN_DXDYDZ\">
-          <!-- Ox,Oy,Oz + Dx,Dy,Dz-->
+          <!-- Oz,Oy,Ox + Dz,Dy,Dx in row major-->
           <DataItem DataType=\"Float\" Dimensions=\"3\" Format=\"XML\">
           <!-- where start origins -->
             0.0 0.0 0.0
           </DataItem>
           <DataItem DataType=\"Float\" Dimensions=\"3\" Format=\"XML\">
-            <!-- dx dy dz -->
+            <!-- dz dy dx -->
             $dx $dy $dz
           </DataItem>
         </Geometry>")

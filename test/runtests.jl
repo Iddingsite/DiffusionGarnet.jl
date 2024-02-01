@@ -129,7 +129,7 @@ end
 
     domainSph = Domain(ICSph, T, P)
 
-    sol = simulate(domainSph; progress=false)
+    sol = simulate(domainSph; progress=false, abstol=1e-6,reltol=1e-6)
 
     @test norm(sum.(sol.u[end][:,1] .+ sol.u[end][:,2] .+ sol.u[end][:,3])) ≈ 20.268803083443927
 end
@@ -152,7 +152,7 @@ end
     IC2D = InitialConditions2D(CMg, CFe, CMn, Lx, Ly, tfinal; grt_boundary = grt_boundary)
     domain2D = Domain(IC2D, T, P)
 
-    sol = simulate(domain2D; save_everystep=false, progress=false, abstol=1e-6,reltol=1e-6)
+    sol = simulate(domain2D; save_everystep=false, abstol=1e-6,reltol=1e-6)
 
     @test norm(sol.u[end][:,:,1]) ≈ 12.783357041653609
 end
@@ -174,7 +174,7 @@ end
     IC3D = InitialConditions3D(Mg0, Fe0, Mn0, Lx, Ly, Lz, tfinal; grt_boundary = grt_boundary)
     domain3D = Domain(IC3D, T, P)
 
-    sol = simulate(domain3D; save_everystep=false, progress=false, abstol=1e-6,reltol=1e-6);
+    sol = simulate(domain3D; save_everystep=false, abstol=1e-6,reltol=1e-6);
 
     @test norm(sol.u[end][:,:,:,1]) ≈ 371.1477084396848
 end
