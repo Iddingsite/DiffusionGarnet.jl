@@ -5,10 +5,11 @@ using Reexport: @reexport
 @reexport using Parameters: @unpack
 @reexport using Unitful
 @reexport using DiffEqCallbacks: PresetTimeCallback
+@reexport using OrdinaryDiffEq: ROCK2, ROCK4
 
 using Logging: global_logger
 using TerminalLoggers: TerminalLogger
-using OrdinaryDiffEq: ODEProblem, solve, ROCK2
+using OrdinaryDiffEq: ODEProblem, solve
 using ParallelStencil
 using Preferences
 using HDF5: h5open, create_group, attributes, read_attribute

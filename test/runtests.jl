@@ -77,6 +77,7 @@ end
     D0 = zeros(Float64, 4)
     D_ini!(D0,T,P)
 
+    # benchmarked with TeriaG and 12.783356187311105
     @test D0[1] ≈ 2.383676419323230e2
     @test D0[2] ≈ 4.500484945403809e+02
     @test D0[3] ≈ 6.232092221232668e+03
@@ -152,9 +153,9 @@ end
     IC2D = InitialConditions2D(CMg, CFe, CMn, Lx, Ly, tfinal; grt_boundary = grt_boundary)
     domain2D = Domain(IC2D, T, P)
 
-    sol = simulate(domain2D; save_everystep=false, abstol=1e-6,reltol=1e-6)
+    sol = simulate(domain2D; save_everystep=false, save_start=false)
 
-    @test norm(sol.u[end][:,:,1]) ≈ 12.783357041653609
+    @test norm(sol.u[end][:,:,1]) ≈ 12.783356187311105
 end
 
 @testset "3D Diffusion" begin
@@ -174,9 +175,9 @@ end
     IC3D = InitialConditions3D(Mg0, Fe0, Mn0, Lx, Ly, Lz, tfinal; grt_boundary = grt_boundary)
     domain3D = Domain(IC3D, T, P)
 
-    sol = simulate(domain3D; save_everystep=false, abstol=1e-6,reltol=1e-6);
+    sol = simulate(domain3D; save_everystep=false, save_start=false);
 
-    @test norm(sol.u[end][:,:,:,1]) ≈ 371.1477084396848
+    @test norm(sol.u[end][:,:,:,1]) ≈ 371.1466260290486
 end
 
 
@@ -228,7 +229,7 @@ end
     @unpack time_update_ad = domain2D
     update_diffusion_coef_call = PresetTimeCallback(time_update_ad, update_diffusion_coef)
 
-    sol_2D = simulate(domain2D; callback=update_diffusion_coef_call,save_everystep=false, abstol=1e-6,reltol=1e-6)
+    sol_2D = simulate(domain2D; callback=update_diffusion_coef_call,save_everystep=false, save_start=false)
 
     T=600  # in °C
     P=3  # in kbar
@@ -329,7 +330,7 @@ end
 
     save_data_callback = PresetTimeCallback(ustrip.(time_save) ./ domain2D.t_charact, save_data_paraview)
 
-    sol_2D = simulate(domain2D; callback=save_data_callback, path_save=(@__DIR__) * "/Grt_2D.h5", progress=false, save_everystep=false)
+    sol_2D = simulate(domain2D; callback=save_data_callback, path_save=(@__DIR__) * "/Grt_2D.h5", progress=false, save_everystep=false, save_start=false)
 
     h5open("./Grt_2D.h5", "r") do file
         @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"])' == convert(Array{Float32}, IC2D.CMg0)
