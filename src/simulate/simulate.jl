@@ -12,7 +12,6 @@ The solution type variable is following the format of OrdinaryDiffEq.jl (see htt
 
 `solver` is an optional argument, which can be used to define the solver to use for the time discretisation. Default is the ROCK2 method. All other ODE solvers accepted as the ones from DifferentialEquations (see https://docs.sciml.ai/DiffEqDocs/stable/solvers/ode_solve/).
 
-
 All other accepted arguments such as `callback` or `progress` are the same as those of the `solve` function from DifferentialEquations (see https://docs.sciml.ai/DiffEqDocs/stable/basics/common_solver_opts/).
 """
 function simulate end
