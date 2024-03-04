@@ -26,16 +26,13 @@ domain1D = Domain(IC1D, T, P, time_update)
 
 update_diffusion_coef_call = PresetTimeCallback(time_update_ad, update_diffusion_coef)
 
-
 sol = simulate(domain1D; callback=update_diffusion_coef_call);
 
-
-@unpack tfinal_ad, t_charact = domain1D
-
-anim = @animate for i = LinRange(0, tfinal_ad, 100)
+# plotting
+anim = @animate for i = LinRange(0, sol.t[end], 100)
     l = @layout [a ; b]
 
-    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = "Total Time = $(round(((i)* t_charact);digits=2)) Ma", legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
+    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = "Total Time = $(round(i;digits=2)) Ma", legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
     p1 = plot!(distance, sol(i)[:,2], label="Fe",linecolor=1, linewidth=1)
 
 

@@ -81,9 +81,8 @@ We can now plot the solution to our problem.
 anim = @animate for i = LinRange(0, sol.t[end], 100)
     l = @layout [a ; b]
 
-    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = "Timestep = $(round(((i));digits=2)) Ma", legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
+    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = "Timestep = $(round(i;digits=2)) Ma", legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
     p1 = plot!(distance, sol(i)[:,2], label="Fe",linecolor=1, linewidth=1)
-
 
     p2 = plot(distance, Mg0, label="Mg initial", linestyle = :dash, linewidth=1, dpi=200,legend=:outerbottomright,linecolor=2,xlabel = "Distance (µm)")
     p2 = plot!(distance, Mn0, label="Mn initial", linestyle = :dash, linewidth=1, linecolor=3)
@@ -98,7 +97,7 @@ anim = @animate for i = LinRange(0, sol.t[end], 100)
 end every 1
 
 println("Now, generating the gif...")
-gif(anim, "Grt_1D_test.gif", fps = 7)
+gif(anim, "Grt_1D.gif", fps = 7)
 println("...Done!")
 ```
 
