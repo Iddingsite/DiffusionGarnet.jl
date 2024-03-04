@@ -74,7 +74,7 @@ which outputs the time spent on the solver, for example, on the second run:
 
 `simulate()` uses the [DifferentialEquations.jl](https://docs.sciml.ai/DiffEqDocs/stable/) package behind the hood to solve our problem efficiently. The returned variable `sol` is the common solution type from this package and more information can be found [here](https://docs.sciml.ai/DiffEqDocs/stable/basics/solution/). It basically holds all the information from our simulation.
 
-We can now plot the solution to our problem.
+We can now plot the solution to our problem. By default, DiffusionGarnet saves the time in Myr.
 
 ```julia
 
