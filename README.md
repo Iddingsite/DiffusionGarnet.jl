@@ -46,15 +46,11 @@ sol = simulate(domain1D)
 
 # you can now plot the solutions from the sol variable
 
-# extract characteristic time to convert back to dimensional time
-@unpack tfinal_ad, t_charact = domain1D
-
-anim = @animate for i = LinRange(0, tfinal_ad, 100)
+anim = @animate for i = LinRange(0, sol.t[end], 100)
     l = @layout [a ; b]
 
-    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = "Timestep = $(round(((i)* t_charact);digits=2)) Ma", legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
+    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = "Timestep = $(round(i;digits=2)) Ma", legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
     p1 = plot!(distance, sol(i)[:,2], label="Fe",linecolor=1, linewidth=1)
-
 
     p2 = plot(distance, Mg0, label="Mg initial", linestyle = :dash, linewidth=1, dpi=200,legend=:outerbottomright,linecolor=2,xlabel = "Distance (µm)")
     p2 = plot!(distance, Mn0, label="Mn initial", linestyle = :dash, linewidth=1, linecolor=3)
@@ -84,6 +80,12 @@ DiffusionGarnet may be installed directly from the REPL:
 ```julia-repl
 julia>]
   pkg> add DiffusionGarnet
+```
+
+And you can test the package with:
+
+```julia-repl
+julia>]
   pkg> test DiffusionGarnet
 ```
 
