@@ -88,7 +88,8 @@ using LinearAlgebra: norm
 
     @testset "1D diffusion" begin
 
-        path_1D = joinpath("Data", "1D", "Data_Grt_1D.txt")
+        root = @__DIR__
+        path_1D = joinpath(root, "Data", "1D", "Data_Grt_1D.txt")
 
         data = DelimitedFiles.readdlm(path_1D, '\t', '\n', header=true)[1]
 
@@ -116,7 +117,8 @@ using LinearAlgebra: norm
 
         using LinearAlgebra: norm
 
-        path_1D = joinpath("Data", "1D", "Data_Grt_1D.txt")
+        root = @__DIR__
+        path_1D = joinpath(root, "Data", "1D", "Data_Grt_1D.txt")
 
         data = DelimitedFiles.readdlm(path_1D, '\t', '\n', header=true)[1]
 
@@ -144,10 +146,11 @@ using LinearAlgebra: norm
 
         using LinearAlgebra: norm
 
-        path_2D_Mg = joinpath("Data", "2D", "Xprp_LR.txt")
-        path_2D_Fe = joinpath("Data", "2D", "Xalm_LR.txt")
-        path_2D_Mn = joinpath("Data", "2D", "Xsps_LR.txt")
-        path_2D_grt = joinpath("Data", "2D", "Contour_LR.txt")
+        root = @__DIR__
+        path_2D_Mg = joinpath(root, "Data", "2D", "Xprp_LR.txt")
+        path_2D_Fe = joinpath(root, "Data", "2D", "Xalm_LR.txt")
+        path_2D_Mn = joinpath(root, "Data", "2D", "Xsps_LR.txt")
+        path_2D_grt = joinpath(root, "Data", "2D", "Contour_LR.txt")
 
         CMg = DelimitedFiles.readdlm(path_2D_Mg, '\t', '\n', header=false)
         CFe = DelimitedFiles.readdlm(path_2D_Fe, '\t', '\n', header=false)
@@ -171,7 +174,8 @@ using LinearAlgebra: norm
     @testset "3D Diffusion" begin
 
         # use JLD2 to load data
-        path_3D = joinpath("Data", "3D", "3D_data.jld2")
+        root = @__DIR__
+        path_3D = joinpath(root, "Data", "3D", "3D_data.jld2")
 
         file = jldopen(path_3D, "r")
         @unpack Mg0, Fe0, Mn0, Ca0, grt_boundary = file
@@ -195,7 +199,8 @@ using LinearAlgebra: norm
 
     @testset "Callback update D0" begin
 
-        path_1D = joinpath("Data", "1D", "Data_Grt_1D.txt")
+        root = @__DIR__
+        path_1D = joinpath(root, "Data", "1D", "Data_Grt_1D.txt")
 
         data = DelimitedFiles.readdlm(path_1D, '\t', '\n', header=true)[1]
 
@@ -220,10 +225,10 @@ using LinearAlgebra: norm
         @test domainSph.D0[1] ≈ 151880.41527919917
         @test domain1D.D0[1] ≈ 151880.41527919917
 
-        path_2D_Mg = joinpath("Data", "2D", "Xprp_LR.txt")
-        path_2D_Fe = joinpath("Data", "2D", "Xalm_LR.txt")
-        path_2D_Mn = joinpath("Data", "2D", "Xsps_LR.txt")
-        path_2D_grt = joinpath("Data", "2D", "Contour_LR.txt")
+        path_2D_Mg = joinpath(root, "Data", "2D", "Xprp_LR.txt")
+        path_2D_Fe = joinpath(root, "Data", "2D", "Xalm_LR.txt")
+        path_2D_Mn = joinpath(root, "Data", "2D", "Xsps_LR.txt")
+        path_2D_grt = joinpath(root, "Data", "2D", "Contour_LR.txt")
 
         CMg = DelimitedFiles.readdlm(path_2D_Mg, '\t', '\n', header=false)
         CFe = DelimitedFiles.readdlm(path_2D_Fe, '\t', '\n', header=false)
@@ -267,7 +272,8 @@ using LinearAlgebra: norm
 
         using HDF5
 
-        path_1D = joinpath("Data", "1D", "Data_Grt_1D.txt")
+        root = @__DIR__
+        path_1D = joinpath(root, "Data", "1D", "Data_Grt_1D.txt")
 
         data_1D = DelimitedFiles.readdlm(path_1D, '\t', '\n', header=true)[1]
 
@@ -288,9 +294,9 @@ using LinearAlgebra: norm
         domainSph = Domain(ICSph, T, P)
         domain1D = Domain(IC1D, T, P)
 
-        path_2D_Mg = joinpath("Data", "2D", "Xprp_LR.txt")
-        path_2D_Fe = joinpath("Data", "2D", "Xalm_LR.txt")
-        path_2D_Mn = joinpath("Data", "2D", "Xsps_LR.txt")
+        path_2D_Mg = joinpath(root, "Data", "2D", "Xprp_LR.txt")
+        path_2D_Fe = joinpath(root, "Data", "2D", "Xalm_LR.txt")
+        path_2D_Mn = joinpath(root, "Data", "2D", "Xsps_LR.txt")
 
         Mg_2D = DelimitedFiles.readdlm(path_2D_Mg, '\t', '\n', header=false)
         Fe_2D = DelimitedFiles.readdlm(path_2D_Fe, '\t', '\n', header=false)
