@@ -61,7 +61,7 @@ include("Discretisation/Spherical/semi_discretisation_spherical.jl")
 include("simulate/simulate.jl")
 
 export InitialConditions1D, InitialConditions2D, InitialConditions3D, InitialConditionsSpherical
-export D_ini!, Domain
+export Domain
 export semi_discretisation_diffusion_1D, semi_discretisation_diffusion_spherical, semi_discretisation_diffusion_2D, semi_discretisation_diffusion_3D
 export simulate
 export update_diffusion_coef

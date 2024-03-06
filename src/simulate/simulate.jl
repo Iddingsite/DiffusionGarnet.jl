@@ -17,12 +17,12 @@ All other accepted arguments such as `callback` or `progress` are the same as th
 function simulate end
 
 """
-    simulate(domain::Domain1D; path_save=nothing, solver=ROCK2(), kwargs...)
+    simulate(domain::Domain1D; path_save=nothing, solver=ROCK2(), abstol=1e-8, reltol=1e-6, kwargs...)
 
 Solve the coupled major element diffusion equations in 1D. Save all timesteps in the output solution type variable by default.
 
 """
-function simulate(domain::Domain1D; path_save=nothing, solver=ROCK2(), kwargs...)
+function simulate(domain::Domain1D; path_save=nothing, solver=ROCK2(), abstol=1e-8, reltol=1e-6, kwargs...)
 
     p = (domain = domain, path_save = path_save)
 
@@ -32,7 +32,7 @@ function simulate(domain::Domain1D; path_save=nothing, solver=ROCK2(), kwargs...
 
     prob = ODEProblem(semi_discretisation_diffusion_1D, u0, t, p)
 
-    sol = @time solve(prob, solver; kwargs...)
+    sol = @time solve(prob, solver; abstol=abstol, reltol=reltol, kwargs...)
 
     sol.t .*= t_charact
 
@@ -40,11 +40,11 @@ function simulate(domain::Domain1D; path_save=nothing, solver=ROCK2(), kwargs...
 end
 
 """
-    simulate(domain::DomainSpherical; path_save=nothing, solver=ROCK2(), kwargs...)
+    simulate(domain::DomainSpherical; path_save=nothing, solver=ROCK2(), abstol=1e-8, reltol=1e-6, kwargs...)
 
 Solve the coupled major element diffusion equations in spherical coordinates. Save all timesteps in the output solution type variable by default.
 """
-function simulate(domain::DomainSpherical; path_save=nothing, solver=ROCK2(), kwargs...)
+function simulate(domain::DomainSpherical; path_save=nothing, solver=ROCK2(), abstol=1e-8, reltol=1e-6, kwargs...)
 
     p = (domain = domain, path_save = path_save)
 
@@ -54,7 +54,7 @@ function simulate(domain::DomainSpherical; path_save=nothing, solver=ROCK2(), kw
 
     prob = ODEProblem(semi_discretisation_diffusion_spherical, u0, t, p)
 
-    sol = @time solve(prob, solver; kwargs...)
+    sol = @time solve(prob, solver; abstol=abstol, reltol=reltol, kwargs...)
 
     sol.t .*= t_charact
 

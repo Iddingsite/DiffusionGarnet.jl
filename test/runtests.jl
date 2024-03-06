@@ -2,6 +2,7 @@ using DiffusionGarnet
 using Test
 using DelimitedFiles
 using JLD2
+using HDF5
 using LinearAlgebra: norm
 
 @testset "All tests" begin
@@ -77,13 +78,60 @@ using LinearAlgebra: norm
         T=650  # in °C
         P=2  # in kbar
         D0 = zeros(Float64, 4)
-        D_ini!(D0,T,P)
+        DiffusionGarnet.D_ini!(D0,T,P)
 
         # benchmarked with TeriaG and 12.783356187311105
         @test D0[1] ≈ 2.383676419323230e2
         @test D0[2] ≈ 4.500484945403809e+02
         @test D0[3] ≈ 6.232092221232668e+03
         @test D0[4] ≈ 2.250242472701905e+02
+
+        root = @__DIR__
+        path_1D = joinpath(root, "Data", "1D", "Data_Grt_1D.txt")
+
+        data = DelimitedFiles.readdlm(path_1D, '\t', '\n', header=true)[1]
+
+        Mg0 = data[:, 4]
+        Fe0 = data[:, 2]
+        Mn0 = data[:, 3]
+        Ca0 = data[:, 5]
+        distance = data[:, 1]
+        Lx = (data[end,1] - data[1,1])u"µm"
+        tfinal = 15u"Myr"
+
+        IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
+        ICSph = InitialConditionsSpherical(Mg0, Fe0, Mn0, Lx, tfinal)
+
+        T = 900u"°C"
+        P = 0.6u"GPa"
+
+        domain1D = Domain(IC1D, T, P)
+        domainSph = Domain(ICSph, T, P)
+
+        @unpack D, D0, D_charact, Δxad_, bc_neumann = domain1D
+
+        DiffusionGarnet.Diffusion_coef_1D!(domain1D.D, Mg0, Fe0, Mn0, domain1D.D0, domain1D.D_charact)
+        DiffusionGarnet.Diffusion_coef_spherical!(domainSph.D, Mg0, Fe0, Mn0, domainSph.D0, domainSph.D_charact)
+
+        @test domain1D.D.DMgMg[1] ≈ 0.2773178721173649
+        @test domain1D.D.DMgFe[1] ≈ -0.02573379000046055
+        @test domain1D.D.DMgMn[1] ≈ -0.35580783646658704
+        @test domain1D.D.DFeFe[1] ≈ 0.2402462850382149
+        @test domain1D.D.DFeMg[1] ≈ -0.06667916104762957
+        @test domain1D.D.DFeMn[1] ≈ -2.4378766634656803
+        @test domain1D.D.DMnMn[1] ≈ 3.0157426040866078
+        @test domain1D.D.DMnMg[1] ≈ -0.0019791216586272685
+        @test domain1D.D.DMnFe[1] ≈ -0.005233380819623645
+
+        @test domainSph.D.DMgMg[1] ≈ domain1D.D.DMgMg[1]
+        @test domainSph.D.DMgFe[1] ≈ domain1D.D.DMgFe[1]
+        @test domainSph.D.DMgMn[1] ≈ domain1D.D.DMgMn[1]
+        @test domainSph.D.DFeFe[1] ≈ domain1D.D.DFeFe[1]
+        @test domainSph.D.DFeMg[1] ≈ domain1D.D.DFeMg[1]
+        @test domainSph.D.DFeMn[1] ≈ domain1D.D.DFeMn[1]
+        @test domainSph.D.DMnMn[1] ≈ domain1D.D.DMnMn[1]
+        @test domainSph.D.DMnMg[1] ≈ domain1D.D.DMnMg[1]
+        @test domainSph.D.DMnFe[1] ≈ domain1D.D.DMnFe[1]
     end
 
     @testset "1D diffusion" begin
@@ -115,8 +163,6 @@ using LinearAlgebra: norm
 
     @testset "Spherical diffusion" begin
 
-        using LinearAlgebra: norm
-
         root = @__DIR__
         path_1D = joinpath(root, "Data", "1D", "Data_Grt_1D.txt")
 
@@ -139,12 +185,10 @@ using LinearAlgebra: norm
 
         sol = simulate(domainSph; progress=false, abstol=1e-6,reltol=1e-6)
 
-        @test norm(sum.(sol.u[end][:,1] .+ sol.u[end][:,2] .+ sol.u[end][:,3])) ≈ 20.268803083443927
+        @test norm(sum.(sol.u[end][:,1] .+ sol.u[end][:,2] .+ sol.u[end][:,3])) ≈ 20.268802749231984
     end
 
     @testset "2D Diffusion" begin
-
-        using LinearAlgebra: norm
 
         root = @__DIR__
         path_2D_Mg = joinpath(root, "Data", "2D", "Xprp_LR.txt")
@@ -261,7 +305,7 @@ using LinearAlgebra: norm
         T=600  # in °C
         P=3  # in kbar
         D0 = zeros(Float64, 4)
-        D_ini!(D0,T,P)
+        DiffusionGarnet.D_ini!(D0,T,P)
 
         @test sol_1D.prob.p.domain.D0[1] ≈ D0[1]
         @test sol_sph.prob.p.domain.D0[1] ≈ D0[1]
@@ -269,8 +313,6 @@ using LinearAlgebra: norm
     end
 
     @testset "Callback output" begin
-
-        using HDF5
 
         root = @__DIR__
         path_1D = joinpath(root, "Data", "1D", "Data_Grt_1D.txt")

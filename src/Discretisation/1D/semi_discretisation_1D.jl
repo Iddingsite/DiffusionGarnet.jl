@@ -24,9 +24,7 @@ function Diffusion_coef_1D!(D, CMg, CFe, CMn, D0, D_charact)
         DMnFe[I] = (      - D0[3] * CMn[I] * sum_D_ * (D0[2] - D0[end])) * D_charact_
         DMnMn[I] = (D0[3] - D0[3] * CMn[I] * sum_D_ * (D0[3] - D0[end])) * D_charact_
     end
-
 end
-
 
 function stencil_diffusion_1D!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δxad_, bc_neumann)
 
