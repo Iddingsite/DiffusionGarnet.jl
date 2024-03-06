@@ -6,28 +6,20 @@ import Base.@propagate_inbounds
     @propagate_inbounds @inline sum_D(CMg, CFe, CMn, D0, ix, iy, iz) = D0[1] * CMg[iy, ix, iz] + D0[2] * CFe[iy, ix, iz] + D0[3] * CMn[iy, ix, iz] +
         D0[4] * (1 - CMg[iy, ix, iz] - CFe[iy, ix, iz] - CMn[iy, ix, iz])
 
+    D_charact_ = 1 / D_charact
+
     if ix>1 && ix<size(DMgMg,2) && iy>1 && iy<size(DMgMg,1) && iz>1 && iz<size(DMgMg,3)
         if grt_position[iy,ix,iz] == 1.0
-            DMgMg[iy,ix,iz] = (D0[1] - D0[1] * CMg[iy,ix,iz] / sum_D(CMg,CFe,CMn,D0,ix,iy, iz) * (D0[1] - D0[end])) / D_charact
-            DMgFe[iy,ix,iz] = (      - D0[1] * CMg[iy,ix,iz] / sum_D(CMg,CFe,CMn,D0,ix,iy, iz) * (D0[2] - D0[end])) / D_charact
-            DMgMn[iy,ix,iz] = (      - D0[1] * CMg[iy,ix,iz] / sum_D(CMg,CFe,CMn,D0,ix,iy, iz) * (D0[3] - D0[end])) / D_charact
-            DFeMg[iy,ix,iz] = (      - D0[2] * CFe[iy,ix,iz] / sum_D(CMg,CFe,CMn,D0,ix,iy, iz) * (D0[1] - D0[end])) / D_charact
-            DFeFe[iy,ix,iz] = (D0[2] - D0[2] * CFe[iy,ix,iz] / sum_D(CMg,CFe,CMn,D0,ix,iy, iz) * (D0[2] - D0[end])) / D_charact
-            DFeMn[iy,ix,iz] = (      - D0[2] * CFe[iy,ix,iz] / sum_D(CMg,CFe,CMn,D0,ix,iy, iz) * (D0[3] - D0[end])) / D_charact
-            DMnMg[iy,ix,iz] = (      - D0[3] * CMn[iy,ix,iz] / sum_D(CMg,CFe,CMn,D0,ix,iy, iz) * (D0[1] - D0[end])) / D_charact
-            DMnFe[iy,ix,iz] = (      - D0[3] * CMn[iy,ix,iz] / sum_D(CMg,CFe,CMn,D0,ix,iy, iz) * (D0[2] - D0[end])) / D_charact
-            DMnMn[iy,ix,iz] = (D0[3] - D0[3] * CMn[iy,ix,iz] / sum_D(CMg,CFe,CMn,D0,ix,iy, iz) * (D0[3] - D0[end])) / D_charact
-        # no need, as they are already equal to zero
-        # else
-        #     DMgMg[iy,ix,iz] = 0.0
-        #     DMgFe[iy,ix,iz] = 0.0
-        #     DMgMn[iy,ix,iz] = 0.0
-        #     DFeMg[iy,ix,iz] = 0.0
-        #     DFeFe[iy,ix,iz] = 0.0
-        #     DFeMn[iy,ix,iz] = 0.0
-        #     DMnMg[iy,ix,iz] = 0.0
-        #     DMnFe[iy,ix,iz] = 0.0
-        #     DMnMn[iy,ix,iz] = 0.0
+            sum_D_ = 1 / sum_D(CMg,CFe,CMn,D0,ix,iy, iz)
+            DMgMg[iy,ix,iz] = (D0[1] - D0[1] * CMg[iy,ix,iz] * sum_D_ * (D0[1] - D0[end])) * D_charact_
+            DMgFe[iy,ix,iz] = (      - D0[1] * CMg[iy,ix,iz] * sum_D_ * (D0[2] - D0[end])) * D_charact_
+            DMgMn[iy,ix,iz] = (      - D0[1] * CMg[iy,ix,iz] * sum_D_ * (D0[3] - D0[end])) * D_charact_
+            DFeMg[iy,ix,iz] = (      - D0[2] * CFe[iy,ix,iz] * sum_D_ * (D0[1] - D0[end])) * D_charact_
+            DFeFe[iy,ix,iz] = (D0[2] - D0[2] * CFe[iy,ix,iz] * sum_D_ * (D0[2] - D0[end])) * D_charact_
+            DFeMn[iy,ix,iz] = (      - D0[2] * CFe[iy,ix,iz] * sum_D_ * (D0[3] - D0[end])) * D_charact_
+            DMnMg[iy,ix,iz] = (      - D0[3] * CMn[iy,ix,iz] * sum_D_ * (D0[1] - D0[end])) * D_charact_
+            DMnFe[iy,ix,iz] = (      - D0[3] * CMn[iy,ix,iz] * sum_D_ * (D0[2] - D0[end])) * D_charact_
+            DMnMn[iy,ix,iz] = (D0[3] - D0[3] * CMn[iy,ix,iz] * sum_D_ * (D0[3] - D0[end])) * D_charact_
         end
     end
 
