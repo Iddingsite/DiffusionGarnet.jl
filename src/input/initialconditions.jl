@@ -201,7 +201,7 @@ function InitialConditions3D(CMg0::AbstractArray{<:Real, 3}, CFe0::AbstractArray
 end
 
 
-function D_ini!(D0,T,P)
+function D_ini!(D0, T, P, fugacity_O2=1e-25)  # by defaut 1e-25 Pa is graphite buffer
     R = 8.314462618  # constant of gas in J mol−1 K−1
 
     # Magnesium
@@ -224,16 +224,30 @@ function D_ini!(D0,T,P)
     DMn = D0Mn * exp(- (Eₐ_Mn + (100 * (P-0.001) * ΔV⁺Mn)) / (R * (T+273.15)))  # in µm2 / s
     DCa = 0.5 * DFe
 
-    D0[1] = DMg .* (365.25 * 24 * 3600 * 1e6)  # in Myr
-    D0[2] = DFe .* (365.25 * 24 * 3600 * 1e6)  # in Myr
-    D0[3] = DMn .* (365.25 * 24 * 3600 * 1e6)  # in Myr
-    D0[4] = DCa .* (365.25 * 24 * 3600 * 1e6)  # in Myr
+    fugacity_ratio = fugacity_O2/1e-25  # current fO2 over fO2 buffered with graphite
+
+    DMg = DMg .* (365.25 * 24 * 3600 * 1e6)  # in Myr
+    DFe = DFe .* (365.25 * 24 * 3600 * 1e6)  # in Myr
+    DMn = DMn .* (365.25 * 24 * 3600 * 1e6)  # in Myr
+    DCa = DCa .* (365.25 * 24 * 3600 * 1e6)  # in Myr
+
+    # after Chakraborty and Ganguly, 1991 (page 142, equation 2)
+    DMg = exp(log(DMg) + 1/6 * log(fugacity_ratio))
+    DFe = exp(log(DFe) + 1/6 * log(fugacity_ratio))
+    DMn = exp(log(DMn) + 1/6 * log(fugacity_ratio))
+    DCa = exp(log(DCa) + 1/6 * log(fugacity_ratio))
+
+    D0[1] = DMg  # in Myr
+    D0[2] = DFe  # in Myr
+    D0[3] = DMn  # in Myr
+    D0[4] = DCa  # in Myr
 end
 
 @with_kw struct Domain1D{T1, T2, T3, T4} <: Domain
     IC::T4
     T::T1
     P::T1
+    fugacity_O2::T1
     time_update::T1
     D0::Vector{T2}
     D::NamedTuple{(:DMgMg, :DMgFe, :DMgMn, :DFeMg, :DFeFe, :DFeMn, :DMnMg, :DMnFe, :DMnMn),
@@ -246,7 +260,7 @@ end
     tfinal_ad::T2
     time_update_ad::T1
     bc_neumann::T3
-    function Domain1D(IC::InitialConditions1D, T::T1, P::T1, time_update::T1, bc_neumann::T3) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}, T3 <: Tuple}
+    function Domain1D(IC::InitialConditions1D, T::T1, P::T1, time_update::T1, fugacity_O2::T1, bc_neumann::T3) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}, T3 <: Tuple}
 
         #check that T, P and time_update have the same size
         if size(T, 1) ≠ size(P, 1) || size(T, 1) ≠ size(time_update, 1)
@@ -258,7 +272,7 @@ end
         T2 = eltype(CMg0)
 
         D0 = zeros(T2, 4)
-        D_ini!(D0, T[1], P[1])  # compute initial diffusion coefficients
+        D_ini!(D0, T[1], P[1], fugacity_O2[1])  # compute initial diffusion coefficients
 
         D = (DMgMg = zeros(T2, nx), DMgFe = zeros(T2, nx), DMgMn = zeros(T2, nx), DFeMg = zeros(T2, nx), DFeFe = zeros(T2, nx), DFeMn = zeros(T2, nx), DMnMg = zeros(T2, nx), DMnFe = zeros(T2, nx), DMnMn = zeros(T2, nx))  # tensor of interdiffusion coefficients
 
@@ -277,7 +291,7 @@ end
 
         T4 = typeof(IC)
 
-        new{T1, T2, T3, T4}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, u0, tfinal_ad, time_update_ad, bc_neumann)
+        new{T1, T2, T3, T4}(IC, T, P, fugacity_O2, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, u0, tfinal_ad, time_update_ad, bc_neumann)
     end
 end
 
@@ -285,6 +299,7 @@ end
     IC::T3
     T::T1
     P::T1
+    fugacity_O2::T1
     time_update::T1
     D0::Vector{T2}
     D::NamedTuple{(:DMgMg, :DMgFe, :DMgMn, :DFeMg, :DFeFe, :DFeMn, :DMnMg, :DMnFe, :DMnMn),
@@ -298,7 +313,7 @@ end
     u0::Matrix{T2}
     tfinal_ad::T2
     time_update_ad::T1
-    function DomainSpherical(IC::InitialConditionsSpherical, T::T1, P::T1, time_update::T1) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}}
+    function DomainSpherical(IC::InitialConditionsSpherical, T::T1, P::T1, time_update::T1, fugacity_O2::T1) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}}
 
         #check that T, P and time_update have the same size
         if size(T, 1) ≠ size(P, 1) || size(T, 1) ≠ size(time_update, 1)
@@ -310,7 +325,7 @@ end
         T2 = eltype(CMg0)
 
         D0 = zeros(T2, 4)
-        D_ini!(D0, T[1], P[1])  # compute initial diffusion coefficients
+        D_ini!(D0, T[1], P[1], fugacity_O2[1])  # compute initial diffusion coefficients
 
         D = (DMgMg = zeros(T2, nr), DMgFe = zeros(T2, nr), DMgMn = zeros(T2, nr), DFeMg = zeros(T2, nr), DFeFe = zeros(T2, nr), DFeMn = zeros(T2, nr), DMnMg = zeros(T2, nr), DMnFe = zeros(T2, nr), DMnMn = zeros(T2, nr))  # tensor of interdiffusion coefficients
 
@@ -331,7 +346,7 @@ end
 
         T3 = typeof(IC)
 
-        new{T1, T2, T3}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δrad, Δrad_, r_ad, u0, tfinal_ad, time_update_ad)
+        new{T1, T2, T3}(IC, T, P, fugacity_O2, time_update, D0, D, L_charact, D_charact, t_charact, Δrad, Δrad_, r_ad, u0, tfinal_ad, time_update_ad)
     end
 end
 
@@ -339,6 +354,7 @@ end
     IC::T6
     T::T1
     P::T1
+    fugacity_O2::T1
     time_update::T1
     D0::T3
     D::T4  # tensor of interdiffusion coefficients
@@ -350,13 +366,13 @@ end
     u0::T5
     tfinal_ad::T2
     time_update_ad::T1
-    function Domain2D(IC::InitialConditions2D, T::T1, P::T1, time_update::T1) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}}
+    function Domain2D(IC::InitialConditions2D, T::T1, P::T1, time_update::T1, fugacity_O2::T1) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}}
         @unpack nx, ny, Δx, Δy, tfinal, Lx, CMg0, CFe0, CMn0 = IC
         similar(CMg0, (nx,ny))
 
 
         D0 = similar(CMg0, 4)
-        D_ini!(D0, T[1], P[1])  # compute initial diffusion coefficients
+        D_ini!(D0, T[1], P[1], fugacity_O2[1])  # compute initial diffusion coefficients
 
         D = (DMgMg = similar(CMg0, (nx,ny)), DMgFe = similar(CMg0, (nx,ny)), DMgMn = similar(CMg0, (nx,ny)), DFeMg = similar(CMg0, (nx,ny)), DFeFe = similar(CMg0, (nx,ny)), DFeMn = similar(CMg0, (nx,ny)), DMnMg = similar(CMg0, (nx,ny)), DMnFe = similar(CMg0, (nx,ny)), DMnMn = similar(CMg0, (nx,ny)))  # tensor of interdiffusion coefficients
 
@@ -383,7 +399,7 @@ end
         T5 = typeof(u0)
         T6 = typeof(IC)
 
-        new{T1, T2, T3, T4, T5, T6}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, Δyad_, u0, tfinal_ad, time_update_ad)
+        new{T1, T2, T3, T4, T5, T6}(IC, T, P, fugacity_O2, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, Δyad_, u0, tfinal_ad, time_update_ad)
     end
 end
 
@@ -391,6 +407,7 @@ end
     IC::T6
     T::T1
     P::T1
+    fugacity_O2::T1
     time_update::T1
     D0::T3
     D::T4
@@ -403,11 +420,11 @@ end
     u0::T5
     tfinal_ad::T2
     time_update_ad::T1
-    function Domain3D(IC::InitialConditions3D, T::T1, P::T1, time_update::T1) where {T1 <: Union{Float64, Array{Float64, 1}}}
+    function Domain3D(IC::InitialConditions3D, T::T1, P::T1, time_update::T1, fugacity_O2::T1) where {T1 <: Union{Float64, Array{Float64, 1}}}
         @unpack nx, ny, nz, Δx, Δy, Δz, tfinal, Lx, CMg0, CFe0, CMn0 = IC
 
         D0 = similar(CMg0, 4)
-        D_ini!(D0, T[1], P[1])  # compute initial diffusion coefficients
+        D_ini!(D0, T[1], P[1], fugacity_O2[1])  # compute initial diffusion coefficients
 
         D = (DMgMg = similar(CMg0, (nx, ny, nz)), DMgFe = similar(CMg0, (nx, ny, nz)), DMgMn = similar(CMg0, (nx, ny, nz)), DFeMg = similar(CMg0, (nx, ny, nz)), DFeFe = similar(CMg0, (nx, ny, nz)), DFeMn = similar(CMg0, (nx, ny, nz)), DMnMg = similar(CMg0, (nx, ny, nz)), DMnFe = similar(CMg0, (nx, ny, nz)), DMnMn = similar(CMg0, (nx, ny, nz)))  # tensor of interdiffusion coefficients
 
@@ -436,7 +453,7 @@ end
         T5 = typeof(u0)
         T6 = typeof(IC)
 
-        new{T1, T2, T3, T4, T5, T6}(IC, T, P, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, Δyad_, Δzad_, u0, tfinal_ad, time_update_ad)
+        new{T1, T2, T3, T4, T5, T6}(IC, T, P, fugacity_O2, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, Δyad_, Δzad_, u0, tfinal_ad, time_update_ad)
     end
 end
 
@@ -453,8 +470,8 @@ function Domain end
 
 When applied to 1D initial conditions, define corresponding 1D domain. `bc_neumann` can be used to define Neumann boundary conditions on the left or right side of the domain if set to true.
 """
-function Domain(IC::InitialConditions1D, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr"; bc_neumann::Tuple=(false, false))
-    Domain1D(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), bc_neumann)
+function Domain(IC::InitialConditions1D, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr", fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa"; bc_neumann::Tuple=(false, false))
+    Domain1D(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)), bc_neumann)
 end
 
 """
@@ -462,8 +479,8 @@ end
 
 When applied to spherical initial conditions, define corresponding spherical domain. Assume that the center of the grain is on the left side.
 """
-function Domain(IC::InitialConditionsSpherical, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr")
-    DomainSpherical(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)))
+function Domain(IC::InitialConditionsSpherical, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr", fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa")
+    DomainSpherical(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)))
 end
 
 """
@@ -471,8 +488,8 @@ end
 
 When applied to 2D initial conditions, define corresponding 2D domain.
 """
-function Domain(IC::InitialConditions2D, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr")
-    Domain2D(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)))
+function Domain(IC::InitialConditions2D, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr", fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa")
+    Domain2D(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)))
 end
 
 """
@@ -480,6 +497,6 @@ end
 
 When applied to 3D initial conditions, define corresponding 3D domain.
 """
-function Domain(IC::InitialConditions3D, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr")
-    Domain3D(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)))
+function Domain(IC::InitialConditions3D, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr", fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa")
+    Domain3D(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)))
 end
