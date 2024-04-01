@@ -122,7 +122,7 @@ end
 end
 
 
-function semi_discretisation_diffusion_2D(du,u,p,t)
+function semi_discretisation_diffusion_cartesian(du::T,u::T,p,t) where T <: AbstractArray{<:Real, 3}
 
     @unpack D, D0, D_charact, Δxad_, Δyad_ = p.domain
     @unpack grt_position, grt_boundary     = p.domain.IC

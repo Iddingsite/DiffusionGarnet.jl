@@ -1,4 +1,6 @@
-using DiffusionGarnet
+@time using DiffusionGarnet
+# 47.165121 seconds (20.21 M allocations: 1.316 GiB, 1.17% gc time, 16.92% compilation time: 14% of which was recompilation)
+# 11.193057 seconds (11.13 M allocations: 689.943 MiB, 4.09% gc time, 15.93% compilation time: 66% of which was recompilation)
 using DelimitedFiles
 using Plots
 

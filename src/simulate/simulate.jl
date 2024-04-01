@@ -30,7 +30,7 @@ function simulate(domain::Domain1D; path_save=nothing, solver=ROCK2(), abstol=1e
 
     t = (0, tfinal_ad)
 
-    prob = ODEProblem(semi_discretisation_diffusion_1D, u0, t, p)
+    prob = ODEProblem(semi_discretisation_diffusion_cartesian, u0, t, p)
 
     sol = @time solve(prob, solver; abstol=abstol, reltol=reltol, kwargs...)
 
@@ -74,7 +74,7 @@ function simulate(domain::Domain2D; path_save=nothing, solver=ROCK2(), kwargs...
 
     t = (0.0, tfinal_ad)
 
-    prob = ODEProblem(semi_discretisation_diffusion_2D, u0, t, p)
+    prob = ODEProblem(semi_discretisation_diffusion_cartesian, u0, t, p)
 
     sol = @time solve(prob, solver; kwargs...)
 
@@ -97,7 +97,7 @@ function simulate(domain::Domain3D; path_save=nothing, solver=ROCK2(), kwargs...
 
     t = (0.0, tfinal_ad)
 
-    prob = ODEProblem(semi_discretisation_diffusion_3D, u0, t, p)
+    prob = ODEProblem(semi_discretisation_diffusion_cartesian, u0, t, p)
 
     sol = @time solve(prob, solver; kwargs...)
 

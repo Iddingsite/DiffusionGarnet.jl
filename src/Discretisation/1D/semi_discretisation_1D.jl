@@ -94,7 +94,7 @@ function stencil_diffusion_1D!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δxad_, bc
     end
 end
 
-function semi_discretisation_diffusion_1D(du,u,p,t)
+function semi_discretisation_diffusion_cartesian(du::T,u::T,p,t) where T <: AbstractArray{<:Real, 2}
 
     @unpack D, D0, D_charact, Δxad_, bc_neumann = p.domain
 
