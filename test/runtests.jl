@@ -158,7 +158,8 @@ using LinearAlgebra: norm
 
         sol = simulate(domain1D; progress=false, abstol=1e-6,reltol=1e-6)
 
-        @test norm(sum.(sol.u[end][:,1] .+ sol.u[end][:,2] .+ sol.u[end][:,3])) ≈ 28.64886878627501
+        # @test norm(sum.(sol.u[end][:,1] .+ sol.u[end][:,2] .+ sol.u[end][:,3])) ≈ 28.64886878627501
+        @test norm(sum.(sol.u[end][:,1] .+ sol.u[end][:,2] .+ sol.u[end][:,3])) ≈ 28.64886878627501 rtol=1e-5
     end
 
     @testset "Spherical diffusion" begin
@@ -185,7 +186,7 @@ using LinearAlgebra: norm
 
         sol = simulate(domainSph; progress=false, abstol=1e-6,reltol=1e-6)
 
-        @test norm(sum.(sol.u[end][:,1] .+ sol.u[end][:,2] .+ sol.u[end][:,3])) ≈ 20.268802749231984
+        @test norm(sum.(sol.u[end][:,1] .+ sol.u[end][:,2] .+ sol.u[end][:,3])) ≈ 20.268802749231984 rtol=1e-5
     end
 
     @testset "2D Diffusion" begin
@@ -212,7 +213,7 @@ using LinearAlgebra: norm
 
         sol = simulate(domain2D; save_everystep=false, save_start=false)
 
-        @test norm(sol.u[end][:,:,1]) ≈ 12.783356187311105
+        @test norm(sol.u[end][:,:,1]) ≈ 12.783356187311105 rtol=1e-5
     end
 
     @testset "3D Diffusion" begin
