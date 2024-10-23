@@ -2,7 +2,7 @@
 
 ### Theory
 
-Garnet is a mineral commonly used in metamorphic petrology to better understand geological processes, as it occurs in a variety of rock types. This mineral often exhibits a wide range of compositional zoning, which can be interpreted as recording ranges of pressure and temperature (PT) conditions. Modelling diffusion processes can help to better understand this zoning and better constrain the pressure-temperature-time (PTt) conditions of the metamorphic event of interest.
+Garnet is a mineral commonly used in metamorphic petrology to better understand geological processes, as it occurs in a variety of rock types. This mineral often exhibits a wide range of compositional zoning, which can be interpreted as recording ranges of pressure and temperature (*PT*) conditions. Modelling diffusion processes can help to better understand this zoning and better constrain the pressure-temperature-time (*PTt*) conditions of the metamorphic event of interest.
 
 Major element diffusion in garnet is described by a coupled multicomponent system between four poles: Mg, Fe, Mn and Ca. This can be expressed by a system of parabolic partial differential equations (PDEs) following Fick's first law of diffusion:
 
@@ -52,7 +52,7 @@ In DiffusionGarnet.jl, ``D_{0,i}``, ``E_{a,i}``, and ``\Delta V^+_i`` are those 
 
 ### Numerical approach
 
-By defining the PT conditions of the metamorphic event of interest, (3) can be solved for each component, and the diffusion coefficient tensor can be calculated using (2) from the initial major composition data. In DiffusionGarnet.jl, (1) is then discretised in space using finite differences, and the resulting system of ordinary differential equations is solved with ROCK2, a stabilised explicit method (Abdulle & Medovikov (2001) [[4]](@ref refs)) using the [DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl) ecosystem.
+By defining the *PT* conditions of the metamorphic event of interest, (3) can be solved for each component, and the diffusion coefficient tensor can be calculated using (2) from the initial major composition data. In DiffusionGarnet.jl, (1) is then discretised in space using finite differences, and the resulting system of ordinary differential equations is solved with ROCK2, a stabilised explicit method (Abdulle & Medovikov, 2001 [[4]](@ref refs)) using the [DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl) ecosystem.
 
 ## [References](@id refs)
 
