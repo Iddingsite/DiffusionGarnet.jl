@@ -101,11 +101,12 @@ We use here the arguments `progress=true` and `progress_steps=1` to display a pr
 We can now plot the results:
 
 ```julia
+@unpack t_charact = domain2D
 
 println("Plotting...")
 anim = @animate for i = tqdm(LinRange(0, sol.t[end], 20))
 
-    time = round(i;digits=2)
+    time = round(i*t_charact;digits=2)
 
     l = @layout [a b ; c d ]
     Ca = 1 .- sol(i)[:,:,1] .- sol(i)[:,:,2] .- sol(i)[:,:,3]

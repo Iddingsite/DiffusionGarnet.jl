@@ -74,14 +74,16 @@ which outputs the time spent on the solver, for example, on the second run:
 
 `simulate()` uses the [DifferentialEquations.jl](https://docs.sciml.ai/DiffEqDocs/stable/) package behind the hood to solve our problem efficiently. The returned variable `sol` is the common solution type from this package and more information can be found [here](https://docs.sciml.ai/DiffEqDocs/stable/basics/solution/). It basically holds all the information from our simulation.
 
-We can now plot the solution to our problem. By default, DiffusionGarnet saves the time in Myr.
+We can now plot the solution to our problem.
 
 ```julia
+# extract characteristic time to convert back to dimensional time
+@unpack t_charact = domain1D
 
 anim = @animate for i = LinRange(0, sol.t[end], 100)
     l = @layout [a ; b]
 
-    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = "Timestep = $(round(i;digits=2)) Ma", legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
+    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = "Timestep = $(round(i*t_charact;digits=2)) Ma", legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
     p1 = plot!(distance, sol(i)[:,2], label="Fe",linecolor=1, linewidth=1)
 
     p2 = plot(distance, Mg0, label="Mg initial", linestyle = :dash, linewidth=1, dpi=200,legend=:outerbottomright,linecolor=2,xlabel = "Distance (µm)")

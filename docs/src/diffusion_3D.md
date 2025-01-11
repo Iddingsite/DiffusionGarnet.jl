@@ -74,6 +74,3 @@ Two files should have been created in the same folder as your current session: `
 !!! warning
     For any visualisation software, make sure you open the XDMF file and not the HDF5 file. For [Paraview](https://www.paraview.org/), select the `XDMF Reader` as the reader when you open your data. Only Paraview has been tested with this package, but other software should work as well.
 
-
-
-

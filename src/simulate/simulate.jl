@@ -6,7 +6,7 @@ Solve the coupled major element diffusion equations for a given domain using fin
 
 The time discretisation is based on the ROCK2 method, a stabilized explicit method (Adbdulle and Medovikov, 2001 ; https://doi.org/10.1007/s002110100292) using OrdinaryDiffEq.jl.
 
-The solution type variable is following the format of OrdinaryDiffEq.jl (see https://docs.sciml.ai/DiffEqDocs/stable/basics/solution/), and can be used to plot the solution, and to extract the solution at a given time. The time of the solution is in Myr.
+The solution type variable is following the format of OrdinaryDiffEq.jl (see https://docs.sciml.ai/DiffEqDocs/stable/basics/solution/), and can be used to plot the solution, and to extract the solution at a given time. The time of the solution is non-dimensional but can be converted back using the characteristic time (`t_charact` contained in the `Domain` structure).
 
 `path_save` is an optional argument, which can be used to define the path of the HDF5 output file. Default is to nothing.
 
@@ -34,7 +34,8 @@ function simulate(domain::Domain1D; path_save=nothing, solver=ROCK2(), abstol=1e
 
     sol = @time solve(prob, solver; abstol=abstol, reltol=reltol, kwargs...)
 
-    sol.t .*= t_charact
+    # sol.t .*= t_charact
+    # sol.interp.ts .*= t_charact
 
     return sol
 end
@@ -56,7 +57,8 @@ function simulate(domain::DomainSpherical; path_save=nothing, solver=ROCK2(), ab
 
     sol = @time solve(prob, solver; abstol=abstol, reltol=reltol, kwargs...)
 
-    sol.t .*= t_charact
+    # sol.t .*= t_charact
+    # sol.interp.ts .*= t_charact
 
     return sol
 end
@@ -78,7 +80,8 @@ function simulate(domain::Domain2D; path_save=nothing, solver=ROCK2(), kwargs...
 
     sol = @time solve(prob, solver; kwargs...)
 
-    sol.t .*= t_charact
+    # sol.t .*= t_charact
+    # sol.interp.ts .*= t_charact
 
     return sol
 end
@@ -101,7 +104,8 @@ function simulate(domain::Domain3D; path_save=nothing, solver=ROCK2(), kwargs...
 
     sol = @time solve(prob, solver; kwargs...)
 
-    sol.t .*= t_charact
+    # sol.t .*= t_charact
+    # sol.interp.ts .*= t_charact
 
     return sol
 end

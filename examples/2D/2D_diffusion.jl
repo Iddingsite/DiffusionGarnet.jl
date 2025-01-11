@@ -23,12 +23,14 @@ domain2D = Domain(IC2D, T, P)
 
 sol = simulate(domain2D; save_everystep=true, progress=true, progress_steps=1)
 
+@unpack t_charact = domain2D
+
 distance = LinRange(0, ustrip(u"µm", Lx), size(Mg0,1))
 
 println("Plotting...")
 anim = @animate for i = tqdm(LinRange(0,  sol.t[end], 20))
 
-    time = round(i;digits=2)
+    time = round(i*t_charact;digits=2)
 
     l = @layout [a b ; c d ]
 

@@ -23,10 +23,13 @@ DomainSph = Domain(ICSph, T, P)
 
 sol_sph = simulate(DomainSph)
 
+@unpack t_charact = DomainSph
+
+
 anim = @animate for i = LinRange(0, sol_sph.t[end], 100)
     l = @layout [a ; b]
 
-    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = "Total Time = $(round(i;digits=2)) Ma", legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
+    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = "Total Time = $(round(i*t_charact;digits=2)) Ma", legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
     p1 = plot!(distance, sol_sph(i)[:,2], label="Fe Sph",linecolor=1, linewidth=1)
 
     p2 = plot(distance, Mg0, label="Mg initial", linestyle = :dash, linewidth=1, dpi=200,legend=:outerbottomright,linecolor=2,xlabel = "Distance (µm)")
