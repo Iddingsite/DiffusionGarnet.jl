@@ -62,7 +62,6 @@ include("simulate/simulate.jl")
 
 export InitialConditions1D, InitialConditions2D, InitialConditions3D, InitialConditionsSpherical
 export Domain
-export semi_discretisation_diffusion_1D, semi_discretisation_diffusion_spherical, semi_discretisation_diffusion_2D, semi_discretisation_diffusion_3D
 export simulate
 export update_diffusion_coef
 export save_data, save_data_paraview
