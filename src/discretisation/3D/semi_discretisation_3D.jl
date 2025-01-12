@@ -27,7 +27,7 @@ import Base.@propagate_inbounds
 end
 
 
-@parallel_indices (iy, ix, iz) function stencil_diffusion_3D!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn, position_Grt, Grt_boundaries, Δxad_, Δyad_, Δzad_)
+@parallel_indices (iy, ix, iz) function stencil_diffusion_3D_major!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn, position_Grt, Grt_boundaries, Δxad_, Δyad_, Δzad_)
 
     @propagate_inbounds @inline av_D_x(D, ix, iy, iz) = 0.5 * (D[iy,ix,iz] + D[iy,ix+1,iz])
     @propagate_inbounds @inline av_D_y(D, ix, iy, iz) = 0.5 * (D[iy,ix,iz] + D[iy+1,ix,iz])
@@ -174,7 +174,7 @@ function semi_discretisation_diffusion_cartesian(du::T,u::T,p,t) where T <: Abst
 
 
     # semi-discretization
-    @parallel stencil_diffusion_3D!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn,
+    @parallel stencil_diffusion_3D_major!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn,
                                  DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn,
                                  grt_position, grt_boundary, Δxad_, Δyad_, Δzad_)
 end

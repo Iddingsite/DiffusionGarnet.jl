@@ -26,7 +26,7 @@ function Diffusion_coef_1D_major!(D, CMg, CFe, CMn, D0, D_charact)
     end
 end
 
-function stencil_diffusion_1D!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δxad_, bc_neumann)
+function stencil_diffusion_1D_major!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δxad_, bc_neumann)
 
     DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn = D
 
@@ -111,6 +111,6 @@ function semi_discretisation_diffusion_cartesian(du::T,u::T,p,t) where T <: Abst
     Diffusion_coef_1D_major!(D, CMg, CFe ,CMn, D0, D_charact)
 
     # semi-discretization
-    stencil_diffusion_1D!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δxad_, bc_neumann)
+    stencil_diffusion_1D_major!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δxad_, bc_neumann)
 end
 
