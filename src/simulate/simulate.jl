@@ -4,7 +4,7 @@
 
 Solve the coupled major element diffusion equations for a given domain using finite differences for the discretisation in space and return a solution type variable.
 
-The time discretisation is based on the ROCK2 method, a stabilized explicit method (Adbdulle and Medovikov, 2001 ; https://doi.org/10.1007/s002110100292) using OrdinaryDiffEq.jl.
+The default time discretisation is based on the ROCK2 method, a stabilized explicit method (Adbdulle and Medovikov, 2001 ; https://doi.org/10.1007/s002110100292) using OrdinaryDiffEq.jl.
 
 The solution type variable is following the format of OrdinaryDiffEq.jl (see https://docs.sciml.ai/DiffEqDocs/stable/basics/solution/), and can be used to plot the solution, and to extract the solution at a given time. The time of the solution is non-dimensional but can be converted back using the characteristic time (`t_charact` contained in the `Domain` structure).
 
@@ -26,16 +26,13 @@ function simulate(domain::Domain1D; path_save=nothing, solver=ROCK2(), abstol=1e
 
     p = (domain = domain, path_save = path_save)
 
-    @unpack tfinal_ad, u0, t_charact = p.domain
+    @unpack tfinal_ad, u0 = p.domain
 
     t = (0, tfinal_ad)
 
-    prob = ODEProblem(semi_discretisation_diffusion_1D, u0, t, p)
+    prob = ODEProblem(semi_discretisation_diffusion_cartesian, u0, t, p)
 
     sol = @time solve(prob, solver; abstol=abstol, reltol=reltol, kwargs...)
-
-    # sol.t .*= t_charact
-    # sol.interp.ts .*= t_charact
 
     return sol
 end
@@ -49,16 +46,13 @@ function simulate(domain::DomainSpherical; path_save=nothing, solver=ROCK2(), ab
 
     p = (domain = domain, path_save = path_save)
 
-    @unpack tfinal_ad, u0, t_charact = p.domain
+    @unpack tfinal_ad, u0 = p.domain
 
     t = (0, tfinal_ad)
 
     prob = ODEProblem(semi_discretisation_diffusion_spherical, u0, t, p)
 
     sol = @time solve(prob, solver; abstol=abstol, reltol=reltol, kwargs...)
-
-    # sol.t .*= t_charact
-    # sol.interp.ts .*= t_charact
 
     return sol
 end
@@ -72,16 +66,13 @@ function simulate(domain::Domain2D; path_save=nothing, solver=ROCK2(), kwargs...
 
     p = (domain = domain, path_save = path_save)
 
-    @unpack tfinal_ad, u0, t_charact = p.domain
+    @unpack tfinal_ad, u0 = p.domain
 
     t = (0.0, tfinal_ad)
 
-    prob = ODEProblem(semi_discretisation_diffusion_2D, u0, t, p)
+    prob = ODEProblem(semi_discretisation_diffusion_cartesian, u0, t, p)
 
     sol = @time solve(prob, solver; kwargs...)
-
-    # sol.t .*= t_charact
-    # sol.interp.ts .*= t_charact
 
     return sol
 end
@@ -96,16 +87,13 @@ function simulate(domain::Domain3D; path_save=nothing, solver=ROCK2(), kwargs...
 
     p = (domain = domain, path_save = path_save)
 
-    @unpack tfinal_ad, u0, t_charact = p.domain
+    @unpack tfinal_ad, u0 = p.domain
 
     t = (0.0, tfinal_ad)
 
-    prob = ODEProblem(semi_discretisation_diffusion_3D, u0, t, p)
+    prob = ODEProblem(semi_discretisation_diffusion_cartesian, u0, t, p)
 
     sol = @time solve(prob, solver; kwargs...)
-
-    # sol.t .*= t_charact
-    # sol.interp.ts .*= t_charact
 
     return sol
 end

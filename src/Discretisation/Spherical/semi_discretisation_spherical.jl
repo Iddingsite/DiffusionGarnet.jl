@@ -1,6 +1,6 @@
 import Base.@propagate_inbounds
 
-function Diffusion_coef_spherical!(D, CMg, CFe, CMn, D0, D_charact)
+function Diffusion_coef_spherical_major!(D, CMg, CFe, CMn, D0, D_charact)
 
     DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn = D
 
@@ -28,7 +28,7 @@ end
 
 
 
-function stencil_diffusion_spherical!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δrad, Δrad_, r_ad)
+function stencil_diffusion_spherical_major!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δrad, Δrad_, r_ad)
 
     DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn = D
 
@@ -77,9 +77,9 @@ function semi_discretisation_diffusion_spherical(du,u,p,t)
     dtCMn = @view du[:,3]
 
     # update diffusive parameters
-    Diffusion_coef_spherical!(D, CMg, CFe ,CMn, D0, D_charact)
+    Diffusion_coef_spherical_major!(D, CMg, CFe ,CMn, D0, D_charact)
 
     # semi-discretization
-    stencil_diffusion_spherical!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δrad, Δrad_, r_ad)
+    stencil_diffusion_spherical_major!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δrad, Δrad_, r_ad)
 end
 

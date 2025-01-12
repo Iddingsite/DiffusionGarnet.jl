@@ -1,6 +1,6 @@
 import Base.@propagate_inbounds
 
-@parallel_indices (iy, ix) function Diffusion_coef_2D!(DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn, CMg, CFe ,CMn, D0, D_charact, grt_position)
+@parallel_indices (iy, ix) function Diffusion_coef_2D_major!(DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn, CMg, CFe ,CMn, D0, D_charact, grt_position)
 
     @propagate_inbounds @inline sum_D(CMg, CFe, CMn, D0, ix, iy) = D0[1] * CMg[iy, ix] + D0[2] * CFe[iy, ix] + D0[3] * CMn[iy, ix] +
         D0[4] * (1 - CMg[iy, ix] - CFe[iy, ix] - CMn[iy, ix])
@@ -122,7 +122,7 @@ end
 end
 
 
-function semi_discretisation_diffusion_2D(du,u,p,t)
+function semi_discretisation_diffusion_cartesian(du::T,u::T,p,t) where T <: AbstractArray{<:Real, 3}
 
     @unpack D, D0, D_charact, Δxad_, Δyad_ = p.domain
     @unpack grt_position, grt_boundary     = p.domain.IC
@@ -137,7 +137,7 @@ function semi_discretisation_diffusion_2D(du,u,p,t)
     dtCMn = @view du[:,:,3]
 
     # update diffusive parameters
-    @parallel Diffusion_coef_2D!(DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn,
+    @parallel Diffusion_coef_2D_major!(DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn,
                                  CMg, CFe ,CMn, D0, D_charact, grt_position)
 
 

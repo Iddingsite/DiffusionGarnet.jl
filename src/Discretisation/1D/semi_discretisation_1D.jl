@@ -1,6 +1,6 @@
 import Base.@propagate_inbounds
 
-function Diffusion_coef_1D!(D, CMg, CFe, CMn, D0, D_charact)
+function Diffusion_coef_1D_major!(D, CMg, CFe, CMn, D0, D_charact)
 
     DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn = D
 
@@ -94,7 +94,8 @@ function stencil_diffusion_1D!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δxad_, bc
     end
 end
 
-function semi_discretisation_diffusion_1D(du,u,p,t)
+
+function semi_discretisation_diffusion_cartesian(du::T,u::T,p,t) where T <: AbstractArray{<:Real, 2}
 
     @unpack D, D0, D_charact, Δxad_, bc_neumann = p.domain
 
@@ -107,7 +108,7 @@ function semi_discretisation_diffusion_1D(du,u,p,t)
     dtCMn = @view du[:,3]
 
     # update diffusive parameters
-    Diffusion_coef_1D!(D, CMg, CFe ,CMn, D0, D_charact)
+    Diffusion_coef_1D_major!(D, CMg, CFe ,CMn, D0, D_charact)
 
     # semi-discretization
     stencil_diffusion_1D!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δxad_, bc_neumann)
