@@ -110,8 +110,8 @@ using LinearAlgebra: norm
 
         @unpack D, D0, D_charact, Δxad_, bc_neumann = domain1D
 
-        DiffusionGarnet.Diffusion_coef_1D!(domain1D.D, Mg0, Fe0, Mn0, domain1D.D0, domain1D.D_charact)
-        DiffusionGarnet.Diffusion_coef_spherical!(domainSph.D, Mg0, Fe0, Mn0, domainSph.D0, domainSph.D_charact)
+        DiffusionGarnet.Diffusion_coef_1D_major!(domain1D.D, Mg0, Fe0, Mn0, domain1D.D0, domain1D.D_charact)
+        DiffusionGarnet.Diffusion_coef_spherical_major!(domainSph.D, Mg0, Fe0, Mn0, domainSph.D0, domainSph.D_charact)
 
         @test domain1D.D.DMgMg[1] ≈ 0.2773178721173649
         @test domain1D.D.DMgFe[1] ≈ -0.02573379000046055
