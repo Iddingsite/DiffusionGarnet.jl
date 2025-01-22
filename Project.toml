@@ -4,7 +4,6 @@ authors = ["Hugo Dominguez <hugo.dominguez@unibe.ch>"]
 version = "0.2.0"
 
 [deps]
-CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 DiffEqBase = "2b5f629d-d688-5b77-993f-72d75c75574e"
 DiffEqCallbacks = "459566f4-90b8-5000-8ac3-15dfb0a30def"
@@ -25,7 +24,6 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
-CUDA = "3, 4, 5"
 DiffEqBase = "6"
 DiffEqCallbacks = "3, 4"
 Documenter = "1"
