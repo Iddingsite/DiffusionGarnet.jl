@@ -15,6 +15,7 @@ using Preferences
 using HDF5: h5open, create_group, attributes, read_attribute
 using DelimitedFiles
 using Plots
+using TOML
 
 # initialise ParallelStencil (Thx AlbertDeMontserrat!)
 function set_backend(new_backend::String)
@@ -35,6 +36,30 @@ const backend = @load_preference("backend", "Threads_Float64_2D")
 export backend, set_backend
 
 function __init__()
+    # thanks Pascal Aellig for this!
+    printstyled("""
+
+        ▐▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▌
+        ▐ ██████╗ ██╗███████╗███████╗██╗   ██╗███████╗██╗ ██████╗ ███╗   ██╗   ▌
+        ▐ ██╔══██╗██║██╔════╝██╔════╝██║   ██║██╔════╝██║██╔═══██╗████╗  ██║   ▌
+        ▐ ██║  ██║██║█████╗  █████╗  ██║   ██║███████╗██║██║   ██║██╔██╗ ██║   ▌
+        ▐ ██║  ██║██║██╔══╝  ██╔══╝  ██║   ██║╚════██║██║██║   ██║██║╚██╗██║   ▌
+        ▐ ██████╔╝██║██║     ██║     ╚██████╔╝███████║██║╚██████╔╝██║ ╚████║   ▌
+        ▐ ╚═════╝ ╚═╝╚═╝     ╚═╝      ╚═════╝ ╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝   ▌
+        ▐  ██████╗  █████╗ ██████╗ ███╗   ██╗███████╗████████╗     ██╗██╗      ▌
+        ▐ ██╔════╝ ██╔══██╗██╔══██╗████╗  ██║██╔════╝╚══██╔══╝     ██║██║      ▌
+        ▐ ██║  ███╗███████║██████╔╝██╔██╗ ██║█████╗     ██║        ██║██║      ▌
+        ▐ ██║   ██║██╔══██║██╔══██╗██║╚██╗██║██╔══╝     ██║   ██   ██║██║      ▌
+        ▐ ╚██████╔╝██║  ██║██║  ██║██║ ╚████║███████╗   ██║██╗╚█████╔╝███████╗ ▌
+        ▐  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝   ╚═╝╚═╝ ╚════╝ ╚══════╝ ▌
+        ▐▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▌
+
+
+    Version: $(TOML.parsefile(joinpath(@__DIR__, "..", "Project.toml"))["version"])
+    Latest commit: $(strip(read(`git log -1 --pretty=%B`, String)))
+    Commit date: $(strip(read(`git log -1 --pretty=%cd`, String)))
+    """, bold=true, color=:default)
+
     # initialise global logger for OrdinaryDiffEq
     global_logger(TerminalLogger())
 
