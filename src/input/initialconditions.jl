@@ -237,10 +237,8 @@ function D_ini!(D0, T, P, fugacity_O2=1e-25)  # by defaut 1e-25 Pa is graphite b
     DMn = exp(log(DMn) + 1/6 * log(fugacity_ratio))
     DCa = exp(log(DCa) + 1/6 * log(fugacity_ratio))
 
-    D0[1] = DMg  # in Myr
-    D0[2] = DFe  # in Myr
-    D0[3] = DMn  # in Myr
-    D0[4] = DCa  # in Myr
+    D0 .= (DMg, DFe, DMn, DCa)   # in Myr
+
 end
 
 @with_kw struct Domain1D{T1, T2, T3, T4} <: Domain
