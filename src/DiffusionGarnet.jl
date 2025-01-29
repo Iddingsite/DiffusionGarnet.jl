@@ -56,8 +56,6 @@ function __init__()
 
 
     Version: $(TOML.parsefile(joinpath(@__DIR__, "..", "Project.toml"))["version"])
-    Latest commit: $(strip(read(`git log -1 --pretty=%B`, String)))
-    Commit date: $(strip(read(`git log -1 --pretty=%cd`, String)))
     """, bold=true, color=:default)
 
     # initialise global logger for OrdinaryDiffEq
