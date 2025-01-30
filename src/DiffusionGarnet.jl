@@ -16,7 +16,6 @@ using GeoParams.Garnet: Grt_Fe_Chakraborty1992, Grt_Mg_Chakraborty1992, Grt_Mn_C
 using Preferences
 using HDF5: h5open, create_group, attributes, read_attribute
 using DelimitedFiles
-using Plots
 using TOML
 
 # initialise ParallelStencil (Thx AlbertDeMontserrat!)
