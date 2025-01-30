@@ -202,34 +202,24 @@ end
 
 
 function D_ini!(D0, T, P, fugacity_O2=1e-25)  # by defaut 1e-25 Pa is graphite buffer
-    R = 8.314462618  # constant of gas in J mol−1 K−1
 
-    # Magnesium
-    D0Mg = 1.1 * 1e-3 * 1e8  # pre-exponential constant in µm2 / s
-    Eₐ_Mg = 67997 * 4.1855 # activation energy at 1 bar in J / mol
-    ΔV⁺Mg = 5.3  # activation volume in cm3 / mol
+    Grt_Mg = Grt_Mg_Chakraborty1992
+    Grt_Fe = Grt_Fe_Chakraborty1992
+    Grt_Mn = Grt_Mn_Chakraborty1992
 
-    # Iron
-    D0Fe = 6.4 * 1e-4 * 1e8  # pre-exponential constant in µm2 / s
-    Eₐ_Fe = 65824 * 4.1855  # activation energy at 1 bar in J / mol
-    ΔV⁺Fe = 5.6  # activation volume in cm3 / mol
+    Grt_Mg = SetChemicalDiffusion(Grt_Mg)
+    Grt_Fe = SetChemicalDiffusion(Grt_Fe)
+    Grt_Mn = SetChemicalDiffusion(Grt_Mn)
 
-    # Manganese
-    D0Mn = 5.1 * 1e-4 * 1e8  # pre-exponential constant in µm2 / s
-    Eₐ_Mn = 60569 * 4.1855  # activation energy at 1 bar in J / mol
-    ΔV⁺Mn = 6.0  # activation volume in cm3 / mol
+    T_K = (T+273.15) .* 1u"K"
+    P_kbar = P * 1u"kbar"
 
-    DMg = D0Mg * exp(- (Eₐ_Mg + (100 * (P-0.001) * ΔV⁺Mg)) / (R * (T+273.15)))  # in µm2 / s
-    DFe = D0Fe * exp(- (Eₐ_Fe + (100 * (P-0.001) * ΔV⁺Fe)) / (R * (T+273.15)))  # in µm2 / s
-    DMn = D0Mn * exp(- (Eₐ_Mn + (100 * (P-0.001) * ΔV⁺Mn)) / (R * (T+273.15)))  # in µm2 / s
+    DMg = ustrip(uconvert(u"µm^2/Myr",compute_D(Grt_Mg, T = T_K, P = P_kbar)))
+    DFe = ustrip(uconvert(u"µm^2/Myr",compute_D(Grt_Fe, T = T_K, P = P_kbar)))
+    DMn = ustrip(uconvert(u"µm^2/Myr",compute_D(Grt_Mn, T = T_K, P = P_kbar)))
     DCa = 0.5 * DFe
 
     fugacity_ratio = fugacity_O2/1e-25  # current fO2 over fO2 buffered with graphite
-
-    DMg = DMg .* (365.25 * 24 * 3600 * 1e6)  # in Myr
-    DFe = DFe .* (365.25 * 24 * 3600 * 1e6)  # in Myr
-    DMn = DMn .* (365.25 * 24 * 3600 * 1e6)  # in Myr
-    DCa = DCa .* (365.25 * 24 * 3600 * 1e6)  # in Myr
 
     # after Chakraborty and Ganguly, 1991 (page 142, equation 2)
     DMg = exp(log(DMg) + 1/6 * log(fugacity_ratio))
@@ -237,7 +227,7 @@ function D_ini!(D0, T, P, fugacity_O2=1e-25)  # by defaut 1e-25 Pa is graphite b
     DMn = exp(log(DMn) + 1/6 * log(fugacity_ratio))
     DCa = exp(log(DCa) + 1/6 * log(fugacity_ratio))
 
-    D0 .= (DMg, DFe, DMn, DCa)   # in Myr
+    D0 .= (DMg, DFe, DMn, DCa)   # in µm^2/Myr
 
 end
 

@@ -53,14 +53,14 @@ using LinearAlgebra: norm
         P = 2u"GPa"
         domain1D = Domain(IC1D, T, P)
         @test domain1D.L_charact == ustrip(u"µm",Lx)
-        @test domain1D.t_charact ≈ 0.22518558662307234
-        @test domain1D.tfinal_ad ≈ 4.44078155709785
+        @test domain1D.t_charact ≈ 0.2224999357930375
+        @test domain1D.tfinal_ad ≈ 4.494383319418882
         @test domain1D.Δxad_ == 4.0
 
         domainSph = Domain(ICSph, T, P)
         @test domainSph.L_charact == ustrip(u"µm",Lx)
-        @test domainSph.t_charact ≈ 0.22518558662307234
-        @test domainSph.tfinal_ad ≈ 4.44078155709785
+        @test domainSph.t_charact ≈ 0.2224999357930375
+        @test domainSph.tfinal_ad ≈ 4.494383319418882
         @test domainSph.Δrad_ == 4.0
         @test domainSph.r_ad[end] == 1.0
 
@@ -80,11 +80,10 @@ using LinearAlgebra: norm
         D0 = zeros(Float64, 4)
         DiffusionGarnet.D_ini!(D0,T,P)
 
-        # benchmarked with TeriaG and 12.783356187311105
-        @test D0[1] ≈ 2.383676419323230e2
-        @test D0[2] ≈ 4.500484945403809e+02
-        @test D0[3] ≈ 6.232092221232668e+03
-        @test D0[4] ≈ 2.250242472701905e+02
+        @test D0[1] ≈ 241.5563196143817
+        @test D0[2] ≈ 455.8752224396371
+        @test D0[3] ≈ 6306.29872433989
+        @test D0[4] ≈ 227.93761121981854
 
         root = @__DIR__
         path_1D = joinpath(root, "Data", "1D", "Data_Grt_1D.txt")
@@ -113,15 +112,15 @@ using LinearAlgebra: norm
         DiffusionGarnet.Diffusion_coef_1D_major!(domain1D.D, Mg0, Fe0, Mn0, domain1D.D0, domain1D.D_charact)
         DiffusionGarnet.Diffusion_coef_spherical_major!(domainSph.D, Mg0, Fe0, Mn0, domainSph.D0, domainSph.D_charact)
 
-        @test domain1D.D.DMgMg[1] ≈ 0.2773178721173649
-        @test domain1D.D.DMgFe[1] ≈ -0.02573379000046055
-        @test domain1D.D.DMgMn[1] ≈ -0.35580783646658704
-        @test domain1D.D.DFeFe[1] ≈ 0.2402462850382149
-        @test domain1D.D.DFeMg[1] ≈ -0.06667916104762957
-        @test domain1D.D.DFeMn[1] ≈ -2.4378766634656803
-        @test domain1D.D.DMnMn[1] ≈ 3.0157426040866078
-        @test domain1D.D.DMnMg[1] ≈ -0.0019791216586272685
-        @test domain1D.D.DMnFe[1] ≈ -0.005233380819623645
+        @test domain1D.D.DMgMg[1] ≈ 0.27756534824753715
+        @test domain1D.D.DMgFe[1] ≈ -0.02575729575705166
+        @test domain1D.D.DMgMn[1] ≈ -0.35582434974845456
+        @test domain1D.D.DFeFe[1] ≈ 0.24039414025060646
+        @test domain1D.D.DFeMg[1] ≈ -0.06679903115794805
+        @test domain1D.D.DFeMn[1] ≈ -2.437175247864287
+        @test domain1D.D.DMnMn[1] ≈ 3.015178710791253
+        @test domain1D.D.DMnMg[1] ≈ -0.001981077957486304
+        @test domain1D.D.DMnFe[1] ≈ -0.00523218102384065
 
         @test domainSph.D.DMgMg[1] ≈ domain1D.D.DMgMg[1]
         @test domainSph.D.DMgFe[1] ≈ domain1D.D.DMgFe[1]
@@ -156,10 +155,9 @@ using LinearAlgebra: norm
 
         domain1D = Domain(IC1D, T, P)
 
-        sol = simulate(domain1D; progress=false, abstol=1e-6,reltol=1e-6)
+        sol = simulate(domain1D; progress=false, abstol=1e-6,reltol=1e-6, save_everystep=false, save_start=false)
 
-        # @test norm(sum.(sol.u[end][:,1] .+ sol.u[end][:,2] .+ sol.u[end][:,3])) ≈ 28.64886878627501
-        @test norm(sum.(sol.u[end][:,1] .+ sol.u[end][:,2] .+ sol.u[end][:,3])) ≈ 28.64886878627501 rtol=1e-5
+        @test norm(sum.(sol.u[end][:,1] .+ sol.u[end][:,2] .+ sol.u[end][:,3])) ≈ 28.653159661729227 rtol=1e-5
     end
 
     @testset "Spherical diffusion" begin
@@ -184,9 +182,9 @@ using LinearAlgebra: norm
 
         domainSph = Domain(ICSph, T, P)
 
-        sol = simulate(domainSph; progress=false, abstol=1e-6,reltol=1e-6)
+        sol = simulate(domainSph; progress=false, abstol=1e-6,reltol=1e-6, save_everystep=false, save_start=false)
 
-        @test norm(sum.(sol.u[end][:,1] .+ sol.u[end][:,2] .+ sol.u[end][:,3])) ≈ 20.268802749231984 rtol=1e-5
+        @test norm(sum.(sol.u[end][:,1] .+ sol.u[end][:,2] .+ sol.u[end][:,3])) ≈ 20.272049461615836 rtol=1e-5
     end
 
     @testset "2D Diffusion" begin
@@ -213,7 +211,7 @@ using LinearAlgebra: norm
 
         sol = simulate(domain2D; save_everystep=false, save_start=false)
 
-        @test norm(sol.u[end][:,:,1]) ≈ 12.783356187311105 rtol=1e-5
+        @test norm(sol.u[end][:,:,1]) ≈ 12.783354423875512 rtol=1e-5
     end
 
     @testset "3D Diffusion" begin
@@ -238,7 +236,7 @@ using LinearAlgebra: norm
 
         sol = simulate(domain3D; save_everystep=false, save_start=false);
 
-        @test norm(sol.u[end][:,:,:,1]) ≈ 371.1466260290486
+        @test norm(sol.u[end][:,:,:,1]) ≈ 371.1775756471261
     end
 
 
@@ -267,8 +265,8 @@ using LinearAlgebra: norm
         domainSph = Domain(ICSph, T, P, time_update)
         domain1D = Domain(IC1D, T, P, time_update)
 
-        @test domainSph.D0[1] ≈ 151880.41527919917
-        @test domain1D.D0[1] ≈ 151880.41527919917
+        @test domainSph.D0[1] ≈ 153548.37186274922
+        @test domain1D.D0[1] ≈ 153548.37186274922
 
         path_2D_Mg = joinpath(root, "Data", "2D", "Xprp_LR.txt")
         path_2D_Fe = joinpath(root, "Data", "2D", "Xalm_LR.txt")
@@ -286,7 +284,7 @@ using LinearAlgebra: norm
         IC2D = InitialConditions2D(CMg, CFe, CMn, Lx, Ly, tfinal; grt_boundary = grt_boundary)
         domain2D = Domain(IC2D, T, P, time_update)
 
-        @test domain2D.D0[1] ≈ 151880.41527919917
+        @test domain2D.D0[1] ≈ 153548.37186274922
 
         @unpack time_update_ad = domainSph
 
