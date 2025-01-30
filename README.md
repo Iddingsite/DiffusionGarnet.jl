@@ -19,6 +19,7 @@ To know more about this package, don't hesitate to refer to the [documentation](
 using DiffusionGarnet
 using DelimitedFiles
 using Plots
+using Printf
 
 # load the data of your choice (here from the text file located in https://github.com/Iddingsite/DiffusionGarnet.jl/tree/main/examples/1D, place it in the same folder as where you are running the code)
 data = DelimitedFiles.readdlm("Data_Grt_1D.txt", '\t', '\n', header=true)[1]
@@ -28,8 +29,8 @@ Fe0 = data[:, 2]
 Mn0 = data[:, 3]
 Ca0 = data[:, 5]
 distance = data[:, 1]
-Lx = (data[end,1] - data[1,1])u"µm"  # length in x of the model
-tfinal = 15u"Myr"  # total time of the model
+Lx = (data[end,1] - data[1,1])u"µm"
+tfinal = 15u"Myr"
 
 # define the initial conditions in 1D of your problem
 IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
@@ -42,15 +43,18 @@ P = 0.6u"GPa"
 domain1D = Domain(IC1D, T, P)
 
 # solve the problem using DifferentialEquations.jl
-sol = simulate(domain1D)
+sol = simulate(domain1D);
 
 # you can now plot the solutions from the sol variable
+
+@unpack t_charact = domain1D
 
 anim = @animate for i = LinRange(0, sol.t[end], 100)
     l = @layout [a ; b]
 
-    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = "Timestep = $(round(i;digits=2)) Ma", legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
+    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = @sprintf("Total Time = %.2f Ma | T = %.0f °C | P = %.1f GPa", i*t_charact, T[1].val, P[1].val), legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
     p1 = plot!(distance, sol(i)[:,2], label="Fe",linecolor=1, linewidth=1)
+
 
     p2 = plot(distance, Mg0, label="Mg initial", linestyle = :dash, linewidth=1, dpi=200,legend=:outerbottomright,linecolor=2,xlabel = "Distance (µm)")
     p2 = plot!(distance, Mn0, label="Mn initial", linestyle = :dash, linewidth=1, linecolor=3)

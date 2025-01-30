@@ -1,6 +1,7 @@
 using DiffusionGarnet
 using DelimitedFiles
 using Plots
+using Printf
 
 cd(@__DIR__)
 
@@ -13,7 +14,7 @@ Mn0 = data[:, 3]
 Ca0 = data[:, 5]
 distance = data[:, 1]
 Lx = (data[end,1] - data[1,1])u"µm"
-tfinal = 1u"Myr"
+tfinal = 15u"Myr"
 
 # define the initial conditions in 1D of your problem
 IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
@@ -35,7 +36,7 @@ sol = simulate(domain1D);
 anim = @animate for i = LinRange(0, sol.t[end], 100)
     l = @layout [a ; b]
 
-    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = "Total Time = $(round((i*t_charact);digits=2)) Myr", legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
+    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = @sprintf("Total Time = %.2f Ma | T = %.0f °C | P = %.1f GPa", i*t_charact, T[1].val, P[1].val), legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
     p1 = plot!(distance, sol(i)[:,2], label="Fe",linecolor=1, linewidth=1)
 
 
@@ -52,5 +53,5 @@ anim = @animate for i = LinRange(0, sol.t[end], 100)
 end every 1
 
 println("Now, generating the gif...")
-gif(anim, "Grt_1D_1Ma.gif", fps = 7)
+gif(anim, "Grt_1D.gif", fps = 7)
 println("...Done!")

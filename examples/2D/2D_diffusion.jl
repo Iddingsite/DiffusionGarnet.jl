@@ -2,6 +2,7 @@ using DiffusionGarnet
 using DelimitedFiles
 using Plots
 using ProgressBars
+using Printf
 
 cd(@__DIR__)
 println("Number of threads: $(Threads.nthreads())")
@@ -42,11 +43,11 @@ anim = @animate for i = tqdm(LinRange(0,  sol.t[end], 20))
     p3 = heatmap(distance, distance, sol(i)[:,:,3], label="Mn", dpi=200, title="Mn", clim=(0, maximum(sol(0)[:,:,3])), xlabel= "Distance (µm)", ylabel= "Distance (µm)")
     p4 = heatmap(distance, distance, Ca, label="Ca", dpi=200, title="Ca", clim=(0, 0.1), xlabel= "Distance (µm)")
 
-    plot(p1, p2, p3, p4, layout = l , plot_title="Total Time = $(time) Ma")
+    plot(p1, p2, p3, p4, layout = l , plot_title=@sprintf("Total Time = %.2f Ma | T = %.0f °C | P = %.1f GPa", i*t_charact, T[1].val, P[1].val), plot_titlefontsize=12)
 end every 1
 
 println("...Done!")
 
 println("Now, generating the gif...")
-gif(anim, "Grt_2D_900.gif", fps = 3)
+gif(anim, "Grt_2D.gif", fps = 3)
 println("...Done!")

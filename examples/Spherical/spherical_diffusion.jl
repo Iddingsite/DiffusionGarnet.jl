@@ -1,6 +1,7 @@
 using DiffusionGarnet
 using DelimitedFiles
 using Plots
+using Printf
 
 cd(@__DIR__)
 
@@ -29,7 +30,7 @@ sol_sph = simulate(DomainSph)
 anim = @animate for i = LinRange(0, sol_sph.t[end], 100)
     l = @layout [a ; b]
 
-    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = "Total Time = $(round(i*t_charact;digits=2)) Ma", legend=:outerbottomright, linecolor=1,xlabel = "Distance from the core (µm)")
+    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = @sprintf("Total Time = %.2f Ma | T = %.0f °C | P = %.1f GPa", i*t_charact, T[1].val, P[1].val), legend=:outerbottomright, linecolor=1,xlabel = "Distance from the core (µm)")
     p1 = plot!(distance, sol_sph(i)[:,2], label="Fe Sph",linecolor=1, linewidth=1)
 
     p2 = plot(distance, Mg0, label="Mg initial", linestyle = :dash, linewidth=1, dpi=200,legend=:outerbottomright,linecolor=2,xlabel = "Distance from the core (µm)")
