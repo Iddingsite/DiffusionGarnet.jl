@@ -172,7 +172,7 @@ function XMDF_creation(path_hdf5)
           </DataItem>
           <DataItem DataType=\"Float\" Dimensions=\"3\" Format=\"XML\">
             <!-- dz dy dx -->
-            $dx $dy $dz
+            $dz $dy $dx
           </DataItem>
         </Geometry>")
 

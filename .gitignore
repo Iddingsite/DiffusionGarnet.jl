@@ -7,3 +7,4 @@ docs/build/
 *.h5
 *.hdf5
 *.xdmf
+*.DS_Store
