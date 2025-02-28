@@ -42,11 +42,11 @@ The tracer diffusion coefficient ``D_i^*`` can be calculated from an Arrhenius r
 ```math
 \begin{equation}
   \label{arrhenius}
-D_i^* = D_{0,i} \exp \left( -\frac{E_{a,i} - (P-1)\Delta V^+_i}{RT} \right),
+D_i^* = D_{0,i} \exp \left( -\frac{E_{a,i} - (P-P_0)\Delta V^+_i}{RT} \right),
 \end{equation}
 ```
 
-with ``D_{0,i}`` the pre-exponential constant, ``E_{a,i}`` the activation energy of diffusion, ``\Delta V^+_i`` the activation volume of diffusion at 1 bar, ``R`` the universal gas constant, ``T`` the temperature, and ``P`` the pressure.
+with ``D_{0,i}`` the pre-exponential constant, ``E_{a,i}`` the activation energy of diffusion, ``\Delta V^+_i`` the activation volume of diffusion, ``P_0`` the pressure of calibration, ``R`` the universal gas constant, ``T`` the temperature, and ``P`` the pressure.
 
 In DiffusionGarnet.jl, ``D_{0,i}``, ``E_{a,i}``, and ``\Delta V^+_i`` are those of Chakraborty & Ganguly (1992) [[2]](@ref refs). The tracer diffusion coefficient of Ca is defined as ``0.5D_{Fe}^*``, following the approach of Loomis et al. (1985) [[3]](@ref refs).
 
