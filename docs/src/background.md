@@ -15,7 +15,7 @@ Major element diffusion in garnet is described by a coupled multicomponent syste
 \end{equation}
 ```
 
-with ``C_i`` the molar fraction of the ``i^{th}`` pole of garnet, ``n`` the total number of poles, and ``\textbf{D}_{ij}`` the interdiffusion coefficient tensor.
+with ``C_i`` the molar fraction of the ``i^{th}`` pole of garnet, ``n`` the total number of poles, and ``\textbf{D}_{ij}`` the interdiffusion coefficient matrix.
 
 For a system of ``n`` components, only ``n-1`` equations are needed, as the sum of the molar fractions of all components is equal to 1. Thus, Ca is made dependent on the other concentrations and (1) is made up of three coupled PDEs.
 
@@ -48,7 +48,7 @@ D_i^* = D_{0,i} \exp \left( -\frac{E_{a,i} - (P-1)\Delta V^+_i}{RT} \right),
 
 with ``D_{0,i}`` the pre-exponential constant, ``E_{a,i}`` the activation energy of diffusion, ``\Delta V^+_i`` the activation volume of diffusion at 1 bar, ``R`` the universal gas constant, ``T`` the temperature, and ``P`` the pressure.
 
-In DiffusionGarnet.jl, ``D_{0,i}``, ``E_{a,i}``, and ``\Delta V^+_i`` are those of Chakraborty & Ganguly (1992) [[2]](@ref refs). The tracer diffusion coefficient of Ca is defined as ``0.5D_{Fe}``, following the approach of Loomis et al. (1985) [[3]](@ref refs).
+In DiffusionGarnet.jl, ``D_{0,i}``, ``E_{a,i}``, and ``\Delta V^+_i`` are those of Chakraborty & Ganguly (1992) [[2]](@ref refs). The tracer diffusion coefficient of Ca is defined as ``0.5D_{Fe}^*``, following the approach of Loomis et al. (1985) [[3]](@ref refs).
 
 ### Numerical approach
 
