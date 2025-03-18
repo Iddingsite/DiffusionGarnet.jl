@@ -13,7 +13,8 @@ makedocs(;
                 "Diffusion in 2D Cartesian coordinates on CPU" => "diffusion_2D.md",
                 "Callbacks" => Any["Updating pressure and temperature conditions" => "updating_PT.md",
                 "Saving output as HDF5 files" => "saving_output.md"],
-                "Diffusion in 3D Cartesian coordinates on CPU" => "diffusion_3D.md"
+                "Diffusion in 3D Cartesian coordinates on CPU" => "diffusion_3D_CPU.md",
+                "Diffusion in 3D Cartesian coordinates on GPU" => "diffusion_3D_GPU.md"
                 ]
                 "List of functions" => "reference.md"
                ],
