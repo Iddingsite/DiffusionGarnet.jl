@@ -31,7 +31,7 @@ Now, we can start a new Julia session and load DiffusionGarnet.jl. The simulatio
 using DiffusionGarnet
 
 println(backend)
-````
+```
 
 This should now print: `CUDA_Float32_3D`.
 
@@ -86,7 +86,7 @@ Fe0[grt_boundary .== 1] .= Fe_border
 Mn0[grt_boundary .== 1] .= Mn_border
 Ca0[grt_boundary .== 1] .= Ca_border
 
-# convert to float32
+# convert to float32 and CUDA arrays
 Mg0 = convert(CuArray{Float32}, Mg0)
 Fe0 = convert(CuArray{Float32}, Fe0)
 Mn0 = convert(CuArray{Float32}, Mn0)

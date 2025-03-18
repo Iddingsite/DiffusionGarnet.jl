@@ -11,7 +11,7 @@ To do so, we will use a callback function to save the results of the simulation 
 
 As mentioned in the tutorial for [2D modelling](@ref 2D_diffusion_CPU) DiffusionGarnet internally uses the package [ParallelStencil.jl](https://github.com/omlins/ParallelStencil.jl). Make sure to start with multiple threads to get the most out of this approach if you run the model on CPU.
 
-For this tutorial, we will first download the data from this [Zenodo repository](https://zenodo.org/record/5520734) and then load it into our simulation. The data is using the 3D geometry of a real garnet grain, derived from µCT, with the initial composition of the major elements (Mg, Fe, Mn, and Ca) and the location of the boundary of the garnet domain with the matrix domain.
+For this tutorial, we will first download the data from this [Zenodo repository](https://zenodo.org/records/15045718) and then load it into our simulation. The data is using the 3D geometry of a real garnet grain, derived from µCT, with the initial composition of the major elements (Mg, Fe, Mn, and Ca) and the location of the boundary of the garnet domain with the matrix domain.
 
 ```julia
 using Downloads
