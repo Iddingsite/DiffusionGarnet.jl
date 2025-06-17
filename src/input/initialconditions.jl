@@ -356,7 +356,6 @@ end
     time_update_ad::T1
     function Domain2D(IC::InitialConditions2D, T::T1, P::T1, time_update::T1, fugacity_O2::T1) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}}
         @unpack nx, ny, Δx, Δy, tfinal, Lx, CMg0, CFe0, CMn0 = IC
-        similar(CMg0, (nx,ny))
 
 
         D0 = similar(CMg0, 4)
