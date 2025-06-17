@@ -2,7 +2,7 @@ module DiffusionGarnet
 
 using Reexport: @reexport
 
-@reexport using Parameters: @unpack
+@reexport using UnPack: @unpack
 @reexport using Unitful
 @reexport using DiffEqCallbacks: PresetTimeCallback
 @reexport using OrdinaryDiffEqStabilizedRK: ROCK2, ROCK4, ESERK4, ESERK5
@@ -84,7 +84,7 @@ include("discretisation/3D/semi_discretisation_3D.jl")
 include("discretisation/spherical/semi_discretisation_spherical.jl")
 include("simulate/simulate.jl")
 
-export InitialConditions1D, InitialConditions2D, InitialConditions3D, InitialConditionsSpherical
+export InitialConditions1D, InitialConditions2D, InitialConditions3D, InitialConditionsSpherical, InitialConditions1DTrace
 export Domain
 export simulate
 export update_diffusion_coef

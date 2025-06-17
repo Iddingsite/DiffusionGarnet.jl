@@ -22,7 +22,7 @@ function simulate end
 Solve the coupled major element diffusion equations in 1D. Save all timesteps in the output solution type variable by default.
 
 """
-function simulate(domain::Domain1D; path_save=nothing, solver=ROCK2(), abstol=1e-8, reltol=1e-6, kwargs...)
+function simulate(domain::Domain1D_major; path_save=nothing, solver=ROCK2(), abstol=1e-8, reltol=1e-6, kwargs...)
 
     p = (domain = domain, path_save = path_save)
 
@@ -42,7 +42,7 @@ end
 
 Solve the coupled major element diffusion equations in spherical coordinates. Save all timesteps in the output solution type variable by default.
 """
-function simulate(domain::DomainSpherical; path_save=nothing, solver=ROCK2(), abstol=1e-8, reltol=1e-6, kwargs...)
+function simulate(domain::DomainSpherical_major; path_save=nothing, solver=ROCK2(), abstol=1e-8, reltol=1e-6, kwargs...)
 
     p = (domain = domain, path_save = path_save)
 
@@ -62,7 +62,7 @@ end
 
 Solve the coupled major element diffusion equations in 2D. By default, save only the first and last timestep in the output solution type variable by default.
 """
-function simulate(domain::Domain2D; path_save=nothing, solver=ROCK2(), kwargs...)
+function simulate(domain::Domain2D_major; path_save=nothing, solver=ROCK2(), kwargs...)
 
     p = (domain = domain, path_save = path_save)
 
@@ -83,7 +83,7 @@ end
 Solve the coupled major element diffusion equations in 3D. Save only the first and last timestep in the output solution type variable by default.
 
 """
-function simulate(domain::Domain3D; path_save=nothing, solver=ROCK2(), kwargs...)
+function simulate(domain::Domain3D_major; path_save=nothing, solver=ROCK2(), kwargs...)
 
     p = (domain = domain, path_save = path_save)
 
