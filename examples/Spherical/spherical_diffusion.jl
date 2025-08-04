@@ -15,7 +15,7 @@ distance = data[:, 1]
 Lr = (data[end,1] - data[1,1])u"µm"
 tfinal = 15u"Myr"
 
-ICSph = InitialConditionsSpherical(Mg0, Fe0, Mn0, Lr, tfinal)
+ICSph = ICSphMajor(;CMg0=Mg0, CFe0=Fe0, CMn0=Mn0, Lr, tfinal)
 
 T = 900u"°C"
 P = 0.6u"GPa"

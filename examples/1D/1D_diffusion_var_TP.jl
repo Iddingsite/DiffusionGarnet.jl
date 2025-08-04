@@ -15,7 +15,7 @@ const distance = data[:, 1]
 const Lx = (data[end,1] - data[1,1])u"µm"
 const tfinal = 15u"Myr"
 
-IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
+IC1D = IC1DMajor(;CMg0=Mg0, CFe0=Fe0, CMn0=Mn0, Lx=Lx, tfinal=tfinal)
 
 time_update = [0, 2, 4, 6, 8, 10, 12, 14]u"Myr"
 T = [900, 850, 800, 750, 700, 650, 600, 550]u"°C"

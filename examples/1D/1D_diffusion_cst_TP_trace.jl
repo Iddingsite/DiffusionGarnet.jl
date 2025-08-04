@@ -1,6 +1,6 @@
 using DiffusionGarnet
 using DelimitedFiles
-using Plots
+# using Plots
 using Printf
 
 cd(@__DIR__)
@@ -8,16 +8,14 @@ cd(@__DIR__)
 # load the data of your choice (here from the text file located in https://github.com/Iddingsite/DiffusionGarnet.jl/tree/main/examples/1D, place it in the same folder as where you are running the code)
 data = DelimitedFiles.readdlm("Data_Grt_1D.txt", '\t', '\n', header=true)[1]
 
-CMg0 = data[:, 4]
-CFe0 = data[:, 2]
-CMn0 = data[:, 3]
-CCa0 = data[:, 5]
+Mg0 = data[:, 4]
+
 distance = data[:, 1]
 Lx = (data[end,1] - data[1,1])u"µm"
 tfinal = 15u"Myr"
 
 # define the initial conditions in 1D of your problem
-IC1D = IC1DMajor(;CMg0, CFe0, CMn0, Lx, tfinal)
+IC1D = InitialConditions1DTrace(C=Mg0, Lx=Lx, tfinal=tfinal, element="La")
 
 # define the PT conditions
 T = 900u"°C"
