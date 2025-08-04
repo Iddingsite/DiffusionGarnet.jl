@@ -33,7 +33,7 @@ Lx = (data[end,1] - data[1,1])u"µm"
 tfinal = 15u"Myr"
 
 # define the initial conditions in 1D of your problem
-IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
+IC1D = IC1DMajor(;CMg0, CFe0, CMn0, Lx, tfinal)
 
 # define the PT conditions
 T = 900u"°C"
