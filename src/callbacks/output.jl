@@ -1,4 +1,4 @@
-function hdf5_initial_conditions(IC::IC1DMajor, Domain::Domain1D_major, path_hdf5::String)
+function hdf5_initial_conditions(IC::InitialConditions1DMajor, Domain::Domain1DMajor, path_hdf5::String)
     h5open(path_hdf5, "w") do file
         g = create_group(file, "Diffusion_Grt") # create a group
 
@@ -36,7 +36,7 @@ function hdf5_initial_conditions(IC::IC1DMajor, Domain::Domain1D_major, path_hdf
 end
 
 
-function hdf5_initial_conditions(IC::InitialConditionsSpherical, Domain::DomainSpherical_major, path_hdf5::String)
+function hdf5_initial_conditions(IC::InitialConditionsSpherical, Domain::DomainSphericalMajor, path_hdf5::String)
     h5open(path_hdf5, "w") do file
         g = create_group(file, "Diffusion_Grt") # create a group
 
@@ -74,7 +74,7 @@ function hdf5_initial_conditions(IC::InitialConditionsSpherical, Domain::DomainS
 end
 
 
-function hdf5_initial_conditions(IC::InitialConditions2D, Domain::Domain2D_major, path_hdf5)
+function hdf5_initial_conditions(IC::InitialConditions2DMajor, Domain::Domain2DMajor, path_hdf5)
 
     h5open(path_hdf5, "w") do file
         g = create_group(file, "Diffusion_Grt") # create a group
@@ -119,7 +119,7 @@ function hdf5_initial_conditions(IC::InitialConditions2D, Domain::Domain2D_major
     end
 end
 
-function hdf5_initial_conditions(IC::InitialConditions3D, Domain::Domain3D_major, path_hdf5)
+function hdf5_initial_conditions(IC::InitialConditions3DMajor, Domain::Domain3DMajor, path_hdf5)
 
     h5open(path_hdf5, "w") do file
         g = create_group(file, "Diffusion_Grt") # create a group

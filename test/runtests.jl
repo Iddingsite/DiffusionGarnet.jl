@@ -1,5 +1,6 @@
 using DiffusionGarnet
 using Test
+using GeoParams
 using DelimitedFiles
 using JLD2
 using HDF5
@@ -7,45 +8,45 @@ using LinearAlgebra: norm
 
 @testset "All tests" begin
 
-    @testset "initial conditions" begin
-        # 1D, test geometry.jl
+    @testset "initial conditions Major" begin
+
         CMg = ones(5) .* 0.1
         CFe = ones(5) .* 0.1
         CMn = ones(5) .* 0.1
         Lx = 10.0u"µm"
         tfinal = 1.0u"Myr"
 
-        IC1D = InitialConditions1D(CMg, CFe, CMn, Lx, tfinal)
+        IC1D = IC1DMajor(;CMg0=CMg, CFe0=CFe, CMn0=CMn, Lx, tfinal)
 
         @test IC1D.CMg0 == CMg
         @test IC1D.Lx == ustrip(u"µm",Lx)
         @test IC1D.tfinal == ustrip(u"Myr",tfinal)
 
-        ICSph = InitialConditionsSpherical(CMg, CFe, CMn, Lx, tfinal)
+        ICSph = ICSphMajor(;CMg0=CMg, CFe0=CFe, CMn0=CMn, Lr=Lx, tfinal)
 
         @test ICSph.CMg0 == CMg
         @test ICSph.Lr == ustrip(u"µm",Lx)
         @test ICSph.tfinal == ustrip(u"Myr",tfinal)
 
-        CMg = ones(5, 5) .* 0.1
-        CFe = ones(5, 5) .* 0.1
-        CMn = ones(5, 5) .* 0.1
+        CMg0 = ones(5, 5) .* 0.1
+        CFe0 = ones(5, 5) .* 0.1
+        CMn0 = ones(5, 5) .* 0.1
         Ly = 10.0u"µm"
 
-        IC2D = InitialConditions2D(CMg, CFe, CMn, Lx, Ly, tfinal)
+        IC2D = IC2DMajor(;CMg0, CFe0, CMn0, Lx, Ly, tfinal)
 
-        @test IC2D.CMg0 == CMg
+        @test IC2D.CMg0 == CMg0
         @test IC2D.Ly == ustrip(u"µm",Ly)
         @test IC2D.tfinal == ustrip(u"Myr",tfinal)
 
-        CMg = ones(5, 5, 5) .* 0.1
-        CFe = ones(5, 5, 5) .* 0.1
-        CMn = ones(5, 5, 5) .* 0.1
+        CMg0 = ones(5, 5, 5) .* 0.1
+        CFe0 = ones(5, 5, 5) .* 0.1
+        CMn0 = ones(5, 5, 5) .* 0.1
         Lz = 10.0u"µm"
 
-        IC3D = InitialConditions3D(CMg, CFe, CMn, Lx, Ly, Lz, tfinal)
+        IC3D = IC3DMajor(;CMg0, CFe0, CMn0, Lx, Ly, Lz, tfinal)
 
-        @test IC3D.CMg0 == CMg
+        @test IC3D.CMg0 == CMg0
         @test IC3D.Lz == ustrip(u"µm",Lz)
         @test IC3D.tfinal == ustrip(u"Myr",tfinal)
 
@@ -55,13 +56,13 @@ using LinearAlgebra: norm
         @test domain1D.L_charact == ustrip(u"µm",Lx)
         @test domain1D.t_charact ≈ 0.2224999357930375
         @test domain1D.tfinal_ad ≈ 4.494383319418882
-        @test domain1D.Δxad_ == 4.0
+        @test domain1D.Δxad_[1] == 4.0
 
         domainSph = Domain(ICSph, T, P)
         @test domainSph.L_charact == ustrip(u"µm",Lx)
         @test domainSph.t_charact ≈ 0.2224999357930375
         @test domainSph.tfinal_ad ≈ 4.494383319418882
-        @test domainSph.Δrad_ == 4.0
+        @test domainSph.Δrad_[1] == 4.0
         @test domainSph.r_ad[end] == 1.0
 
         domain2D = Domain(IC2D, T, P)
@@ -72,6 +73,33 @@ using LinearAlgebra: norm
         @test domain3D.L_charact == ustrip(u"µm",Lx)
         @test domain3D.Δzad_ == 4.0
     end
+
+
+    # @testset "initial conditions Trace" begin
+
+    #     C = ones(5) .* 0.1
+    #     Lx = 10.0u"µm"
+    #     tfinal = 1.0u"Myr"
+
+    #     Grt_REE = Garnet.Grt_REE_Bloch2020_slow
+    #     D = SetChemicalDiffusion(Grt_REE)
+
+    #     IC1D = IC1DTrace(;C, D, Lx, tfinal)
+
+    #     @test IC1D.C == C
+    #     @test IC1D.Lx == ustrip(u"cm",Lx)
+    #     @test IC1D.tfinal == ustrip(u"Myr",tfinal)
+    #     @test IC1D.D == D
+
+    #     T = 650u"°C"
+    #     P = 2u"GPa"
+    #     domain1D = Domain(IC1D, T, P)
+    #     @test domain1D.L_charact == ustrip(u"cm",Lx)
+    #     @test domain1D.t_charact ≈ 2.3942878663294216e-14
+    #     @test domain1D.tfinal_ad ≈ 4.176607224481559e13
+    #     @test domain1D.Δxad_ == 4.0
+
+    # end
 
     @testset "diffusion coefficients" begin
         # test Domain
@@ -98,8 +126,8 @@ using LinearAlgebra: norm
         Lx = (data[end,1] - data[1,1])u"µm"
         tfinal = 15u"Myr"
 
-        IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
-        ICSph = InitialConditionsSpherical(Mg0, Fe0, Mn0, Lx, tfinal)
+        IC1D = IC1DMajor(;CMg0=Mg0, CFe0=Fe0, CMn0=Mn0, Lx, tfinal)
+        ICSph = ICSphMajor(;CMg0=Mg0, CFe0=Fe0, CMn0=Mn0, Lr=Lx, tfinal)
 
         T = 900u"°C"
         P = 0.6u"GPa"
@@ -131,6 +159,16 @@ using LinearAlgebra: norm
         @test domainSph.D.DMnMn[1] ≈ domain1D.D.DMnMn[1]
         @test domainSph.D.DMnMg[1] ≈ domain1D.D.DMnMg[1]
         @test domainSph.D.DMnFe[1] ≈ domain1D.D.DMnFe[1]
+
+
+        # check diffusion coefficients from Bloch et al. 2020 from GeoParams
+        Grt_Mg = Garnet.Grt_REE_Bloch2020_slow
+        D = SetChemicalDiffusion(Grt_Mg)
+
+        D =  ustrip(u"m^2/s", GeoParams.compute_D(D, T = 800u"°C", P = 1u"GPa"))  # diffusion coefficient in µm^2/Myr
+        D_paper = exp(-10.24 - (221057) / (2.303 * 8.31446261815324 * (800+ 273.15)))
+
+        @test D ≈ D_paper
     end
 
     @testset "1D diffusion" begin
@@ -140,15 +178,15 @@ using LinearAlgebra: norm
 
         data = DelimitedFiles.readdlm(path_1D, '\t', '\n', header=true)[1]
 
-        Mg0 = data[:, 4]
-        Fe0 = data[:, 2]
-        Mn0 = data[:, 3]
-        Ca0 = data[:, 5]
+        CMg0 = data[:, 4]
+        CFe0 = data[:, 2]
+        CMn0 = data[:, 3]
+        CCa0 = data[:, 5]
         distance = data[:, 1]
         Lx = (data[end,1] - data[1,1])u"µm"
         tfinal = 15u"Myr"
 
-        IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
+        IC1D = IC1DMajor(;CMg0, CFe0, CMn0, Lx, tfinal)
 
         T = 900u"°C"
         P = 0.6u"GPa"
@@ -175,7 +213,7 @@ using LinearAlgebra: norm
         Lr = (data[end,1] - data[1,1])u"µm"
         tfinal = 15u"Myr"
 
-        ICSph = InitialConditionsSpherical(Mg0, Fe0, Mn0, Lr, tfinal)
+        ICSph = ICSphMajor(;CMg0=Mg0, CFe0=Fe0, CMn0=Mn0, Lr, tfinal)
 
         T = 900u"°C"
         P = 0.6u"GPa"
@@ -195,9 +233,9 @@ using LinearAlgebra: norm
         path_2D_Mn = joinpath(root, "Data", "2D", "Xsps_LR.txt")
         path_2D_grt = joinpath(root, "Data", "2D", "Contour_LR.txt")
 
-        CMg = DelimitedFiles.readdlm(path_2D_Mg, '\t', '\n', header=false)
-        CFe = DelimitedFiles.readdlm(path_2D_Fe, '\t', '\n', header=false)
-        CMn = DelimitedFiles.readdlm(path_2D_Mn, '\t', '\n', header=false)
+        CMg0 = DelimitedFiles.readdlm(path_2D_Mg, '\t', '\n', header=false)
+        CFe0 = DelimitedFiles.readdlm(path_2D_Fe, '\t', '\n', header=false)
+        CMn0 = DelimitedFiles.readdlm(path_2D_Mn, '\t', '\n', header=false)
         grt_boundary = DelimitedFiles.readdlm(path_2D_grt, '\t', '\n', header=false)
 
         Lx = 900.0u"µm"
@@ -206,7 +244,7 @@ using LinearAlgebra: norm
         T = 900u"°C"
         P = 0.6u"GPa"
 
-        IC2D = InitialConditions2D(CMg, CFe, CMn, Lx, Ly, tfinal; grt_boundary = grt_boundary)
+        IC2D = IC2DMajor(;CMg0, CFe0, CMn0, Lx, Ly, tfinal, grt_boundary)
         domain2D = Domain(IC2D, T, P)
 
         sol = simulate(domain2D; save_everystep=false, save_start=false)
@@ -231,7 +269,7 @@ using LinearAlgebra: norm
         T = 900u"°C"
         P = 0.6u"GPa"
 
-        IC3D = InitialConditions3D(Mg0, Fe0, Mn0, Lx, Ly, Lz, tfinal; grt_boundary = grt_boundary)
+        IC3D = IC3DMajor(;CMg0=Mg0, CFe0=Fe0, CMn0=Mn0, Lx, Ly, Lz, tfinal, grt_boundary)
         domain3D = Domain(IC3D, T, P)
 
         sol = simulate(domain3D; save_everystep=false, save_start=false);
@@ -247,18 +285,18 @@ using LinearAlgebra: norm
 
         data = DelimitedFiles.readdlm(path_1D, '\t', '\n', header=true)[1]
 
-        Mg0 = reverse(data[1:size(data,1)÷2, 4])
-        Fe0 = reverse(data[1:size(data,1)÷2, 2])
-        Mn0 = reverse(data[1:size(data,1)÷2, 3])
-        Ca0 = reverse(data[1:size(data,1)÷2, 5])
+        CMg0 = reverse(data[1:size(data,1)÷2, 4])
+        CFe0 = reverse(data[1:size(data,1)÷2, 2])
+        CMn0 = reverse(data[1:size(data,1)÷2, 3])
+        CCa0 = reverse(data[1:size(data,1)÷2, 5])
         distance = data[1:size(data,1)÷2, 1]
         Lx = Lr = (data[end,1] - data[1,1])u"µm"
         tfinal = 1u"Myr"
         T = [850u"°C", 600u"°C"]
         P = [0.5u"GPa", 0.3u"GPa"]
 
-        ICSph = InitialConditionsSpherical(Mg0, Fe0, Mn0, Lr, tfinal)
-        IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
+        ICSph = ICSphMajor(;CMg0, CFe0, CMn0, Lr, tfinal)
+        IC1D = IC1DMajor(;CMg0, CFe0, CMn0, Lx, tfinal)
 
         time_update = [0u"Myr", 1u"Myr"]
 
@@ -273,15 +311,15 @@ using LinearAlgebra: norm
         path_2D_Mn = joinpath(root, "Data", "2D", "Xsps_LR.txt")
         path_2D_grt = joinpath(root, "Data", "2D", "Contour_LR.txt")
 
-        CMg = DelimitedFiles.readdlm(path_2D_Mg, '\t', '\n', header=false)
-        CFe = DelimitedFiles.readdlm(path_2D_Fe, '\t', '\n', header=false)
-        CMn = DelimitedFiles.readdlm(path_2D_Mn, '\t', '\n', header=false)
+        CMg0 = DelimitedFiles.readdlm(path_2D_Mg, '\t', '\n', header=false)
+        CFe0 = DelimitedFiles.readdlm(path_2D_Fe, '\t', '\n', header=false)
+        CMn0 = DelimitedFiles.readdlm(path_2D_Mn, '\t', '\n', header=false)
         grt_boundary = DelimitedFiles.readdlm(path_2D_grt, '\t', '\n', header=false)
 
         Lx = 900.0u"µm"
         Ly = 900.0u"µm"
 
-        IC2D = InitialConditions2D(CMg, CFe, CMn, Lx, Ly, tfinal; grt_boundary = grt_boundary)
+        IC2D = IC2DMajor(;CMg0, CFe0, CMn0, Lx, Ly, tfinal, grt_boundary)
         domain2D = Domain(IC2D, T, P, time_update)
 
         @test domain2D.D0[1] ≈ 153548.37186274922
@@ -318,16 +356,16 @@ using LinearAlgebra: norm
 
         data_1D = DelimitedFiles.readdlm(path_1D, '\t', '\n', header=true)[1]
 
-        Mg0 = data_1D[:, 4]
-        Fe0 = data_1D[:, 2]
-        Mn0 = data_1D[:, 3]
-        Ca0 = data_1D[:, 5]
+        CMg0 = data_1D[:, 4]
+        CFe0 = data_1D[:, 2]
+        CMn0 = data_1D[:, 3]
+        CCa0 = data_1D[:, 5]
         distance = data_1D[:, 1]
         Lx = (data_1D[end,1] - data_1D[1,1])u"µm"
         tfinal = 15u"Myr"
 
-        IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
-        ICSph = InitialConditionsSpherical(Mg0, Fe0, Mn0, Lx, tfinal)
+        IC1D = IC1DMajor(;CMg0, CFe0, CMn0, Lx, tfinal)
+        ICSph = ICSphMajor(;CMg0, CFe0, CMn0, Lr=Lx, tfinal)
 
         T = 700u"°C"
         P = 0.6u"GPa"
@@ -345,7 +383,7 @@ using LinearAlgebra: norm
         Lx = 900.0u"µm"
         Ly = 900.0u"µm"
 
-        IC2D = InitialConditions2D(Mg_2D, Fe_2D, Mn_2D, Lx, Ly, tfinal)
+        IC2D = IC2DMajor(;CMg0 = Mg_2D, CFe0 = Fe_2D, CMn0 = Mn_2D, Lx, Ly, tfinal)
         domain2D = Domain(IC2D, T, P)
 
         time_save = [0u"Myr", 2u"Myr", 5u"Myr", 15u"Myr"]
@@ -430,3 +468,60 @@ using LinearAlgebra: norm
 
     end
 end
+
+# using DiffusionGarnet
+# # Parameters
+# nx = 400               # number of grid points
+# L = 0.8u"mm"               # domain size (from -L/2 to L/2)
+
+# using GeoParams
+
+# Grt_Mg = Garnet.Grt_REE_Bloch2020_slow
+
+# D = SetChemicalDiffusion(Grt_Mg)
+
+# # gaussian initial condition
+
+# C = zeros(nx)
+# C[1:nx÷2] .= 4.5
+# C[nx÷2+1:end] .= 1.2
+
+# # Create initial conditions
+# IC = IC1DTrace(;C=C, D=D, Lx=L, tfinal=1u"Myr")
+
+# T2 = eltype(C)
+# u0 = copy(C)
+
+# D =  ustrip(u"m^2/s", compute_D(IC.D, T = 800u"°C", P = 1u"GPa"))  # diffusion coefficient in µm^2/Myr
+# D_paper = exp(-10.24 - (221057) / (2.303 * 8.31446261815324 * (800+ 273.15)))
+# D_paper = exp(-9.28 - (265200 + 10800 * 1) / (2.303 * 8.31446261815324 * (800+ 273.15)))  # diffusion coefficient in µm^2/Myr
+
+
+# L_charact = copy(IC.Lx)
+# D_charact = D  # characteristic diffusion coefficient in µm^2/Myr
+# t_charact = L_charact^2 / D_charact  # characteristic time
+
+# tfinal_ad = IC.tfinal / t_charact  # final time in characteristic time units
+
+# # Create domain
+# domain = Domain(IC, 800u"°C", 1u"GPa")
+
+
+# # Simulate
+# using OrdinaryDiffEq
+# sol = simulate(domain; progress=true, solver=Tsit5(),abstol=1e-6, reltol=1e-6, save_everystep=false, save_start=true)
+# using Plots
+# plot(sol[1])
+# plot!(sol[end])
+
+
+
+# using GeoParams.Garnet:Grt_Mg_Chakraborty1992
+
+# Grt_Mg = Grt_Mg_Chakraborty1992
+
+# Grt_Mg = SetChemicalDiffusion(Grt_Mg)
+
+# typeof(Grt_Mg) <: AbstractChemicalDiffusion
+
+

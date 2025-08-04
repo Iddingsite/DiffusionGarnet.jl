@@ -3,7 +3,7 @@
     permutedims(array, reverse(1:ndims(array)))
 end
 
-function hdf5_initial_conditions_paraview(IC::InitialConditions2D, Domain::Domain2D_major, path_hdf5)
+function hdf5_initial_conditions_paraview(IC::InitialConditions2DMajor, Domain::Domain2DMajor, path_hdf5)
 
     h5open(path_hdf5, "w") do file
         g = create_group(file, "Diffusion_Grt") # create a group
@@ -47,7 +47,7 @@ function hdf5_initial_conditions_paraview(IC::InitialConditions2D, Domain::Domai
     end
 end
 
-function hdf5_initial_conditions_paraview(IC::InitialConditions3D, Domain::Domain3D_major, path_hdf5)
+function hdf5_initial_conditions_paraview(IC::InitialConditions3DMajor, Domain::Domain3DMajor, path_hdf5)
 
   h5open(path_hdf5, "w") do file
       g = create_group(file, "Diffusion_Grt") # create a group

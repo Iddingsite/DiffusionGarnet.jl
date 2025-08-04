@@ -1,14 +1,14 @@
 
-@kwdef struct IC1DMajor{T1, T2, T3, T4} <: InitialConditions
+@kwdef struct InitialConditions1DMajor{T1, T2, T3, T4} <: InitialConditions
     CMg0::T1
     CFe0::T1
     CMn0::T1
     Lx::T2
     nx::T3
-    Δx::T2
+    Δx::T4
     x::T4
     tfinal::T2
-    function IC1DMajor(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, tfinal::T2) where {T1 <: AbstractArray{<:Real, 1}, T2 <: Float64}
+    function InitialConditions1DMajor(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, x::ArrayX, tfinal::T2) where {T1 <: AbstractArray{<:Real, 1}, T2 <: Float64, ArrayX <: AbstractArray{<:Real, 1}}
         if Lx <= 0
             error("Length should be positive.")
         elseif tfinal <= 0
@@ -17,12 +17,11 @@
             error("Initial conditions should have the same size.")
         else
             nx = size(CMg0, 1)
-            Δx = Lx / (nx-1)
-            x = range(0, length=nx, stop= Lx)
+            Δx = diff(x)
 
             T3 = typeof(nx)
-            T4 = typeof(x)
-            new{T1, T2, T3, T4}(CMg0, CFe0, CMn0, Lx, nx, Δx, x, tfinal)
+
+            new{T1, T2, T3, ArrayX}(CMg0, CFe0, CMn0, Lx, nx, Δx, x, tfinal)
         end
     end
 end
@@ -33,10 +32,10 @@ end
     CMn0::T1
     Lr::T2
     nr::T3
-    Δr::T2
+    Δr::T4
     r::T4
     tfinal::T2
-    function InitialConditionsSpherical(CMg0::T1, CFe0::T1, CMn0::T1, Lr::T2, tfinal::T2) where {T1 <: AbstractArray{<:Real, 1}, T2 <: Float64}
+    function InitialConditionsSpherical(CMg0::T1, CFe0::T1, CMn0::T1, Lr::T2, radius::ArrayR, tfinal::T2) where {T1 <: AbstractArray{<:Real, 1}, T2 <: Float64, ArrayR <: AbstractArray{<:Real, 1}}
         if Lr <= 0
             error("Length should be positive.")
         elseif tfinal <= 0
@@ -45,8 +44,8 @@ end
             error("Initial conditions should have the same size.")
         else
             nr = size(CMg0, 1)
-            Δr = Lr / (nr-1)
-            radius = range(0, length=nr, stop= Lr)
+            Δr = diff(radius)
+
             T3 = typeof(nr)
             T4 = typeof(radius)
             new{T1, T2, T3, T4}(CMg0, CFe0, CMn0, Lr, nr, Δr, radius, tfinal)
@@ -54,7 +53,7 @@ end
     end
 end
 
-@kwdef struct InitialConditions2D{T1, T2, T3, T4, T5} <: InitialConditions
+@kwdef struct InitialConditions2DMajor{T1, T2, T3, T4, T5} <: InitialConditions
     CMg0::T1
     CFe0::T1
     CMn0::T1
@@ -70,7 +69,7 @@ end
     grt_boundary::T3
     # grid::NamedTuple{(:x, :y), Tuple{AbstractArray{T2, 2}, AbstractArray{T2, 2}}}
     tfinal::T2
-    function InitialConditions2D(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, Ly::T2, tfinal::T2, grt_boundary::T3) where {T1 <: AbstractArray{<:Real, 2}, T2 <: Float64, T3 <: Union{AbstractArray{<:Real, 2}, AbstractArray{<:Bool, 2}}}
+    function InitialConditions2DMajor(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, Ly::T2, tfinal::T2, grt_boundary::T3) where {T1 <: AbstractArray{<:Real, 2}, T2 <: Float64, T3 <: Union{AbstractArray{<:Real, 2}, AbstractArray{<:Bool, 2}}}
         if Lx <= 0 || Ly <= 0
             error("Length should be positive.")
         elseif tfinal <= 0
@@ -104,7 +103,7 @@ end
 end
 
 
-@kwdef struct InitialConditions3D{T1, T2, T3, T4, T5} <: InitialConditions
+@kwdef struct InitialConditions3DMajor{T1, T2, T3, T4, T5} <: InitialConditions
     CMg0::T1
     CFe0::T1
     CMn0::T1
@@ -123,7 +122,7 @@ end
     grt_position::T3
     grt_boundary::T3
     tfinal::T2
-    function InitialConditions3D(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, Ly::T2, Lz::T2, tfinal::T2, grt_boundary::T3) where {T1 <: AbstractArray{<:Real, 3}, T2 <: Float64, T3 <: Union{AbstractArray{<:Real, 3}, AbstractArray{<:Bool, 3}}}
+    function InitialConditions3DMajor(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, Ly::T2, Lz::T2, tfinal::T2, grt_boundary::T3) where {T1 <: AbstractArray{<:Real, 3}, T2 <: Float64, T3 <: Union{AbstractArray{<:Real, 3}, AbstractArray{<:Bool, 3}}}
         if Lx <= 0 || Ly <= 0 || Lz <= 0
             error("Length should be positive.")
         elseif tfinal <= 0
@@ -157,42 +156,77 @@ end
 end
 
 """
-    InitialConditions1D(CMg0::Array{<:Real, 1}, CFe0::Array{<:Real, 1}, CMn0::Array{<:Real, 1}, Lx::Unitful.Length, tfinal::Unitful.Time)
+    IC1DMajor(CMg0::Array{<:Real}, CFe0::Array{<:Real}, CMn0::Array{<:Real}, Lx::Unitful.Length, x::AbstractArray{<:Unitful.Length}=range(0u"µm", length=size(CMg0, 1), stop=Lx), tfinal::Unitful.Time)
 
-Return a structure containing the initial conditions for a 1D diffusion problem. CMg0, CFe0 and CMn0 need to be in molar fraction. Convert the `Lx`` and `tfinal`` to µm and Myr respectively.
+Return a structure containing the initial conditions for a 1D diffusion problem. CMg0, CFe0 and CMn0 need to be in molar fraction. Convert `Lx`, `x`, and `tfinal` to µm, µm and Myr, respectively.
 """
-function InitialConditions1D(;CMg0::AbstractArray{<:Real, 1}, CFe0::AbstractArray{<:Real, 1}, CMn0::AbstractArray{<:Real, 1}, Lx::Unitful.Length, tfinal::Unitful.Time)
-    IC1DMajor(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"Myr",tfinal)))
+function IC1DMajor(;
+                   CMg0::AbstractArray{<:Real},
+                   CFe0::AbstractArray{<:Real},
+                   CMn0::AbstractArray{<:Real},
+                   Lx::Unitful.Length,
+                   x::AbstractArray{<:Unitful.Length}=range(0u"µm", length=size(CMg0, 1), stop=Lx),
+                   tfinal::Unitful.Time
+                   )
+
+    InitialConditions1DMajor(CMg0, CFe0, CMn0, convert(Float64, ustrip(u"µm", Lx)), ustrip.(u"µm", x), convert(Float64, ustrip(u"Myr",tfinal)))
 end
 
 
 """
-    InitialConditionsSpherical(CMg0::AbstractArray{<:Real, 1}, CFe0::AbstractArray{<:Real, 1}, CMn0::AbstractArray{<:Real, 1}, Lr::Unitful.Length, tfinal::Unitful.Time)
+    ICSphMajor(CMg0::AbstractArray{<:Real, 1}, CFe0::AbstractArray{<:Real, 1}, CMn0::AbstractArray{<:Real, 1}, Lr::Unitful.Length, tfinal::Unitful.Time)
 
 Return a structure containing the initial conditions for a spherical diffusion problem. CMg0, CFe0 and CMn0 need to be in molar fraction. Convert `Lr` and `tfinal` to µm and Myr respectively.
 """
-function InitialConditionsSpherical(CMg0::AbstractArray{<:Real, 1}, CFe0::AbstractArray{<:Real, 1}, CMn0::AbstractArray{<:Real, 1}, Lr::Unitful.Length, tfinal::Unitful.Time)
-    InitialConditionsSpherical(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lr)), convert(Float64,ustrip(u"Myr",tfinal)))
+function ICSphMajor(;
+                    CMg0::AbstractArray{<:Real, 1},
+                    CFe0::AbstractArray{<:Real, 1},
+                    CMn0::AbstractArray{<:Real, 1},
+                    Lr::Unitful.Length,
+                    radius::AbstractArray{<:Unitful.Length}=range(0u"µm", length=size(CMg0, 1), stop=Lr),
+                    tfinal::Unitful.Time
+                    )
+
+    InitialConditionsSpherical(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lr)), ustrip.(u"µm", radius), convert(Float64,ustrip(u"Myr",tfinal)))
 end
 
 """
-    InitialConditions2D(CMg0::AbstractArray{<:Real, 2}, CFe0::AbstractArray{<:Real, 2}, CMn0::AbstractArray{<:Real, 2}, Lx::Unitful.Length, Ly::Unitful.Length, tfinal::Unitful.Time; grt_boundary::AbstractArray{<:Real, 2}=zeros(eltype(CMg0), size(CMg0)...))
+    IC2DMajor(;CMg0::AbstractArray{<:Real, 2}, CFe0::AbstractArray{<:Real, 2}, CMn0::AbstractArray{<:Real, 2}, Lx::Unitful.Length, Ly::Unitful.Length, tfinal::Unitful.Time, grt_boundary::AbstractArray{<:Real, 2}=zeros(eltype(CMg0), size(CMg0)...))
 
 Return a structure containing the initial conditions for a 2D diffusion problem. CMg0, CFe0 and CMn0 need to be in molar fraction. Convert `Lx`, `Ly` and `tfinal` to µm, µm and Myr respectively.
 grt_boundary is a matrix of the same size as CMg0, CFe0 and CMn0. It is a binary matrix with 1 where the contour of the garnet is present and 0 otherwise. It is used to apply the Dirichlet boundary condition in the model. If not provided, it is equal to zero everywhere.
 """
-function InitialConditions2D(CMg0::AbstractArray{<:Real, 2}, CFe0::AbstractArray{<:Real, 2}, CMn0::AbstractArray{<:Real, 2}, Lx::Unitful.Length, Ly::Unitful.Length, tfinal::Unitful.Time; grt_boundary::Union{AbstractArray{<:Real, 2}, AbstractArray{<:Bool, 2}}=zeros(Bool, size(CMg0)...))
-    InitialConditions2D(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"µm", Ly)), convert(Float64,ustrip(u"Myr", tfinal)), grt_boundary)
+function IC2DMajor(;
+                   CMg0::AbstractArray{<:Real, 2},
+                   CFe0::AbstractArray{<:Real, 2},
+                   CMn0::AbstractArray{<:Real, 2},
+                   Lx::Unitful.Length,
+                   Ly::Unitful.Length,
+                   tfinal::Unitful.Time,
+                   grt_boundary::Union{AbstractArray{<:Real, 2}, AbstractArray{<:Bool, 2}}=zeros(Bool, size(CMg0)...)
+                   )
+
+    InitialConditions2DMajor(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"µm", Ly)), convert(Float64,ustrip(u"Myr", tfinal)), grt_boundary)
 end
 
 """
-    InitialConditions3D(CMg0::AbstractArray{<:Real, 3}, CFe0::AbstractArray{<:Real, 3}, CMn0::AbstractArray{<:Real, 3}, Lx::Unitful.Length, Ly::Unitful.Length, Lz::Unitful.Length, tfinal::Unitful.Time; grt_boundary::Union{AbstractArray{<:Real, 3}, AbstractArray{<:Bool, 3}}=zeros(Bool, size(CMg0)...))
+    IC3DMajor(;CMg0::AbstractArray{<:Real, 3}, CFe0::AbstractArray{<:Real, 3}, CMn0::AbstractArray{<:Real, 3}, Lx::Unitful.Length, Ly::Unitful.Length, Lz::Unitful.Length, tfinal::Unitful.Time, grt_boundary::Union{AbstractArray{<:Real, 3}, AbstractArray{<:Bool, 3}}=zeros(Bool, size(CMg0)...))
 
 Return a structure containing the initial conditions for a 3D diffusion problem. CMg0, CFe0 and CMn0 need to be in molar fraction. Convert `Lx`, `Ly`, `Lz` and `tfinal` to µm, µm, µm and Myr respectively.
 grt_boundary is a matrix of the same size as CMg0, CFe0 and CMn0. It is a binary matrix with 1 where the contour of the garnet is present and 0 otherwise. It is used to apply the Dirichlet boundary condition in the model. If not provided, it is equal to zero everywhere.
 """
-function InitialConditions3D(CMg0::AbstractArray{<:Real, 3}, CFe0::AbstractArray{<:Real, 3}, CMn0::AbstractArray{<:Real, 3}, Lx::Unitful.Length, Ly::Unitful.Length, Lz::Unitful.Length, tfinal::Unitful.Time; grt_boundary::Union{AbstractArray{<:Real, 3}, AbstractArray{<:Bool, 3}}=zeros(Bool, size(CMg0)...))
-    InitialConditions3D(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"µm", Ly)), convert(Float64,ustrip(u"µm", Lz)), convert(Float64,ustrip(u"Myr", tfinal)), grt_boundary)
+function IC3DMajor(;
+                   CMg0::AbstractArray{<:Real, 3},
+                   CFe0::AbstractArray{<:Real, 3},
+                   CMn0::AbstractArray{<:Real, 3},
+                   Lx::Unitful.Length,
+                   Ly::Unitful.Length,
+                   Lz::Unitful.Length,
+                   tfinal::Unitful.Time,
+                   grt_boundary::Union{AbstractArray{<:Real, 3}, AbstractArray{<:Bool, 3}}=zeros(Bool, size(CMg0)...)
+                   )
+
+    InitialConditions3DMajor(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"µm", Ly)), convert(Float64,ustrip(u"µm", Lz)), convert(Float64,ustrip(u"Myr", tfinal)), grt_boundary)
 end
 
 
@@ -206,7 +240,7 @@ function D_ini!(D0, T, P, fugacity_O2=1e-25)  # by defaut 1e-25 Pa is graphite b
     Grt_Fe = SetChemicalDiffusion(Grt_Fe)
     Grt_Mn = SetChemicalDiffusion(Grt_Mn)
 
-    T_K = (T+273.15) .* 1u"K"
+    T_K = (T+273.15) * 1u"K"
     P_kbar = P * 1u"kbar"
 
     DMg = ustrip(uconvert(u"µm^2/Myr",compute_D(Grt_Mg, T = T_K, P = P_kbar)))
@@ -226,7 +260,7 @@ function D_ini!(D0, T, P, fugacity_O2=1e-25)  # by defaut 1e-25 Pa is graphite b
 
 end
 
-@kwdef struct Domain1D_major{T1, T2, T3, T4} <: Domain
+@kwdef struct Domain1DMajor{T1, T2, T3, T4, T5} <: Domain
     IC::T4
     T::T1
     P::T1
@@ -238,12 +272,12 @@ end
     L_charact::T2
     D_charact::T2
     t_charact::T2
-    Δxad_::T2
+    Δxad_::T5
     u0::Matrix{T2}
     tfinal_ad::T2
     time_update_ad::T1
     bc_neumann::T3
-    function Domain1D_major(IC::IC1DMajor, T::T1, P::T1, time_update::T1, fugacity_O2::T1, bc_neumann::T3) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}, T3 <: Tuple}
+    function Domain1DMajor(IC::InitialConditions1DMajor, T::T1, P::T1, time_update::T1, fugacity_O2::T1, bc_neumann::T3) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}, T3 <: Tuple}
 
         #check that T, P and time_update have the same size
         if size(T, 1) ≠ size(P, 1) || size(T, 1) ≠ size(time_update, 1)
@@ -268,17 +302,18 @@ end
         D_charact = mean(D0)  # characteristic
         t_charact = L_charact^2 / D_charact  # characteristic time
 
-        Δxad_ = 1 / (Δx / L_charact)  # inverse of nondimensionalised Δx
+        Δxad_ = 1 ./ (Δx ./ L_charact)  # inverse of nondimensionalised Δx
         tfinal_ad = tfinal / t_charact  # nondimensionalised total time
         time_update_ad = time_update ./ t_charact  # nondimensionalised time update
 
         T4 = typeof(IC)
+        T5 = typeof(Δxad_)
 
-        new{T1, T2, T3, T4}(IC, T, P, fugacity_O2, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, u0, tfinal_ad, time_update_ad, bc_neumann)
+        new{T1, T2, T3, T4, T5}(IC, T, P, fugacity_O2, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, u0, tfinal_ad, time_update_ad, bc_neumann)
     end
 end
 
-@kwdef struct DomainSpherical_major{T1, T2, T3} <: Domain
+@kwdef struct DomainSphericalMajor{T1, T2, T3} <: Domain
     IC::T3
     T::T1
     P::T1
@@ -290,13 +325,13 @@ end
     L_charact::T2
     D_charact::T2
     t_charact::T2
-    Δrad::T2
-    Δrad_::T2
+    Δrad::Vector{T2}
+    Δrad_::Vector{T2}
     r_ad::Vector{T2}
     u0::Matrix{T2}
     tfinal_ad::T2
     time_update_ad::T1
-    function DomainSpherical_major(IC::InitialConditionsSpherical, T::T1, P::T1, time_update::T1, fugacity_O2::T1) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}}
+    function DomainSphericalMajor(IC::InitialConditionsSpherical, T::T1, P::T1, time_update::T1, fugacity_O2::T1) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}}
 
         #check that T, P and time_update have the same size
         if size(T, 1) ≠ size(P, 1) || size(T, 1) ≠ size(time_update, 1)
@@ -321,8 +356,8 @@ end
         D_charact = mean(D0)  # characteristic
         t_charact = L_charact^2 / D_charact  # characteristic time
 
-        Δrad = Δr / L_charact  # nondimensionalised Δr
-        Δrad_ = 1 / Δrad  # inverse of nondimensionalised Δr
+        Δrad = Δr ./ L_charact  # nondimensionalised Δr
+        Δrad_ = 1 ./ Δrad  # inverse of nondimensionalised Δr
         r_ad = r ./ L_charact  # nondimensionalised radius
         tfinal_ad = tfinal / t_charact  # nondimensionalised total time
         time_update_ad = time_update ./ t_charact  # nondimensionalised time update
@@ -333,7 +368,7 @@ end
     end
 end
 
-@kwdef struct Domain2D_major{T1, T2, T3, T4, T5, T6} <: Domain
+@kwdef struct Domain2DMajor{T1, T2, T3, T4, T5, T6} <: Domain
     IC::T6
     T::T1
     P::T1
@@ -349,7 +384,7 @@ end
     u0::T5
     tfinal_ad::T2
     time_update_ad::T1
-    function Domain2D_major(IC::InitialConditions2D, T::T1, P::T1, time_update::T1, fugacity_O2::T1) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}}
+    function Domain2DMajor(IC::InitialConditions2DMajor, T::T1, P::T1, time_update::T1, fugacity_O2::T1) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}}
         @unpack nx, ny, Δx, Δy, tfinal, Lx, CMg0, CFe0, CMn0 = IC
 
 
@@ -385,7 +420,7 @@ end
     end
 end
 
-@kwdef struct Domain3D_major{T1, T2, T3, T4, T5, T6} <: Domain
+@kwdef struct Domain3DMajor{T1, T2, T3, T4, T5, T6} <: Domain
     IC::T6
     T::T1
     P::T1
@@ -402,7 +437,7 @@ end
     u0::T5
     tfinal_ad::T2
     time_update_ad::T1
-    function Domain3D_major(IC::InitialConditions3D, T::T1, P::T1, time_update::T1, fugacity_O2::T1) where {T1 <: Union{Float64, Array{Float64, 1}}}
+    function Domain3DMajor(IC::InitialConditions3DMajor, T::T1, P::T1, time_update::T1, fugacity_O2::T1) where {T1 <: Union{Float64, Array{Float64, 1}}}
         @unpack nx, ny, nz, Δx, Δy, Δz, tfinal, Lx, CMg0, CFe0, CMn0 = IC
 
         D0 = similar(CMg0, 4)
@@ -445,8 +480,8 @@ end
 
 When applied to 1D initial conditions, define corresponding 1D domain. `bc_neumann` can be used to define Neumann boundary conditions on the left or right side of the domain if set to true.
 """
-function Domain(IC::IC1DMajor, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr", fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa"; bc_neumann::Tuple=(false, false))
-    Domain1D_major(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)), bc_neumann)
+function Domain(IC::InitialConditions1DMajor, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr", fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa"; bc_neumann::Tuple=(false, false))
+    Domain1DMajor(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)), bc_neumann)
 end
 
 """
@@ -455,23 +490,23 @@ end
 When applied to spherical initial conditions, define corresponding spherical domain. Assume that the center of the grain is on the left side.
 """
 function Domain(IC::InitialConditionsSpherical, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr", fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa")
-    DomainSpherical_major(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)))
+    DomainSphericalMajor(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)))
 end
 
 """
-    Domain(IC::InitialConditions2D, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr")
+    Domain(IC::IC2DMajor, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr")
 
 When applied to 2D initial conditions, define corresponding 2D domain.
 """
-function Domain(IC::InitialConditions2D, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr", fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa")
-    Domain2D_major(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)))
+function Domain(IC::InitialConditions2DMajor, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr", fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa")
+    Domain2DMajor(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)))
 end
 
 """
-    Domain(IC::InitialConditions3D, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr")
+    Domain(IC::IC3DMajor, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr")
 
 When applied to 3D initial conditions, define corresponding 3D domain.
 """
-function Domain(IC::InitialConditions3D, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr", fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa")
-    Domain3D_major(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)))
+function Domain(IC::InitialConditions3DMajor, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr", fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa")
+    Domain3DMajor(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)))
 end

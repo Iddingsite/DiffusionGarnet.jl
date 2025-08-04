@@ -1,5 +1,9 @@
 using Unitful
+using Unitful:𝐋,𝐓
 using Statistics
+
+# define diffusion coefficient as a derived dimension
+@derived_dimension 𝓓 𝐋^2/𝐓
 
 abstract type InitialConditions end
 abstract type Domain end
@@ -13,4 +17,4 @@ Return a struct containing the struct `IC`, the PT conditions `T` and `P`  and t
 function Domain end
 
 include("initialconditions_major.jl")
-include("initialconditions_trace.jl")
+# include("initialconditions_trace.jl")

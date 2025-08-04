@@ -45,7 +45,7 @@ which outputs:
 Then, we can define our initial conditions, both for the spherical and 1D Cartesian coordinates.
 
 ```julia
-ICSph = InitialConditionsSpherical(Mg0, Fe0, Mn0, Lr, tfinal)
+ICSph = ICSphMajor(;CMg0=Mg0, CFe0=Fe0, CMn0=Mn0, Lr, tfinal)
 IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
 
 # define the pressure and temperature conditions of diffusion
@@ -57,7 +57,7 @@ Domain1D = Domain(IC1D, T, P; bc_neumann = (true, false))
 ```
 
 !!! tip
-    `InitialConditionsSpherical` always assumes that the core of the profile is on the left and the edge is on the right side.
+    `ICSphMajor` always assumes that the core of the profile is on the left and the edge is on the right side.
 
 !!! note
     We use `bc_neumann` in `Domain` to indicate that a homogeneous Neumann boundary must be ensured on the left side of the 1D profile to simulate the core of the garnet grain.

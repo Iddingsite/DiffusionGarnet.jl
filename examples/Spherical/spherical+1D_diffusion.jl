@@ -1,6 +1,7 @@
 using DiffusionGarnet
 using DelimitedFiles
 using Plots
+using Printf
 
 cd(@__DIR__)
 
@@ -14,8 +15,8 @@ distance = data[:, 1]
 Lr = Lx = (data[end,1] - data[1,1])u"µm"
 tfinal = 15u"Myr"
 
-ICSph = InitialConditionsSpherical(Mg0, Fe0, Mn0, Lr, tfinal)
-IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
+ICSph = ICSphMajor(;CMg0=Mg0, CFe0=Fe0, CMn0=Mn0, Lr, tfinal)
+IC1D = IC1DMajor(;CMg0=Mg0, CFe0=Fe0, CMn0=Mn0, Lx, tfinal)
 
 T = 900u"°C"
 P = 0.6u"GPa"

@@ -17,12 +17,12 @@ All other accepted arguments such as `callback` or `progress` are the same as th
 function simulate end
 
 """
-    simulate(domain::Domain1D; path_save=nothing, solver=ROCK2(), abstol=1e-8, reltol=1e-6, kwargs...)
+    simulate(domain::Domain1DMajor; path_save=nothing, solver=ROCK2(), abstol=1e-8, reltol=1e-6, kwargs...)
 
 Solve the coupled major element diffusion equations in 1D. Save all timesteps in the output solution type variable by default.
 
 """
-function simulate(domain::Domain1D_major; path_save=nothing, solver=ROCK2(), abstol=1e-8, reltol=1e-6, kwargs...)
+function simulate(domain::Domain1DMajor; path_save=nothing, solver=ROCK2(), abstol=1e-8, reltol=1e-6, kwargs...)
 
     p = (domain = domain, path_save = path_save)
 
@@ -37,12 +37,33 @@ function simulate(domain::Domain1D_major; path_save=nothing, solver=ROCK2(), abs
     return sol
 end
 
+# """
+#     simulate(domain::Domain1DTrace; path_save=nothing, solver=TRBDF2(), abstol=1e-8, reltol=1e-6, kwargs...)
+
+# Solve the linear diffusion equation in 1D. Save all timesteps in the output solution type variable by default.
+
+# """
+# function simulate(domain::Domain1DTrace; path_save=nothing, solver=TRBDF2(), abstol=1e-8, reltol=1e-6, kwargs...)
+
+#     p = (domain = domain, path_save = path_save)
+
+#     @unpack tfinal_ad, u0 = p.domain
+
+#     t = (0, tfinal_ad)
+
+#     prob = ODEProblem(semi_discretisation_diffusion_cartesian_trace, u0, t, p)
+
+#     sol = @time solve(prob, solver; abstol=abstol, reltol=reltol, kwargs...)
+
+#     return sol
+# end
+
 """
     simulate(domain::DomainSpherical; path_save=nothing, solver=ROCK2(), abstol=1e-8, reltol=1e-6, kwargs...)
 
 Solve the coupled major element diffusion equations in spherical coordinates. Save all timesteps in the output solution type variable by default.
 """
-function simulate(domain::DomainSpherical_major; path_save=nothing, solver=ROCK2(), abstol=1e-8, reltol=1e-6, kwargs...)
+function simulate(domain::DomainSphericalMajor; path_save=nothing, solver=ROCK2(), abstol=1e-8, reltol=1e-6, kwargs...)
 
     p = (domain = domain, path_save = path_save)
 
@@ -57,12 +78,33 @@ function simulate(domain::DomainSpherical_major; path_save=nothing, solver=ROCK2
     return sol
 end
 
+# """
+#     simulate(domain::Domain1DTrace; path_save=nothing, solver=TRBDF2(), abstol=1e-8, reltol=1e-6, kwargs...)
+
+# Solve the linear diffusion equation in 1D. Save all timesteps in the output solution type variable by default.
+
+# """
+# function simulate(domain::Domain1DTrace; path_save=nothing, solver=TRBDF2(), abstol=1e-8, reltol=1e-6, kwargs...)
+
+#     p = (domain = domain, path_save = path_save)
+
+#     @unpack tfinal_ad, u0 = p.domain
+
+#     t = (0, tfinal_ad)
+
+#     prob = ODEProblem(semi_discretisation_diffusion_cartesian_trace, u0, t, p)
+
+#     sol = @time solve(prob, solver; abstol=abstol, reltol=reltol, kwargs...)
+
+#     return sol
+# end
+
 """
     simulate(domain::Domain2D; path_save=nothing, solver=ROCK2(), kwargs...)
 
 Solve the coupled major element diffusion equations in 2D. By default, save only the first and last timestep in the output solution type variable by default.
 """
-function simulate(domain::Domain2D_major; path_save=nothing, solver=ROCK2(), kwargs...)
+function simulate(domain::Domain2DMajor; path_save=nothing, solver=ROCK2(), kwargs...)
 
     p = (domain = domain, path_save = path_save)
 
@@ -83,7 +125,7 @@ end
 Solve the coupled major element diffusion equations in 3D. Save only the first and last timestep in the output solution type variable by default.
 
 """
-function simulate(domain::Domain3D_major; path_save=nothing, solver=ROCK2(), kwargs...)
+function simulate(domain::Domain3DMajor; path_save=nothing, solver=ROCK2(), kwargs...)
 
     p = (domain = domain, path_save = path_save)
 

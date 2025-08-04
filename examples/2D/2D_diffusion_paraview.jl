@@ -18,7 +18,7 @@ tfinal = 1.0u"Myr"
 T = 900u"°C"
 P = 0.6u"GPa"
 
-IC2D = InitialConditions2D(Mg0, Fe0, Mn0, Lx, Ly, tfinal; grt_boundary = grt_boundary)
+IC2D = IC2DMajor(;CMg0=Mg0, CFe0=Fe0, CMn0=Mn0, Lx, Ly, tfinal, grt_boundary)
 domain2D = Domain(IC2D, T, P)
 
 

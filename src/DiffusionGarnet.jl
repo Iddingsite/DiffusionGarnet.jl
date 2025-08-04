@@ -6,12 +6,15 @@ using Reexport: @reexport
 @reexport using Unitful
 @reexport using DiffEqCallbacks: PresetTimeCallback
 @reexport using OrdinaryDiffEqStabilizedRK: ROCK2, ROCK4, ESERK4, ESERK5
+@reexport using GeoParams: SetChemicalDiffusion
+@reexport using GeoParams.Garnet
 
 using Logging: global_logger
 using TerminalLoggers: TerminalLogger
 using OrdinaryDiffEqStabilizedRK: ODEProblem, solve
+# using OrdinaryDiffEqSDIRK: TRBDF2
 using ParallelStencil
-using GeoParams: compute_D, SetChemicalDiffusion
+using GeoParams: compute_D, SetChemicalDiffusion, AbstractChemicalDiffusion
 using GeoParams.Garnet: Grt_Fe_Chakraborty1992, Grt_Mg_Chakraborty1992, Grt_Mn_Chakraborty1992
 using Preferences
 using HDF5: h5open, create_group, attributes, read_attribute
@@ -78,13 +81,15 @@ include("input/initialconditions.jl")
 include("callbacks/update_diffusion_coef_TP.jl")
 include("callbacks/output.jl")
 include("callbacks/output_paraview.jl")
-include("discretisation/1D/semi_discretisation_1D.jl")
-include("discretisation/2D/semi_discretisation_2D.jl")
-include("discretisation/3D/semi_discretisation_3D.jl")
-include("discretisation/spherical/semi_discretisation_spherical.jl")
+include("discretisation/1D/semi_discretisation_1D_major.jl")
+# include("discretisation/1D/semi_discretisation_1D_trace.jl")
+include("discretisation/2D/semi_discretisation_2D_major.jl")
+include("discretisation/3D/semi_discretisation_3D_major.jl")
+include("discretisation/spherical/semi_discretisation_spherical_major.jl")
+# include("discretisation/spherical/semi_discretisation_spherical_trace.jl")
 include("simulate/simulate.jl")
 
-export InitialConditions1D, InitialConditions2D, InitialConditions3D, InitialConditionsSpherical, InitialConditions1DTrace
+export IC1DMajor, IC2DMajor, IC3DMajor, ICSphMajor#, IC1DTrace
 export Domain
 export simulate
 export update_diffusion_coef

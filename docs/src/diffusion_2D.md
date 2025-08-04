@@ -81,7 +81,7 @@ which outputs:
 Like with [spherical](@ref sph_diffusion) or [1D Cartesian](@ref 1D_diffusion) coordinates, we need to define our `InitialConditions` and `Domain` structures, that will hold all the information of our model.
 
 ```julia
-IC2D = InitialConditions2D(Mg0, Fe0, Mn0, Lx, Ly, tfinal; grt_boundary = grt_boundary)
+IC2D = IC2DMajor(;CMg0=Mg0, CFe0=Fe0, CMn0=Mn0, Lx, Ly, tfinal, grt_boundary)
 domain2D = Domain(IC2D, T, P)
 ```
 
