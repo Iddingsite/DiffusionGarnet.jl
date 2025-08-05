@@ -46,7 +46,7 @@ Then, we can define our initial conditions, both for the spherical and 1D Cartes
 
 ```julia
 ICSph = ICSphMajor(;CMg0=Mg0, CFe0=Fe0, CMn0=Mn0, Lr, tfinal)
-IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
+IC1D = IC1DMajor(;CMg0=Mg0, CFe0=Fe0, CMn0=Mn0, Lx, tfinal)
 
 # define the pressure and temperature conditions of diffusion
 T = 900u"°C"
