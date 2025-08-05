@@ -22,7 +22,7 @@ Lx = (data[end,1] - data[1,1])u"µm"  # length in x of the model, here in µm
 tfinal = 15u"Myr"  # total time of the model, here in Myr
 
 # define the initial conditions in 1D of your problem in that order.
-IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
+IC1D = IC1DMajor(;CMg0=Mg0, CFe0=Fe0, CMn0=Mn0, Lx, tfinal)
 ```
 
 We will now define the PT evolution of our model. To do this, we define 3 arrays containing the pressure, temperature and the time at which the conditions are updated:
