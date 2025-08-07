@@ -62,7 +62,7 @@ using LinearAlgebra: norm
         @test domainSph.L_charact == ustrip(u"µm",Lx)
         @test domainSph.t_charact ≈ 0.2224999357930375
         @test domainSph.tfinal_ad ≈ 4.494383319418882
-        @test domainSph.Δrad_[1] == 4.0
+        @test domainSph.Δr_ad_[1] == 4.0
         @test domainSph.r_ad[end] == 1.0
 
         domain2D = Domain(IC2D, T, P)
@@ -110,9 +110,9 @@ using LinearAlgebra: norm
         CFe0 = 0.1
         CMn0 = 0.1
 
-        Grt_Mg = SetChemicalDiffusion(Garnet.Grt_Mg_Carlson2006)
-        Grt_Fe = SetChemicalDiffusion(Garnet.Grt_Fe_Carlson2006)
-        Grt_Mn = SetChemicalDiffusion(Garnet.Grt_Mn_Carlson2006)
+        Grt_Mg = SetChemicalDiffusion(Garnet.Grt_Mg_Chakraborty1992)
+        Grt_Fe = SetChemicalDiffusion(Garnet.Grt_Fe_Chakraborty1992)
+        Grt_Mn = SetChemicalDiffusion(Garnet.Grt_Mn_Chakraborty1992)
 
         D0_data = (Grt_Mg=Grt_Mg, Grt_Fe=Grt_Fe, Grt_Mn=Grt_Mn)
 

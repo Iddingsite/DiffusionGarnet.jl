@@ -35,7 +35,7 @@ end
     Δr::T4
     r::T4
     tfinal::T2
-    function InitialConditionsSpherical(CMg0::T1, CFe0::T1, CMn0::T1, Lr::T2, radius::ArrayR, tfinal::T2) where {T1 <: AbstractArray{<:Real, 1}, T2 <: Float64, ArrayR <: AbstractArray{<:Real, 1}}
+    function InitialConditionsSpherical(CMg0::T1, CFe0::T1, CMn0::T1, Lr::T2, r::ArrayR, tfinal::T2) where {T1 <: AbstractArray{<:Real, 1}, T2 <: Float64, ArrayR <: AbstractArray{<:Real, 1}}
         if Lr <= 0
             error("Length should be positive.")
         elseif tfinal <= 0
@@ -44,11 +44,11 @@ end
             error("Initial conditions should have the same size.")
         else
             nr = size(CMg0, 1)
-            Δr = diff(radius)
+            Δr = diff(r)
 
             T3 = typeof(nr)
-            T4 = typeof(radius)
-            new{T1, T2, T3, T4}(CMg0, CFe0, CMn0, Lr, nr, Δr, radius, tfinal)
+            T4 = typeof(r)
+            new{T1, T2, T3, T4}(CMg0, CFe0, CMn0, Lr, nr, Δr, r, tfinal)
         end
     end
 end
@@ -183,11 +183,11 @@ function ICSphMajor(;
                     CFe0::AbstractArray{<:Real, 1},
                     CMn0::AbstractArray{<:Real, 1},
                     Lr::Unitful.Length,
-                    radius::AbstractArray{<:Unitful.Length}=range(0u"µm", length=size(CMg0, 1), stop=Lr),
+                    r::AbstractArray{<:Unitful.Length}=range(0u"µm", length=size(CMg0, 1), stop=Lr),
                     tfinal::Unitful.Time
                     )
 
-    InitialConditionsSpherical(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lr)), ustrip.(u"µm", radius), convert(Float64,ustrip(u"Myr",tfinal)))
+    InitialConditionsSpherical(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lr)), ustrip.(u"µm", r), convert(Float64,ustrip(u"Myr",tfinal)))
 end
 
 """
@@ -342,8 +342,8 @@ end
     L_charact::T2
     D_charact::T2
     t_charact::T2
-    Δrad::Vector{T2}
-    Δrad_::Vector{T2}
+    Δr_ad::Vector{T2}
+    Δr_ad_::Vector{T2}
     r_ad::Vector{T2}
     u0::Matrix{T2}
     tfinal_ad::T2
@@ -417,15 +417,15 @@ end
         D_charact = D0_mean  # characteristic
         t_charact = L_charact^2 / D_charact  # characteristic time
 
-        Δrad = Δr ./ L_charact  # nondimensionalised Δr
-        Δrad_ = 1 ./ Δrad  # inverse of nondimensionalised Δr
+        Δr_ad = Δr ./ L_charact  # nondimensionalised Δr
+        Δr_ad_ = 1 ./ Δr_ad  # inverse of nondimensionalised Δr
         r_ad = r ./ L_charact  # nondimensionalised radius
         tfinal_ad = tfinal / t_charact  # nondimensionalised total time
         time_update_ad = time_update ./ t_charact  # nondimensionalised time update
 
         T3 = typeof(IC)
 
-        new{T1, T2, T3, T_tuplediffdata}(IC, T, P, fugacity_O2, time_update, diffcoef, D0_data, D0, D, L_charact, D_charact, t_charact, Δrad, Δrad_, r_ad, u0, tfinal_ad, time_update_ad)
+        new{T1, T2, T3, T_tuplediffdata}(IC, T, P, fugacity_O2, time_update, diffcoef, D0_data, D0, D, L_charact, D_charact, t_charact, Δr_ad, Δr_ad_, r_ad, u0, tfinal_ad, time_update_ad)
     end
 end
 
