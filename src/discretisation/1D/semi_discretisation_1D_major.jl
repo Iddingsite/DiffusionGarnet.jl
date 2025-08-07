@@ -1,28 +1,64 @@
 import Base.@propagate_inbounds
 
-function Diffusion_coef_1D_major!(D, CMg, CFe, CMn, D0, D_charact)
+function Diffusion_coef_1D_major!(D, CMg, CFe, CMn, D0, D_charact, domain, t)
 
     DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn = D
 
+    @unpack diffcoef, D0_data, T, P, fugacity_O2, time_update_ad = domain
+
     D_charact_ = 1 / D_charact
 
-    @propagate_inbounds @inline sum_D(CMg, CFe, CMn, D0, I) = D0[1] * CMg[I] + D0[2] * CFe[I] + D0[3] * CMn[I] +
-    D0[4] * (1 - CMg[I] - CFe[I] - CMn[I])
+    @propagate_inbounds @inline sum_D(CMg, CFe, CMn, D0, I) = D0[1, I] * CMg[I] + D0[2, I] * CFe[I] + D0[3, I] * CMn[I] +
+    D0[4, I] * (1 - CMg[I] - CFe[I] - CMn[I])
 
-    @inbounds for I in eachindex(DMgMg)
+
+    # end-member unit-cell dimensions for C12 and CA15
+    a0_Fe = 1.1525
+    a0_Mg = 1.1456
+    a0_Mn = 1.1614
+    a0_Ca = 1.1852
+
+    # find current T, P, and fugacity_O2
+    # to do this, we need to find the lower bound of t in time_update_ad
+    index = findfirst(x -> x >= t, time_update_ad)
+    if index === nothing
+        index = length(time_update_ad)
+    end
+
+    P_kbar = P[index] * 1u"kbar"
+    T_C = T[index] * 1u"C"
+    fO2 = (fugacity_O2[index])NoUnits
+
+    # @inbounds for I in eachindex(DMgMg)
+    for I in eachindex(DMgMg)
+
+        # there is a composition dependence in the self-diffusion coefficients for C12 and CA15
+        if diffcoef == 2 || diffcoef == 3
+
+            X = (CMg[I] * a0_Fe + CFe[I] * a0_Mg + CMn[I] * a0_Mn + (1 - (CMg[I] + CFe[I] + CMn[I])) * a0_Ca)NoUnits
+
+            # if there is no garnet, no need to update the diffusion coefficients
+            if X !== (a0Ca)NoUnits
+                D0[1, I] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mg, T = T_C, P = P_kbar, fO2 = fO2, X = X)))
+                D0[2, I] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Fe, T = T_C, P = P_kbar, fO2 = fO2, X = X)))
+                D0[3, I] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mn, T = T_C, P = P_kbar, fO2 = fO2, X = X)))
+                D0[4, I] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Ca, T = T_C, P = P_kbar, fO2 = fO2, X = X)))
+            end
+        end
+
         sum_D_ = 1 / (sum_D(CMg, CFe, CMn, D0, I))
 
-        DMgMg[I] = (D0[1] - D0[1] * CMg[I] * sum_D_ * (D0[1] - D0[end])) * D_charact_
-        DMgFe[I] = (      - D0[1] * CMg[I] * sum_D_ * (D0[2] - D0[end])) * D_charact_
-        DMgMn[I] = (      - D0[1] * CMg[I] * sum_D_ * (D0[3] - D0[end])) * D_charact_
+        DMgMg[I] = (D0[1, I] - D0[1, I] * CMg[I] * sum_D_ * (D0[1, I] - D0[end, I])) * D_charact_
+        DMgFe[I] = (      - D0[1, I] * CMg[I] * sum_D_ * (D0[2, I] - D0[end, I])) * D_charact_
+        DMgMn[I] = (      - D0[1, I] * CMg[I] * sum_D_ * (D0[3, I] - D0[end, I])) * D_charact_
 
-        DFeMg[I] = (      - D0[2] * CFe[I] * sum_D_ * (D0[1] - D0[end])) * D_charact_
-        DFeFe[I] = (D0[2] - D0[2] * CFe[I] * sum_D_ * (D0[2] - D0[end])) * D_charact_
-        DFeMn[I] = (      - D0[2] * CFe[I] * sum_D_ * (D0[3] - D0[end])) * D_charact_
+        DFeMg[I] = (      - D0[2, I] * CFe[I] * sum_D_ * (D0[1, I] - D0[end, I])) * D_charact_
+        DFeFe[I] = (D0[2, I] - D0[2, I] * CFe[I] * sum_D_ * (D0[2, I] - D0[end, I])) * D_charact_
+        DFeMn[I] = (      - D0[2, I] * CFe[I] * sum_D_ * (D0[3, I] - D0[end, I])) * D_charact_
 
-        DMnMg[I] = (      - D0[3] * CMn[I] * sum_D_ * (D0[1] - D0[end])) * D_charact_
-        DMnFe[I] = (      - D0[3] * CMn[I] * sum_D_ * (D0[2] - D0[end])) * D_charact_
-        DMnMn[I] = (D0[3] - D0[3] * CMn[I] * sum_D_ * (D0[3] - D0[end])) * D_charact_
+        DMnMg[I] = (      - D0[3, I] * CMn[I] * sum_D_ * (D0[1, I] - D0[end, I])) * D_charact_
+        DMnFe[I] = (      - D0[3, I] * CMn[I] * sum_D_ * (D0[2, I] - D0[end, I])) * D_charact_
+        DMnMn[I] = (D0[3, I] - D0[3, I] * CMn[I] * sum_D_ * (D0[3, I] - D0[end, I])) * D_charact_
     end
 end
 
@@ -114,7 +150,7 @@ function semi_discretisation_diffusion_cartesian(du::T,u::T,p,t) where T <: Abst
     dtCMn = @view du[:,3]
 
     # update diffusive parameters
-    Diffusion_coef_1D_major!(D, CMg, CFe ,CMn, D0, D_charact)
+    Diffusion_coef_1D_major!(D, CMg, CFe ,CMn, D0, D_charact, p.domain, t)
 
     # semi-discretization
     stencil_diffusion_1D_major!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δxad_, bc_neumann)

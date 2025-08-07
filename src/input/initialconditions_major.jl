@@ -230,45 +230,17 @@ function IC3DMajor(;
 end
 
 
-function D_ini!(D0, T, P, fugacity_O2=1e-25)  # by defaut 1e-25 Pa is graphite buffer
-
-    Grt_Mg = Grt_Mg_Chakraborty1992
-    Grt_Fe = Grt_Fe_Chakraborty1992
-    Grt_Mn = Grt_Mn_Chakraborty1992
-
-    Grt_Mg = SetChemicalDiffusion(Grt_Mg)
-    Grt_Fe = SetChemicalDiffusion(Grt_Fe)
-    Grt_Mn = SetChemicalDiffusion(Grt_Mn)
-
-    T_K = (T+273.15) * 1u"K"
-    P_kbar = P * 1u"kbar"
-
-    DMg = ustrip(uconvert(u"µm^2/Myr",compute_D(Grt_Mg, T = T_K, P = P_kbar)))
-    DFe = ustrip(uconvert(u"µm^2/Myr",compute_D(Grt_Fe, T = T_K, P = P_kbar)))
-    DMn = ustrip(uconvert(u"µm^2/Myr",compute_D(Grt_Mn, T = T_K, P = P_kbar)))
-    DCa = 0.5 * DFe
-
-    fugacity_ratio = fugacity_O2/1e-25  # current fO2 over fO2 buffered with graphite
-
-    # after Chakraborty and Ganguly, 1991 (page 142, equation 2)
-    DMg = exp(log(DMg) + 1/6 * log(fugacity_ratio))
-    DFe = exp(log(DFe) + 1/6 * log(fugacity_ratio))
-    DMn = exp(log(DMn) + 1/6 * log(fugacity_ratio))
-    DCa = exp(log(DCa) + 1/6 * log(fugacity_ratio))
-
-    D0 .= (DMg, DFe, DMn, DCa)   # in µm^2/Myr
-
-end
-
-@kwdef struct Domain1DMajor{T1, T2, T3, T4, T5} <: Domain
+@kwdef struct Domain1DMajor{T1, T2, T3, T4, T5, T_tuplediffdata} <: Domain
     IC::T4
     T::T1
     P::T1
     fugacity_O2::T1
     time_update::T1
-    D0::Vector{T2}
+    diffcoef::Int
+    D0_data::T_tuplediffdata  # tuple of diffusion coefficients data
+    D0::Matrix{T2}  # diffusion coefficients
     D::NamedTuple{(:DMgMg, :DMgFe, :DMgMn, :DFeMg, :DFeFe, :DFeMn, :DMnMg, :DMnFe, :DMnMn),
-                  NTuple{9, Vector{T2}}}  # tensor of interdiffusion coefficients
+                  NTuple{9, Vector{T2}}}  # matrix of interdiffusion coefficients
     L_charact::T2
     D_charact::T2
     t_charact::T2
@@ -277,7 +249,7 @@ end
     tfinal_ad::T2
     time_update_ad::T1
     bc_neumann::T3
-    function Domain1DMajor(IC::InitialConditions1DMajor, T::T1, P::T1, time_update::T1, fugacity_O2::T1, bc_neumann::T3) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}, T3 <: Tuple}
+    function Domain1DMajor(IC::InitialConditions1DMajor, T::T1, P::T1, time_update::T1, fugacity_O2::T1, diffcoef::Int, bc_neumann::T3) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}, T3 <: Tuple}
 
         #check that T, P and time_update have the same size
         if size(T, 1) ≠ size(P, 1) || size(T, 1) ≠ size(time_update, 1)
@@ -286,21 +258,64 @@ end
 
         @unpack nx, Δx, tfinal, Lx, CMg0, CFe0, CMn0 = IC
 
+        # define the trace diffusion coefficients based on the chosen dataset
+        if diffcoef == 1
+            Grt_Mg = SetChemicalDiffusion(Grt_Mg_Chakraborty1992)
+            Grt_Fe = SetChemicalDiffusion(Grt_Fe_Chakraborty1992)
+            Grt_Mn = SetChemicalDiffusion(Grt_Mn_Chakraborty1992)
+
+            D0_data = (Grt_Mg=Grt_Mg, Grt_Fe=Grt_Fe, Grt_Mn=Grt_Mn)
+        elseif diffcoef == 2
+            Grt_Mg = SetChemicalDiffusion(Grt_Mg_Carlson2006)
+            Grt_Fe = SetChemicalDiffusion(Grt_Fe_Carlson2006)
+            Grt_Mn = SetChemicalDiffusion(Grt_Mn_Carlson2006)
+            Grt_Ca = SetChemicalDiffusion(Grt_Ca_Carlson2006)
+
+            D0_data = (Grt_Mg=Grt_Mg, Grt_Fe=Grt_Fe, Grt_Mn=Grt_Mn, Grt_Ca=Grt_Ca)
+        elseif diffcoef == 3
+            Grt_Mg = SetChemicalDiffusion(Grt_Mg_Chu2015)
+            Grt_Fe = SetChemicalDiffusion(Grt_Fe_Chu2015)
+            Grt_Mn = SetChemicalDiffusion(Grt_Mn_Chu2015)
+            Grt_Ca = SetChemicalDiffusion(Grt_Ca_Chu2015)
+
+            D0_data = (Grt_Mg=Grt_Mg, Grt_Fe=Grt_Fe, Grt_Mn=Grt_Mn, Grt_Ca=Grt_Ca)
+        end
+
+        T_tuplediffdata = typeof(D0_data)
+
         T2 = eltype(CMg0)
+        D0 = zeros(T2, 4, nx)
 
-        D0 = zeros(T2, 4)
-        D_ini!(D0, T[1], P[1], fugacity_O2[1])  # compute initial diffusion coefficients
+        # iterate through D0 and compute the initial diffusion coefficients
+        for j in axes(D0, 2)
+            D0_view = @view D0[:, j]
 
-        D = (DMgMg = zeros(T2, nx), DMgFe = zeros(T2, nx), DMgMn = zeros(T2, nx), DFeMg = zeros(T2, nx), DFeFe = zeros(T2, nx), DFeMn = zeros(T2, nx), DMnMg = zeros(T2, nx), DMnFe = zeros(T2, nx), DMnMn = zeros(T2, nx))  # tensor of interdiffusion coefficients
+            # compute the diffusion coefficients for each point
+            D_update!(D0_view, T[1], P[1], diffcoef, CMg0[j], CFe0[j], CMn0[j], D0_data, fugacity_O2[1])  # compute initial diffusion coefficients
+        end
+
+        D = (DMgMg = zeros(T2, nx),
+             DMgFe = zeros(T2, nx),
+             DMgMn = zeros(T2, nx),
+             DFeMg = zeros(T2, nx),
+             DFeFe = zeros(T2, nx),
+             DFeMn = zeros(T2, nx),
+             DMnMg = zeros(T2, nx),
+             DMnFe = zeros(T2, nx),
+             DMnMn = zeros(T2, nx))  # matrix of interdiffusion coefficients
 
         u0 = similar(CMg0, (nx, 3))
         u0[:,1] .= CMg0
         u0[:,2] .= CFe0
         u0[:,3] .= CMn0
 
+        # find index of the first column of non-zero values in D0
+        first_nonzero_col = findfirst(!iszero, D0[1, :])
+        D0_mean = mean(D0[:, first_nonzero_col])  # mean diffusion coefficient
+
         L_charact = copy(Lx)  # characteristic length
-        D_charact = mean(D0)  # characteristic
-        t_charact = L_charact^2 / D_charact  # characteristic time
+        D_charact = D0_mean  # characteristic
+        t_charact = L_charact^2 / D0_mean  # characteristic time
 
         Δxad_ = 1 ./ (Δx ./ L_charact)  # inverse of nondimensionalised Δx
         tfinal_ad = tfinal / t_charact  # nondimensionalised total time
@@ -309,19 +324,21 @@ end
         T4 = typeof(IC)
         T5 = typeof(Δxad_)
 
-        new{T1, T2, T3, T4, T5}(IC, T, P, fugacity_O2, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, u0, tfinal_ad, time_update_ad, bc_neumann)
+        new{T1, T2, T3, T4, T5, T_tuplediffdata}(IC, T, P, fugacity_O2, time_update, diffcoef, D0_data, D0, D, L_charact, D_charact, t_charact, Δxad_, u0, tfinal_ad, time_update_ad, bc_neumann)
     end
 end
 
-@kwdef struct DomainSphericalMajor{T1, T2, T3} <: Domain
+@kwdef struct DomainSphericalMajor{T1, T2, T3, T_tuplediffdata} <: Domain
     IC::T3
     T::T1
     P::T1
     fugacity_O2::T1
     time_update::T1
-    D0::Vector{T2}
+    diffcoef::Int
+    D0_data::T_tuplediffdata  # tuple of diffusion coefficients data
+    D0::Matrix{T2}
     D::NamedTuple{(:DMgMg, :DMgFe, :DMgMn, :DFeMg, :DFeFe, :DFeMn, :DMnMg, :DMnFe, :DMnMn),
-                  NTuple{9, Vector{T2}}}  # tensor of interdiffusion coefficients
+                  NTuple{9, Vector{T2}}}  # matrix of interdiffusion coefficients
     L_charact::T2
     D_charact::T2
     t_charact::T2
@@ -331,7 +348,7 @@ end
     u0::Matrix{T2}
     tfinal_ad::T2
     time_update_ad::T1
-    function DomainSphericalMajor(IC::InitialConditionsSpherical, T::T1, P::T1, time_update::T1, fugacity_O2::T1) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}}
+    function DomainSphericalMajor(IC::InitialConditionsSpherical, T::T1, P::T1, time_update::T1, fugacity_O2::T1, diffcoef::Int) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}}
 
         #check that T, P and time_update have the same size
         if size(T, 1) ≠ size(P, 1) || size(T, 1) ≠ size(time_update, 1)
@@ -340,20 +357,64 @@ end
 
         @unpack nr, Δr, r, tfinal, Lr, CMg0, CFe0, CMn0 = IC
 
+        # define the trace diffusion coefficients based on the chosen dataset
+        if diffcoef == 1
+            Grt_Mg = SetChemicalDiffusion(Grt_Mg_Chakraborty1992)
+            Grt_Fe = SetChemicalDiffusion(Grt_Fe_Chakraborty1992)
+            Grt_Mn = SetChemicalDiffusion(Grt_Mn_Chakraborty1992)
+
+            D0_data = (Grt_Mg=Grt_Mg, Grt_Fe=Grt_Fe, Grt_Mn=Grt_Mn)
+        elseif diffcoef == 2
+            Grt_Mg = SetChemicalDiffusion(Grt_Mg_Carlson2006)
+            Grt_Fe = SetChemicalDiffusion(Grt_Fe_Carlson2006)
+            Grt_Mn = SetChemicalDiffusion(Grt_Mn_Carlson2006)
+            Grt_Ca = SetChemicalDiffusion(Grt_Ca_Carlson2006)
+
+            D0_data = (Grt_Mg=Grt_Mg, Grt_Fe=Grt_Fe, Grt_Mn=Grt_Mn, Grt_Ca=Grt_Ca)
+        elseif diffcoef == 3
+            Grt_Mg = SetChemicalDiffusion(Grt_Mg_Chu2015)
+            Grt_Fe = SetChemicalDiffusion(Grt_Fe_Chu2015)
+            Grt_Mn = SetChemicalDiffusion(Grt_Mn_Chu2015)
+            Grt_Ca = SetChemicalDiffusion(Grt_Ca_Chu2015)
+
+            D0_data = (Grt_Mg=Grt_Mg, Grt_Fe=Grt_Fe, Grt_Mn=Grt_Mn, Grt_Ca=Grt_Ca)
+        end
+
+        T_tuplediffdata = typeof(D0_data)
+
         T2 = eltype(CMg0)
 
-        D0 = zeros(T2, 4)
-        D_ini!(D0, T[1], P[1], fugacity_O2[1])  # compute initial diffusion coefficients
+        D0 = zeros(T2, 4, nr)
 
-        D = (DMgMg = zeros(T2, nr), DMgFe = zeros(T2, nr), DMgMn = zeros(T2, nr), DFeMg = zeros(T2, nr), DFeFe = zeros(T2, nr), DFeMn = zeros(T2, nr), DMnMg = zeros(T2, nr), DMnFe = zeros(T2, nr), DMnMn = zeros(T2, nr))  # tensor of interdiffusion coefficients
+        # iterate through D0 and compute the initial diffusion coefficients
+        for j in axes(D0, 2)
+            D0_view = @view D0[:, j]
+
+            # compute the diffusion coefficients for each point
+            D_update!(D0_view, T[1], P[1], diffcoef, CMg0[j], CFe0[j], CMn0[j], D0_data, fugacity_O2[1])  # compute initial diffusion coefficients
+        end
+
+        D = (DMgMg = zeros(T2, nr),
+             DMgFe = zeros(T2, nr),
+             DMgMn = zeros(T2, nr),
+             DFeMg = zeros(T2, nr),
+             DFeFe = zeros(T2, nr),
+             DFeMn = zeros(T2, nr),
+             DMnMg = zeros(T2, nr),
+             DMnFe = zeros(T2, nr),
+             DMnMn = zeros(T2, nr))  # matrix of interdiffusion coefficients
 
         u0::Matrix{T2} = similar(CMg0, (nr, 3))
         u0[:,1] .= CMg0
         u0[:,2] .= CFe0
         u0[:,3] .= CMn0
 
+        # find index of the first column of non-zero values in D0
+        first_nonzero_col = findfirst(!iszero, D0[1, :])
+        D0_mean = mean(D0[:, first_nonzero_col])  # mean diffusion coefficient
+
         L_charact = copy(Lr)  # characteristic length
-        D_charact = mean(D0)  # characteristic
+        D_charact = D0_mean  # characteristic
         t_charact = L_charact^2 / D_charact  # characteristic time
 
         Δrad = Δr ./ L_charact  # nondimensionalised Δr
@@ -364,18 +425,20 @@ end
 
         T3 = typeof(IC)
 
-        new{T1, T2, T3}(IC, T, P, fugacity_O2, time_update, D0, D, L_charact, D_charact, t_charact, Δrad, Δrad_, r_ad, u0, tfinal_ad, time_update_ad)
+        new{T1, T2, T3, T_tuplediffdata}(IC, T, P, fugacity_O2, time_update, diffcoef, D0_data, D0, D, L_charact, D_charact, t_charact, Δrad, Δrad_, r_ad, u0, tfinal_ad, time_update_ad)
     end
 end
 
-@kwdef struct Domain2DMajor{T1, T2, T3, T4, T5, T6} <: Domain
+@kwdef struct Domain2DMajor{T1, T2, T3, T4, T5, T6, T_tuplediffdata} <: Domain
     IC::T6
     T::T1
     P::T1
     fugacity_O2::T1
     time_update::T1
-    D0::T3
-    D::T4  # tensor of interdiffusion coefficients
+    diffcoef::Int
+    D0_data::T_tuplediffdata  # tuple of diffusion coefficients data
+    D0::T5
+    D::T4  # matrix of interdiffusion coefficients
     L_charact::T2
     D_charact::T2
     t_charact::T2
@@ -384,26 +447,75 @@ end
     u0::T5
     tfinal_ad::T2
     time_update_ad::T1
-    function Domain2DMajor(IC::InitialConditions2DMajor, T::T1, P::T1, time_update::T1, fugacity_O2::T1) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}}
+    function Domain2DMajor(IC::InitialConditions2DMajor, T::T1, P::T1, time_update::T1, fugacity_O2::T1, diffcoef::Int) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}}
+
+        # check that T, P and time_update have the same size
+        if size(T, 1) ≠ size(P, 1) || size(T, 1) ≠ size(time_update, 1)
+            error("T, P and time_update should have the same size.")
+        end
+
         @unpack nx, ny, Δx, Δy, tfinal, Lx, CMg0, CFe0, CMn0 = IC
 
+        # define the trace diffusion coefficients based on the chosen dataset
+        if diffcoef == 1
+            Grt_Mg = SetChemicalDiffusion(Grt_Mg_Chakraborty1992)
+            Grt_Fe = SetChemicalDiffusion(Grt_Fe_Chakraborty1992)
+            Grt_Mn = SetChemicalDiffusion(Grt_Mn_Chakraborty1992)
 
-        D0 = similar(CMg0, 4)
-        D_ini!(D0, T[1], P[1], fugacity_O2[1])  # compute initial diffusion coefficients
+            D0_data = (Grt_Mg=Grt_Mg, Grt_Fe=Grt_Fe, Grt_Mn=Grt_Mn, Grt_Ca=Grt_Fe) # fake Grt_Ca to make parallelStencil happy!!
+        elseif diffcoef == 2
+            Grt_Mg = SetChemicalDiffusion(Grt_Mg_Carlson2006)
+            Grt_Fe = SetChemicalDiffusion(Grt_Fe_Carlson2006)
+            Grt_Mn = SetChemicalDiffusion(Grt_Mn_Carlson2006)
+            Grt_Ca = SetChemicalDiffusion(Grt_Ca_Carlson2006)
 
-        D = (DMgMg = similar(CMg0, (nx,ny)), DMgFe = similar(CMg0, (nx,ny)), DMgMn = similar(CMg0, (nx,ny)), DFeMg = similar(CMg0, (nx,ny)), DFeFe = similar(CMg0, (nx,ny)), DFeMn = similar(CMg0, (nx,ny)), DMnMg = similar(CMg0, (nx,ny)), DMnFe = similar(CMg0, (nx,ny)), DMnMn = similar(CMg0, (nx,ny)))  # tensor of interdiffusion coefficients
+            D0_data = (Grt_Mg=Grt_Mg, Grt_Fe=Grt_Fe, Grt_Mn=Grt_Mn, Grt_Ca=Grt_Ca)
+        elseif diffcoef == 3
+            Grt_Mg = SetChemicalDiffusion(Grt_Mg_Chu2015)
+            Grt_Fe = SetChemicalDiffusion(Grt_Fe_Chu2015)
+            Grt_Mn = SetChemicalDiffusion(Grt_Mn_Chu2015)
+            Grt_Ca = SetChemicalDiffusion(Grt_Ca_Chu2015)
 
-        for i in eachindex(D)
-            D[i] .= 0
+            D0_data = (Grt_Mg=Grt_Mg, Grt_Fe=Grt_Fe, Grt_Mn=Grt_Mn, Grt_Ca=Grt_Ca)
         end
+
+        T_tuplediffdata = typeof(D0_data)
+
+        T2 = eltype(CMg0)
+        D0 = zeros(T2, 4, nx, ny)
+
+        # iterate through D0 and compute the initial diffusion coefficients
+        for j in axes(D0, 2)
+            for k in axes(D0, 3)
+                D0_view = @view D0[:, j, k]
+
+                # compute the diffusion coefficients for each point
+                D_update!(D0_view, T[1], P[1], diffcoef, CMg0[j, k], CFe0[j, k], CMn0[j, k], D0_data, fugacity_O2[1])  # compute initial diffusion coefficients
+            end
+        end
+
+        D = (DMgMg = zeros(T2, nx, ny),
+             DMgFe = zeros(T2, nx, ny),
+             DMgMn = zeros(T2, nx, ny),
+             DFeMg = zeros(T2, nx, ny),
+             DFeFe = zeros(T2, nx, ny),
+             DFeMn = zeros(T2, nx, ny),
+             DMnMg = zeros(T2, nx, ny),
+             DMnFe = zeros(T2, nx, ny),
+             DMnMn = zeros(T2, nx, ny))  # matrix of interdiffusion coefficients
 
         u0 = similar(CMg0, (nx, ny, 3))
         u0[:, :, 1] .= CMg0
         u0[:, :, 2] .= CFe0
         u0[:, :, 3] .= CMn0
 
+        # to estimate D_charact in 2D and 3D, we simply take a fake composition of garnet.
+        # this is because if D0 is composition dependent, some of them have wrong values for non-garnet compositions.
+        D0_charact = zeros(4)
+        D_update!(D0_charact, T[1], P[1], diffcoef, 0.25, 0.7, 0.025, D0_data, fugacity_O2[1])
+
         L_charact = copy(Lx)  # characteristic length
-        D_charact = mean(D0)  # characteristic
+        D_charact = mean(D0_charact)  # characteristic
         t_charact = L_charact^2 / D_charact  # characteristic time
         Δxad_ = 1 / (Δx / L_charact)  # inverse of nondimensionalised Δx
         Δyad_ = 1 / (Δy / L_charact)  # inverse of nondimensionalised Δy
@@ -416,16 +528,18 @@ end
         T5 = typeof(u0)
         T6 = typeof(IC)
 
-        new{T1, T2, T3, T4, T5, T6}(IC, T, P, fugacity_O2, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, Δyad_, u0, tfinal_ad, time_update_ad)
+        new{T1, T2, T3, T4, T5, T6, T_tuplediffdata}(IC, T, P, fugacity_O2, time_update, diffcoef, D0_data, D0, D, L_charact, D_charact, t_charact, Δxad_, Δyad_, u0, tfinal_ad, time_update_ad)
     end
 end
 
-@kwdef struct Domain3DMajor{T1, T2, T3, T4, T5, T6} <: Domain
+@kwdef struct Domain3DMajor{T1, T2, T3, T4, T5, T6, T_tuplediffdata} <: Domain
     IC::T6
     T::T1
     P::T1
     fugacity_O2::T1
     time_update::T1
+    diffcoef::Int
+    D0_data::T_tuplediffdata  # tuple of diffusion coefficients data
     D0::T3
     D::T4
     L_charact::T2
@@ -437,25 +551,72 @@ end
     u0::T5
     tfinal_ad::T2
     time_update_ad::T1
-    function Domain3DMajor(IC::InitialConditions3DMajor, T::T1, P::T1, time_update::T1, fugacity_O2::T1) where {T1 <: Union{Float64, Array{Float64, 1}}}
+    function Domain3DMajor(IC::InitialConditions3DMajor, T::T1, P::T1, time_update::T1, fugacity_O2::T1, diffcoef::Int) where {T1 <: Union{Float64, Array{Float64, 1}}}
+
         @unpack nx, ny, nz, Δx, Δy, Δz, tfinal, Lx, CMg0, CFe0, CMn0 = IC
 
-        D0 = similar(CMg0, 4)
-        D_ini!(D0, T[1], P[1], fugacity_O2[1])  # compute initial diffusion coefficients
+        # define the trace diffusion coefficients based on the chosen dataset
+        if diffcoef == 1
+            Grt_Mg = SetChemicalDiffusion(Grt_Mg_Chakraborty1992)
+            Grt_Fe = SetChemicalDiffusion(Grt_Fe_Chakraborty1992)
+            Grt_Mn = SetChemicalDiffusion(Grt_Mn_Chakraborty1992)
 
-        D = (DMgMg = similar(CMg0, (nx, ny, nz)), DMgFe = similar(CMg0, (nx, ny, nz)), DMgMn = similar(CMg0, (nx, ny, nz)), DFeMg = similar(CMg0, (nx, ny, nz)), DFeFe = similar(CMg0, (nx, ny, nz)), DFeMn = similar(CMg0, (nx, ny, nz)), DMnMg = similar(CMg0, (nx, ny, nz)), DMnFe = similar(CMg0, (nx, ny, nz)), DMnMn = similar(CMg0, (nx, ny, nz)))  # tensor of interdiffusion coefficients
+            D0_data = (Grt_Mg=Grt_Mg, Grt_Fe=Grt_Fe, Grt_Mn=Grt_Mn)
+        elseif diffcoef == 2
+            Grt_Mg = SetChemicalDiffusion(Grt_Mg_Carlson2006)
+            Grt_Fe = SetChemicalDiffusion(Grt_Fe_Carlson2006)
+            Grt_Mn = SetChemicalDiffusion(Grt_Mn_Carlson2006)
+            Grt_Ca = SetChemicalDiffusion(Grt_Ca_Carlson2006)
 
-        for i in eachindex(D)
-            D[i] .= 0
+            D0_data = (Grt_Mg=Grt_Mg, Grt_Fe=Grt_Fe, Grt_Mn=Grt_Mn, Grt_Ca=Grt_Ca)
+        elseif diffcoef == 3
+            Grt_Mg = SetChemicalDiffusion(Grt_Mg_Chu2015)
+            Grt_Fe = SetChemicalDiffusion(Grt_Fe_Chu2015)
+            Grt_Mn = SetChemicalDiffusion(Grt_Mn_Chu2015)
+            Grt_Ca = SetChemicalDiffusion(Grt_Ca_Chu2015)
+
+            D0_data = (Grt_Mg=Grt_Mg, Grt_Fe=Grt_Fe, Grt_Mn=Grt_Mn, Grt_Ca=Grt_Ca)
         end
+
+        T_tuplediffdata = typeof(D0_data)
+
+        D0 = similar(CMg0, 4, nx, ny, nz)
+
+        # iterate through D0 and compute the initial diffusion coefficients
+        for j in axes(D0, 2)
+            for k in axes(D0, 3)
+                for l in axes(D0, 4)
+                    D0_view = @view D0[:, j, k, l]
+                    # compute the diffusion coefficients for each point
+                    D_update!(D0_view, T[1], P[1], diffcoef, CMg0[j, k, l], CFe0[j, k, l], CMn0[j, k, l], D0_data, fugacity_O2[1])  #
+                end
+            end
+        end
+
+
+
+        D = (DMgMg = zeros(eltype(CMg0), nx, ny, nz),
+             DMgFe = zeros(eltype(CMg0), nx, ny, nz),
+             DMgMn = zeros(eltype(CMg0), nx, ny, nz),
+             DFeMg = zeros(eltype(CMg0), nx, ny, nz),
+             DFeFe = zeros(eltype(CMg0), nx, ny, nz),
+             DFeMn = zeros(eltype(CMg0), nx, ny, nz),
+             DMnMg = zeros(eltype(CMg0), nx, ny, nz),
+             DMnFe = zeros(eltype(CMg0), nx, ny, nz),
+             DMnMn = zeros(eltype(CMg0), nx, ny, nz))  # matrix of interdiffusion coefficients
 
         u0 = similar(CMg0, (nx, ny, nz, 3))
         u0[:, :, :, 1] .= CMg0
         u0[:, :, :, 2] .= CFe0
         u0[:, :, :, 3] .= CMn0
 
+        # to estimate D_charact in 2D and 3D, we simply take a fake composition of garnet.
+        # this is because if D0 is composition dependent, some of them have wrong values for non-garnet compositions.
+        D0_charact = zeros(4)
+        D_update!(D0_charact, T[1], P[1], diffcoef, 0.25, 0.7, 0.025, D0_data, fugacity_O2[1])
+
         L_charact = copy(Lx)  # characteristic length
-        D_charact = mean(D0)  # characteristic
+        D_charact = mean(D0_charact)  # characteristic
         t_charact = L_charact^2 / D_charact  # characteristic time
 
         Δxad_ = 1 / (Δx / L_charact)  # inverse of nondimensionalised Δx
@@ -470,7 +631,7 @@ end
         T5 = typeof(u0)
         T6 = typeof(IC)
 
-        new{T1, T2, T3, T4, T5, T6}(IC, T, P, fugacity_O2, time_update, D0, D, L_charact, D_charact, t_charact, Δxad_, Δyad_, Δzad_, u0, tfinal_ad, time_update_ad)
+        new{T1, T2, T3, T4, T5, T6, T_tuplediffdata}(IC, T, P, fugacity_O2, time_update, diffcoef, D0_data, D0, D, L_charact, D_charact, t_charact, Δxad_, Δyad_, Δzad_, u0, tfinal_ad, time_update_ad)
     end
 end
 
@@ -480,8 +641,19 @@ end
 
 When applied to 1D initial conditions, define corresponding 1D domain. `bc_neumann` can be used to define Neumann boundary conditions on the left or right side of the domain if set to true.
 """
-function Domain(IC::InitialConditions1DMajor, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr", fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa"; bc_neumann::Tuple=(false, false))
-    Domain1DMajor(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)), bc_neumann)
+function Domain(IC::InitialConditions1DMajor, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr", fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa";diffcoef::Symbol=:CG92, bc_neumann::Tuple=(false, false))
+
+    if diffcoef == :CG92
+        diffcoef = 1
+    elseif diffcoef == :C06
+        diffcoef = 2
+    elseif diffcoef == :CA15
+        diffcoef = 3
+    else
+        error("Unknown diffusion coefficient. Use :CG92 for Chakraborty and Ganguly (1992), :C06 for Carlson 2006 and :CA15 for Chu and Ague 2015.")
+    end
+
+    Domain1DMajor(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)), Int(diffcoef), bc_neumann)
 end
 
 """
@@ -489,8 +661,20 @@ end
 
 When applied to spherical initial conditions, define corresponding spherical domain. Assume that the center of the grain is on the left side.
 """
-function Domain(IC::InitialConditionsSpherical, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr", fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa")
-    DomainSphericalMajor(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)))
+function Domain(IC::InitialConditionsSpherical, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr", fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa"; diffcoef::Symbol=:CG92)
+
+    if diffcoef == :CG92
+        diffcoef = 1
+    elseif diffcoef == :C06
+        diffcoef = 2
+    elseif diffcoef == :CA15
+        diffcoef = 3
+    else
+        error("Unknown diffusion coefficient. Use :CG92 for Chakraborty and Ganguly (1992), :C06 for Carlson 2006 and :CA15 for Chu and Ague 2015.")
+    end
+
+
+    DomainSphericalMajor(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)), Int(diffcoef))
 end
 
 """
@@ -498,8 +682,19 @@ end
 
 When applied to 2D initial conditions, define corresponding 2D domain.
 """
-function Domain(IC::InitialConditions2DMajor, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr", fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa")
-    Domain2DMajor(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)))
+function Domain(IC::InitialConditions2DMajor, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr", fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa"; diffcoef::Symbol=:CG92)
+
+    if diffcoef == :CG92
+        diffcoef = 1
+    elseif diffcoef == :C06
+        diffcoef = 2
+    elseif diffcoef == :CA15
+        diffcoef = 3
+    else
+        error("Unknown diffusion coefficient. Use :CG92 for Chakraborty and Ganguly (1992), :C06 for Carlson 2006 and :CA15 for Chu and Ague 2015.")
+    end
+
+    Domain2DMajor(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)), Int(diffcoef))
 end
 
 """
@@ -507,6 +702,17 @@ end
 
 When applied to 3D initial conditions, define corresponding 3D domain.
 """
-function Domain(IC::InitialConditions3DMajor, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr", fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa")
-    Domain3DMajor(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)))
+function Domain(IC::InitialConditions3DMajor, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr", fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa"; diffcoef::Symbol=:CG92)
+
+    if diffcoef == :CG92
+        diffcoef = 1
+    elseif diffcoef == :C06
+        diffcoef = 2
+    elseif diffcoef == :CA15
+        diffcoef = 3
+    else
+        error("Unknown diffusion coefficient. Use :CG92 for Chakraborty and Ganguly (1992), :C06 for Carlson 2006 and :CA15 for Chu and Ague 2015.")
+    end
+
+    Domain3DMajor(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)), Int(diffcoef))
 end

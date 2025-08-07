@@ -1,25 +1,54 @@
 
 import Base.@propagate_inbounds
 
-@parallel_indices (ix, iy, iz) function Diffusion_coef_3D_major!(DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn, CMg, CFe ,CMn, D0, D_charact, grt_position)
+@parallel_indices (ix, iy, iz) function Diffusion_coef_3D_major!(DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn, CMg, CFe ,CMn, D0, D_charact, grt_position, diffcoef, D0_data, T, P, fugacity_O2, time_update_ad, t)
 
-    @propagate_inbounds @inline sum_D(CMg, CFe, CMn, D0, ix, iy, iz) = D0[1] * CMg[ix, iy, iz] + D0[2] * CFe[ix, iy, iz] + D0[3] * CMn[ix, iy, iz] +
-        D0[4] * (1 - CMg[ix, iy, iz] - CFe[ix, iy, iz] - CMn[ix, iy, iz])
+    @propagate_inbounds @inline sum_D(CMg, CFe, CMn, D0, ix, iy, iz) = D0[1, ix, iy, iz] * CMg[ix, iy, iz] + D0[2, ix, iy, iz] * CFe[ix, iy, iz] + D0[3, ix, iy, iz] * CMn[ix, iy, iz] +
+        D0[4, ix, iy, iz] * (1 - CMg[ix, iy, iz] - CFe[ix, iy, iz] - CMn[ix, iy, iz])
 
     D_charact_ = 1 / D_charact
 
+    # end-member unit-cell dimensions for C12 and CA15
+    a0_Fe = 1.1525
+    a0_Mg = 1.1456
+    a0_Mn = 1.1614
+    a0_Ca = 1.1852
+
+    # find current T, P, and fugacity_O2
+    # to do this, we need to find the lower bound of t in time_update_ad
+    index = findfirst(x -> x >= t, time_update_ad)
+    if index === nothing
+        index = length(time_update_ad)
+    end
+
+    P_kbar = P[index] * 1u"kbar"
+    T_C = T[index] * 1u"C"
+    fO2 = (fugacity_O2[index])NoUnits
+
     if ix>1 && ix<size(DMgMg,1) && iy>1 && iy<size(DMgMg,2) && iz>1 && iz<size(DMgMg,3)
         if grt_position[ix,iy,iz] == 1.0
+
+            # there is a composition dependence in the self-diffusion coefficients for C12 and CA15
+            if diffcoef == 2 || diffcoef == 3
+
+                X = (CMg[ix, iy, iz] * a0_Fe + CFe[ix, iy, iz] * a0_Mg + CMn[ix, iy, iz] * a0_Mn + (1 - (CMg[ix, iy, iz] + CFe[ix, iy, iz] + CMn[ix, iy, iz])) * a0_Ca)NoUnits
+
+                D0[1, ix, iy, iz] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mg, T = T_C, P = P_kbar, fO2 = fO2, X = X)))
+                D0[2, ix, iy, iz] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Fe, T = T_C, P = P_kbar, fO2 = fO2, X = X)))
+                D0[3, ix, iy, iz] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mn, T = T_C, P = P_kbar, fO2 = fO2, X = X)))
+                D0[4, ix, iy, iz] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Ca, T = T_C, P = P_kbar, fO2 = fO2, X = X)))
+            end
+
             sum_D_ = 1 / sum_D(CMg,CFe,CMn,D0,ix,iy,iz)
-            DMgMg[ix,iy,iz] = (D0[1] - D0[1] * CMg[ix,iy,iz] * sum_D_ * (D0[1] - D0[end])) * D_charact_
-            DMgFe[ix,iy,iz] = (      - D0[1] * CMg[ix,iy,iz] * sum_D_ * (D0[2] - D0[end])) * D_charact_
-            DMgMn[ix,iy,iz] = (      - D0[1] * CMg[ix,iy,iz] * sum_D_ * (D0[3] - D0[end])) * D_charact_
-            DFeMg[ix,iy,iz] = (      - D0[2] * CFe[ix,iy,iz] * sum_D_ * (D0[1] - D0[end])) * D_charact_
-            DFeFe[ix,iy,iz] = (D0[2] - D0[2] * CFe[ix,iy,iz] * sum_D_ * (D0[2] - D0[end])) * D_charact_
-            DFeMn[ix,iy,iz] = (      - D0[2] * CFe[ix,iy,iz] * sum_D_ * (D0[3] - D0[end])) * D_charact_
-            DMnMg[ix,iy,iz] = (      - D0[3] * CMn[ix,iy,iz] * sum_D_ * (D0[1] - D0[end])) * D_charact_
-            DMnFe[ix,iy,iz] = (      - D0[3] * CMn[ix,iy,iz] * sum_D_ * (D0[2] - D0[end])) * D_charact_
-            DMnMn[ix,iy,iz] = (D0[3] - D0[3] * CMn[ix,iy,iz] * sum_D_ * (D0[3] - D0[end])) * D_charact_
+            DMgMg[ix,iy,iz] = (D0[1, ix, iy, iz] - D0[1, ix, iy, iz] * CMg[ix,iy,iz] * sum_D_ * (D0[1, ix, iy, iz] - D0[end])) * D_charact_
+            DMgFe[ix,iy,iz] = (      - D0[1, ix, iy, iz] * CMg[ix,iy,iz] * sum_D_ * (D0[2, ix, iy, iz] - D0[end])) * D_charact_
+            DMgMn[ix,iy,iz] = (      - D0[1, ix, iy, iz] * CMg[ix,iy,iz] * sum_D_ * (D0[3, ix, iy, iz] - D0[end])) * D_charact_
+            DFeMg[ix,iy,iz] = (      - D0[2, ix, iy, iz] * CFe[ix,iy,iz] * sum_D_ * (D0[1, ix, iy, iz] - D0[end])) * D_charact_
+            DFeFe[ix,iy,iz] = (D0[2, ix, iy, iz] - D0[2, ix, iy, iz] * CFe[ix,iy,iz] * sum_D_ * (D0[2, ix, iy, iz] - D0[end])) * D_charact_
+            DFeMn[ix,iy,iz] = (      - D0[2, ix, iy, iz] * CFe[ix,iy,iz] * sum_D_ * (D0[3, ix, iy, iz] - D0[end])) * D_charact_
+            DMnMg[ix,iy,iz] = (      - D0[3, ix, iy, iz] * CMn[ix,iy,iz] * sum_D_ * (D0[1, ix, iy, iz] - D0[end])) * D_charact_
+            DMnFe[ix,iy,iz] = (      - D0[3, ix, iy, iz] * CMn[ix,iy,iz] * sum_D_ * (D0[2, ix, iy, iz] - D0[end])) * D_charact_
+            DMnMn[ix,iy,iz] = (D0[3, ix, iy, iz] - D0[3, ix, iy, iz] * CMn[ix,iy,iz] * sum_D_ * (D0[3, ix, iy, iz] - D0[end])) * D_charact_
         end
     end
 
@@ -154,9 +183,9 @@ end
 end
 
 
-function semi_discretisation_diffusion_cartesian(du::T,u::T,p,t) where T <: AbstractArray{<:Real, 4}
+function semi_discretisation_diffusion_cartesian(du::Array_T,u::Array_T,p,t) where Array_T <: AbstractArray{<:Real, 4}
 
-    @unpack D, D0, D_charact, Δxad_, Δyad_, Δzad_ = p.domain
+    @unpack D, D0, D_charact, Δxad_, Δyad_, Δzad_, diffcoef, D0_data, T, P, fugacity_O2, time_update_ad = p.domain
     @unpack grt_position, grt_boundary = p.domain.IC
     DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn = D
 
@@ -170,7 +199,7 @@ function semi_discretisation_diffusion_cartesian(du::T,u::T,p,t) where T <: Abst
 
     # update diffusive parameters
     @parallel Diffusion_coef_3D_major!(DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn,
-                                 CMg, CFe ,CMn, D0, D_charact, grt_position)
+                                 CMg, CFe ,CMn, D0, D_charact, grt_position, diffcoef, D0_data, T, P, fugacity_O2, time_update_ad, t)
 
 
     # semi-discretization

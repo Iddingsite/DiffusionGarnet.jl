@@ -1,33 +1,5 @@
 import Base.@propagate_inbounds
 
-function Diffusion_coef_spherical_major!(D, CMg, CFe, CMn, D0, D_charact)
-
-    DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn = D
-
-    D_charact_ = 1 / D_charact
-
-    @propagate_inbounds @inline sum_D(CMg, CFe, CMn, D0, I) = D0[1] * CMg[I] + D0[2] * CFe[I] + D0[3] * CMn[I] +
-    D0[4] * (1 - CMg[I] - CFe[I] - CMn[I])
-
-    @inbounds for I in eachindex(DMgMg)
-        sum_D_ = 1 / (sum_D(CMg, CFe, CMn, D0, I))
-
-        DMgMg[I] = (D0[1] - D0[1] * CMg[I] * sum_D_ * (D0[1] - D0[end])) * D_charact_
-        DMgFe[I] = (      - D0[1] * CMg[I] * sum_D_ * (D0[2] - D0[end])) * D_charact_
-        DMgMn[I] = (      - D0[1] * CMg[I] * sum_D_ * (D0[3] - D0[end])) * D_charact_
-
-        DFeMg[I] = (      - D0[2] * CFe[I] * sum_D_ * (D0[1] - D0[end])) * D_charact_
-        DFeFe[I] = (D0[2] - D0[2] * CFe[I] * sum_D_ * (D0[2] - D0[end])) * D_charact_
-        DFeMn[I] = (      - D0[2] * CFe[I] * sum_D_ * (D0[3] - D0[end])) * D_charact_
-
-        DMnMg[I] = (      - D0[3] * CMn[I] * sum_D_ * (D0[1] - D0[end])) * D_charact_
-        DMnFe[I] = (      - D0[3] * CMn[I] * sum_D_ * (D0[2] - D0[end])) * D_charact_
-        DMnMn[I] = (D0[3] - D0[3] * CMn[I] * sum_D_ * (D0[3] - D0[end])) * D_charact_
-    end
-end
-
-
-
 function stencil_diffusion_spherical_major!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δrad_, r_ad)
 
     DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn = D
@@ -84,8 +56,8 @@ function semi_discretisation_diffusion_spherical(du,u,p,t)
     dtCFe = @view du[:,2]
     dtCMn = @view du[:,3]
 
-    # update diffusive parameters
-    Diffusion_coef_spherical_major!(D, CMg, CFe ,CMn, D0, D_charact)
+    # update diffusive parameters (we can use the same function as in 1D)
+    Diffusion_coef_1D_major!(D, CMg, CFe, CMn, D0, D_charact, p.domain, t)
 
     # semi-discretization
     stencil_diffusion_spherical_major!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δrad_, r_ad)
