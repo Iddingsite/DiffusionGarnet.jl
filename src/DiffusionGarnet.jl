@@ -16,6 +16,8 @@ using OrdinaryDiffEqStabilizedRK: ODEProblem, solve
 using ParallelStencil
 using GeoParams: compute_D, SetChemicalDiffusion, AbstractChemicalDiffusion
 using GeoParams.Garnet: Grt_Fe_Chakraborty1992, Grt_Mg_Chakraborty1992, Grt_Mn_Chakraborty1992
+using GeoParams.Garnet: Grt_Fe_Carlson2006, Grt_Mg_Carlson2006, Grt_Mn_Carlson2006, Grt_Ca_Carlson2006
+using GeoParams.Garnet: Grt_Fe_Chu2015, Grt_Mg_Chu2015, Grt_Mn_Chu2015, Grt_Ca_Chu2015
 using Preferences
 using HDF5: h5open, create_group, attributes, read_attribute
 using DelimitedFiles

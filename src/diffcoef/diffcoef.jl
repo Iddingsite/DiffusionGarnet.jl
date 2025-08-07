@@ -19,7 +19,7 @@ function D_update!(D0, T, P, diffcoef, CMg, CFe, CMn, D0_data, fugacity_O2=1e-25
         a0_Mn = 1.1614
         a0_Ca = 1.1852
 
-        X = (CMg * a0_Fe + CFe * a0_Mg + CMn * a0_Mn + (1 - (CMg + CFe + CMn)) * a0_Ca)NoUnits
+        X = (CFe * a0_Fe + CMg * a0_Mg + CMn * a0_Mn + (1 - (CMg + CFe + CMn)) * a0_Ca)NoUnits
     end
 
     DMg = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mg, T = T_K, P = P_kbar, fO2 = (fugacity_O2)NoUnits, X = X)))

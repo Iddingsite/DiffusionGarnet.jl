@@ -26,7 +26,7 @@ function Diffusion_coef_1D_major!(D, CMg, CFe, CMn, D0, D_charact, domain, t)
     end
 
     P_kbar = P[index] * 1u"kbar"
-    T_C = T[index] * 1u"C"
+    T_K = (T[index] + 273.15) * 1u"K"
     fO2 = (fugacity_O2[index])NoUnits
 
     # @inbounds for I in eachindex(DMgMg)
@@ -35,15 +35,12 @@ function Diffusion_coef_1D_major!(D, CMg, CFe, CMn, D0, D_charact, domain, t)
         # there is a composition dependence in the self-diffusion coefficients for C12 and CA15
         if diffcoef == 2 || diffcoef == 3
 
-            X = (CMg[I] * a0_Fe + CFe[I] * a0_Mg + CMn[I] * a0_Mn + (1 - (CMg[I] + CFe[I] + CMn[I])) * a0_Ca)NoUnits
+            X = (CFe[I] * a0_Fe + CMg[I] * a0_Mg + CMn[I] * a0_Mn + (1 - (CMg[I] + CFe[I] + CMn[I])) * a0_Ca)NoUnits
 
-            # if there is no garnet, no need to update the diffusion coefficients
-            if X !== (a0Ca)NoUnits
-                D0[1, I] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mg, T = T_C, P = P_kbar, fO2 = fO2, X = X)))
-                D0[2, I] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Fe, T = T_C, P = P_kbar, fO2 = fO2, X = X)))
-                D0[3, I] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mn, T = T_C, P = P_kbar, fO2 = fO2, X = X)))
-                D0[4, I] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Ca, T = T_C, P = P_kbar, fO2 = fO2, X = X)))
-            end
+            D0[1, I] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mg, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
+            D0[2, I] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Fe, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
+            D0[3, I] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mn, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
+            D0[4, I] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Ca, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
         end
 
         sum_D_ = 1 / (sum_D(CMg, CFe, CMn, D0, I))

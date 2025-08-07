@@ -110,9 +110,9 @@ using LinearAlgebra: norm
         CFe0 = 0.1
         CMn0 = 0.1
 
-        Grt_Mg = SetChemicalDiffusion(Garnet.Grt_Mg_Chakraborty1992)
-        Grt_Fe = SetChemicalDiffusion(Garnet.Grt_Fe_Chakraborty1992)
-        Grt_Mn = SetChemicalDiffusion(Garnet.Grt_Mn_Chakraborty1992)
+        Grt_Mg = SetChemicalDiffusion(Garnet.Grt_Mg_Carlson2006)
+        Grt_Fe = SetChemicalDiffusion(Garnet.Grt_Fe_Carlson2006)
+        Grt_Mn = SetChemicalDiffusion(Garnet.Grt_Mn_Carlson2006)
 
         D0_data = (Grt_Mg=Grt_Mg, Grt_Fe=Grt_Fe, Grt_Mn=Grt_Mn)
 
