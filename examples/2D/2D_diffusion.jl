@@ -49,5 +49,5 @@ end every 1
 println("...Done!")
 
 println("Now, generating the gif...")
-gif(anim, "Grt_2D.gif", fps = 3)
+gif(anim, "Grt_2D_2.gif", fps = 3)
 println("...Done!")

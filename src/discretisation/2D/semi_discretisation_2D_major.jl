@@ -1,6 +1,6 @@
 import Base.@propagate_inbounds
 
-@parallel_indices (ix, iy) function Diffusion_coef_2D_major!(DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn, CMg, CFe ,CMn, D0, D_charact, grt_position, diffcoef, D0_data, T, P, fugacity_O2, time_update_ad, t)
+@parallel_indices (ix, iy) function Diffusion_coef_2D_major!(DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn, CMg, CFe ,CMn, D0, D_charact, grt_position, grt_boundary, diffcoef, D0_data, T, P, fugacity_O2, time_update_ad, t)
 
     @propagate_inbounds @inline sum_D(CMg, CFe, CMn, D0, ix, iy) = D0[1, ix, iy] * CMg[ix, iy] + D0[2, ix, iy] * CFe[ix, iy] + D0[3, ix, iy] * CMn[ix, iy] +
         D0[4, ix, iy] * (1 - CMg[ix, iy] - CFe[ix, iy] - CMn[ix, iy])
@@ -23,21 +23,21 @@ import Base.@propagate_inbounds
     end
 
     P_kbar = P[index] * 1u"kbar"
-    T_C = T[index] * 1u"C"
+    T_K = (T[index]+273.15) * 1u"K"
     fO2 = (fugacity_O2[index])NoUnits
 
     if ix>1 && ix<size(DMgMg,1) && iy>1 && iy<size(DMgMg,2)
-        if grt_position[ix,iy] == 1.0
+        if grt_position[ix,iy] == 1.0 || grt_boundary[ix,iy] == 1.0
 
             # there is a composition dependence in the self-diffusion coefficients for C12 and CA15
             if diffcoef == 2 || diffcoef == 3
 
-                X = (CFe[I] * a0_Fe + CMg[I] * a0_Mg + CMn[I] * a0_Mn + (1 - (CMg[I] + CFe[I] + CMn[I])) * a0_Ca)NoUnits
+                X = (CFe[ix,iy] * a0_Fe + CMg[ix,iy] * a0_Mg + CMn[ix,iy] * a0_Mn + (1 - (CMg[ix,iy] + CFe[ix,iy] + CMn[ix,iy])) * a0_Ca)NoUnits
 
-                D0[1, ix, iy] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mg, T = T_C, P = P_kbar, fO2 = fO2, X = X)))
-                D0[2, ix, iy] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Fe, T = T_C, P = P_kbar, fO2 = fO2, X = X)))
-                D0[3, ix, iy] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mn, T = T_C, P = P_kbar, fO2 = fO2, X = X)))
-                D0[4, ix, iy] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Ca, T = T_C, P = P_kbar, fO2 = fO2, X = X)))
+                D0[1, ix, iy] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mg, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
+                D0[2, ix, iy] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Fe, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
+                D0[3, ix, iy] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mn, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
+                D0[4, ix, iy] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Ca, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
             end
 
             sum_D_ = 1 / (sum_D(CMg,CFe,CMn,D0,ix,iy))
@@ -170,7 +170,7 @@ function semi_discretisation_diffusion_cartesian(du::Array_T,u::Array_T,p,t) whe
 
     # update diffusive parameters
     @parallel Diffusion_coef_2D_major!(DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn,
-                                 CMg, CFe ,CMn, D0, D_charact, grt_position, diffcoef, D0_data, T, P, fugacity_O2, time_update_ad, t)
+                                 CMg, CFe ,CMn, D0, D_charact, grt_position, grt_boundary, diffcoef, D0_data, T, P, fugacity_O2, time_update_ad, t)
 
 
     # semi-discretization

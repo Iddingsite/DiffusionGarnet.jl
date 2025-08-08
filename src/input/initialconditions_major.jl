@@ -309,13 +309,18 @@ end
         u0[:,2] .= CFe0
         u0[:,3] .= CMn0
 
-        # find index of the first column of non-zero values in D0
-        first_nonzero_col = findfirst(!iszero, D0[1, :])
-        D0_mean = mean(D0[:, first_nonzero_col])  # mean diffusion coefficient
+        # # find index of the first column of non-zero values in D0
+        # first_nonzero_col = findfirst(!iszero, D0[1, :])
+        # D0_mean = mean(D0[:, first_nonzero_col])  # mean diffusion coefficient
 
+        # L_charact = copy(Lx)  # characteristic length
+        # D_charact = D0_mean  # characteristic
+        # t_charact = L_charact^2 / D0_mean  # characteristic time
+
+        # Now fix t to be 1 and make D_charact = L_charact^2 / t_charact
         L_charact = copy(Lx)  # characteristic length
-        D_charact = D0_mean  # characteristic
-        t_charact = L_charact^2 / D0_mean  # characteristic time
+        t_charact = 1.0
+        D_charact = L_charact^2 / t_charact
 
         Δxad_ = 1 ./ (Δx ./ L_charact)  # inverse of nondimensionalised Δx
         tfinal_ad = tfinal / t_charact  # nondimensionalised total time
@@ -410,12 +415,17 @@ end
         u0[:,3] .= CMn0
 
         # find index of the first column of non-zero values in D0
-        first_nonzero_col = findfirst(!iszero, D0[1, :])
-        D0_mean = mean(D0[:, first_nonzero_col])  # mean diffusion coefficient
+        # first_nonzero_col = findfirst(!iszero, D0[1, :])
+        # D0_mean = mean(D0[:, first_nonzero_col])  # mean diffusion coefficient
 
-        L_charact = copy(Lr)  # characteristic length
-        D_charact = D0_mean  # characteristic
-        t_charact = L_charact^2 / D_charact  # characteristic time
+        # L_charact = copy(Lr)  # characteristic length
+        # D_charact = D0_mean  # characteristic
+        # t_charact = L_charact^2 / D_charact  # characteristic time
+
+        # Now fix t to be 1 and make D_charact = L_charact^2 / t_charact
+        L_charact = Lr  # characteristic length
+        t_charact = 1.0
+        D_charact = L_charact^2 / t_charact
 
         Δr_ad = Δr ./ L_charact  # nondimensionalised Δr
         Δr_ad_ = 1 ./ Δr_ad  # inverse of nondimensionalised Δr
@@ -511,16 +521,23 @@ end
 
         # to estimate D_charact in 2D and 3D, we simply take a fake composition of garnet.
         # this is because if D0 is composition dependent, some of them have wrong values for non-garnet compositions.
-        D0_charact = zeros(4)
-        D_update!(D0_charact, T[1], P[1], diffcoef, 0.25, 0.7, 0.025, D0_data, fugacity_O2[1])
+        # D0_charact = zeros(4)
+        # D_update!(D0_charact, T[1], P[1], diffcoef, 0.25, 0.7, 0.025, D0_data, fugacity_O2[1])
 
-        L_charact = copy(Lx)  # characteristic length
-        D_charact = mean(D0_charact)  # characteristic
-        t_charact = L_charact^2 / D_charact  # characteristic time
+        # L_charact = copy(Lx)  # characteristic length
+        # D_charact = mean(D0_charact)  # characteristic
+        # t_charact = L_charact^2 / D_charact  # characteristic time
+
+        # Now fix t to be 1 and make D_charact = L_charact^2 / t_charact
+        L_charact = Lx  # characteristic length
+        t_charact = 1.0
+        D_charact = L_charact^2 / t_charact
+
         Δxad_ = 1 / (Δx / L_charact)  # inverse of nondimensionalised Δx
         Δyad_ = 1 / (Δy / L_charact)  # inverse of nondimensionalised Δy
         tfinal_ad = tfinal / t_charact  # nondimensionalised total time
         time_update_ad = time_update / t_charact  # nondimensionalised time update
+
 
         T2 = typeof(t_charact)
         T3 = typeof(D0)
@@ -593,8 +610,6 @@ end
             end
         end
 
-
-
         D = (DMgMg = zeros(eltype(CMg0), nx, ny, nz),
              DMgFe = zeros(eltype(CMg0), nx, ny, nz),
              DMgMn = zeros(eltype(CMg0), nx, ny, nz),
@@ -612,12 +627,17 @@ end
 
         # to estimate D_charact in 2D and 3D, we simply take a fake composition of garnet.
         # this is because if D0 is composition dependent, some of them have wrong values for non-garnet compositions.
-        D0_charact = zeros(4)
-        D_update!(D0_charact, T[1], P[1], diffcoef, 0.25, 0.7, 0.025, D0_data, fugacity_O2[1])
+        # D0_charact = zeros(4)
+        # D_update!(D0_charact, T[1], P[1], diffcoef, 0.25, 0.7, 0.025, D0_data, fugacity_O2[1])
 
-        L_charact = copy(Lx)  # characteristic length
-        D_charact = mean(D0_charact)  # characteristic
-        t_charact = L_charact^2 / D_charact  # characteristic time
+        # L_charact = copy(Lx)  # characteristic length
+        # D_charact = mean(D0_charact)  # characteristic
+        # t_charact = L_charact^2 / D_charact  # characteristic time
+
+        # Now fix t to be 1 and make D_charact = L_charact^2 / t_charact
+        L_charact = Lx  # characteristic length
+        t_charact = 1.0
+        D_charact = L_charact^2 / t_charact
 
         Δxad_ = 1 / (Δx / L_charact)  # inverse of nondimensionalised Δx
         Δyad_ = 1 / (Δy / L_charact)  # inverse of nondimensionalised Δy

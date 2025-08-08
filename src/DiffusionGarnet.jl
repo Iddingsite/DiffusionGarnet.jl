@@ -12,7 +12,6 @@ using Reexport: @reexport
 using Logging: global_logger
 using TerminalLoggers: TerminalLogger
 using OrdinaryDiffEqStabilizedRK: ODEProblem, solve
-# using OrdinaryDiffEqSDIRK: TRBDF2
 using ParallelStencil
 using GeoParams: compute_D, SetChemicalDiffusion, AbstractChemicalDiffusion
 using GeoParams.Garnet: Grt_Fe_Chakraborty1992, Grt_Mg_Chakraborty1992, Grt_Mn_Chakraborty1992

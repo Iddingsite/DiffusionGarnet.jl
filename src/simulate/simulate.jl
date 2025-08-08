@@ -4,7 +4,7 @@
 
 Solve the coupled major element diffusion equations for a given domain using finite differences for the discretisation in space and return a solution type variable.
 
-The default time discretisation is based on the ROCK2 method, a stabilized explicit method (Adbdulle and Medovikov, 2001 ; https://doi.org/10.1007/s002110100292) using OrdinaryDiffEq.jl.
+The default time discretisation is based on the ROCK2 method, a stabilized explicit method (Adbdulle and Medovikov, 2001) using OrdinaryDiffEq.
 
 The solution type variable is following the format of OrdinaryDiffEq.jl (see https://docs.sciml.ai/DiffEqDocs/stable/basics/solution/), and can be used to plot the solution, and to extract the solution at a given time. The time of the solution is non-dimensional but can be converted back using the characteristic time (`t_charact` contained in the `Domain` structure).
 
@@ -17,12 +17,12 @@ All other accepted arguments such as `callback` or `progress` are the same as th
 function simulate end
 
 """
-    simulate(domain::Domain1DMajor; path_save=nothing, solver=ROCK2(), abstol=1e-8, reltol=1e-6, kwargs...)
+    simulate(domain::Domain1DMajor; path_save=nothing, solver=ROCK2(), abstol=1e-8, reltol=1e-4, kwargs...)
 
 Solve the coupled major element diffusion equations in 1D. Save all timesteps in the output solution type variable by default.
 
 """
-function simulate(domain::Domain1DMajor; path_save=nothing, solver=ROCK2(), abstol=1e-8, reltol=1e-6, kwargs...)
+function simulate(domain::Domain1DMajor; path_save=nothing, solver=ROCK2(), abstol=1e-8, reltol=1e-4, kwargs...)
 
     p = (domain = domain, path_save = path_save)
 
@@ -59,11 +59,11 @@ end
 # end
 
 """
-    simulate(domain::DomainSpherical; path_save=nothing, solver=ROCK2(), abstol=1e-8, reltol=1e-6, kwargs...)
+    simulate(domain::DomainSpherical; path_save=nothing, solver=ROCK2(), abstol=1e-8, reltol=1e-4, kwargs...)
 
 Solve the coupled major element diffusion equations in spherical coordinates. Save all timesteps in the output solution type variable by default.
 """
-function simulate(domain::DomainSphericalMajor; path_save=nothing, solver=ROCK2(), abstol=1e-8, reltol=1e-6, kwargs...)
+function simulate(domain::DomainSphericalMajor; path_save=nothing, solver=ROCK2(), abstol=1e-8, reltol=1e-4, kwargs...)
 
     p = (domain = domain, path_save = path_save)
 
