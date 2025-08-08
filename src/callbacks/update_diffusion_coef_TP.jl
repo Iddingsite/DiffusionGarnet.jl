@@ -19,24 +19,41 @@ function update_diffusion_coef(integrator)
     CFe = @view integrator.u[idx..., 2]
     CMn = @view integrator.u[idx..., 3]
 
+
     # update diffusion coefficients
     if index !== nothing
 
-        for I in CartesianIndices(CMg)
-            I_tuple = Tuple(I)  # convert CartesianIndex to Tuple for indexing
-            # D0 is indexed as D0[:, I...]
-            D0_view = @view D0[:, I_tuple...]
+        if length(idx) == 1
+            for I in CartesianIndices(CMg)
+                I_tuple = Tuple(I)  # convert CartesianIndex to Tuple for indexing
+                # D0 is indexed as D0[:, I...]
+                D0_view = @view D0[:, I_tuple...]
 
-            # Extract local values at spatial index I
-            cMg = CMg[I_tuple...]
-            cFe = CFe[I_tuple...]
-            cMn = CMn[I_tuple...]
-            T_local = T[index]
-            P_local = P[index]
-            fO2_local = fugacity_O2[index]
+                # Extract local values at spatial index I
+                cMg = CMg[I_tuple...]
+                cFe = CFe[I_tuple...]
+                cMn = CMn[I_tuple...]
+                T_local = (T[index]+273.15) * 1u"K"
+                P_local = P[index] * 1u"kbar"
+                fO2_local = (fugacity_O2[index])NoUnits
 
-            # Update diffusion coefficients at this point
-            D_update!(D0_view, T_local, P_local, diffcoef, cMg, cFe, cMn, D0_data, fO2_local)
+                # Update diffusion coefficients at this point
+                D_update!(D0_view, T_local, P_local, diffcoef, cMg, cFe, cMn, D0_data, fO2_local)
+            end
+        elseif length(idx) == 2
+            T_K = (T[index]+273.15) * 1u"K"
+            P_kbar = P[index] * 1u"kbar"
+            fO2 = (fugacity_O2[index])NoUnits
+
+            # use parallelstencil
+            @parallel D_update_2D!(D0, T_K, P_kbar, diffcoef, CMg, CFe, CMn, D0_data, fO2, integrator.p.domain.IC.grt_position, integrator.p.domain.IC.grt_boundary)
+        elseif length(idx) == 3
+            T_K = (T[index]+273.15) * 1u"K"
+            P_kbar = P[index] * 1u"kbar"
+            fO2 = (fugacity_O2[index])NoUnits
+
+            # use parallelstencil
+            @parallel D_update_3D!(D0, T_K, P_kbar, diffcoef, CMg, CFe, CMn, D0_data, fO2, integrator.p.domain.IC.grt_position, integrator.p.domain.IC.grt_boundary)
         end
 
         if integrator.t ≠ 0.0

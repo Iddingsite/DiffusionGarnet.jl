@@ -117,7 +117,13 @@ using LinearAlgebra: norm
         D0_data = (Grt_Mg=Grt_Mg, Grt_Fe=Grt_Fe, Grt_Mn=Grt_Mn)
 
         D0 = zeros(Float64, 4)
-        DiffusionGarnet.D_update!(D0,T,P,diffcoef,CMg0,CFe0,CMn0,D0_data)
+
+        T_K = (T + 273.15) * u"K"
+        P_kbar = P * u"kbar"
+        fugacity_O2 = 1e-25NoUnits  # default value
+
+
+        DiffusionGarnet.D_update!(D0,T_K,P_kbar,diffcoef,CMg0,CFe0,CMn0,D0_data)
 
         @test D0[1] ≈ 241.5563196143817
         @test D0[2] ≈ 455.8752224396371
@@ -332,7 +338,7 @@ using LinearAlgebra: norm
         IC2D = IC2DMajor(;CMg0, CFe0, CMn0, Lx, Ly, tfinal, grt_boundary)
         domain2D = Domain(IC2D, T, P, time_update)
 
-        @test domain2D.D0[1] ≈ 153548.37186274922
+        @test domain2D.D0[589] ≈ 153548.37186274922
 
         @unpack time_update_ad = domainSph
 
@@ -364,11 +370,15 @@ using LinearAlgebra: norm
         D0_data = (Grt_Mg=Grt_Mg, Grt_Fe=Grt_Fe, Grt_Mn=Grt_Mn)
 
         D0 = zeros(Float64, 4)
-        DiffusionGarnet.D_update!(D0,T,P,diffcoef,CMg0,CFe0,CMn0,D0_data)
+
+        T_K = (T + 273.15) * u"K"
+        P_kbar = P * u"kbar"
+
+        DiffusionGarnet.D_update!(D0,T_K,P_kbar,diffcoef,CMg0,CFe0,CMn0,D0_data)
 
         @test sol_1D.prob.p.domain.D0[1] ≈ D0[1]
         @test sol_sph.prob.p.domain.D0[1] ≈ D0[1]
-        @test sol_2D.prob.p.domain.D0[1] ≈ D0[1]
+        @test sol_2D.prob.p.domain.D0[589] ≈ D0[1]
     end
 
     @testset "Callback output" begin

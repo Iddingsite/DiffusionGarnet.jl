@@ -284,25 +284,33 @@ end
         T_tuplediffdata = typeof(D0_data)
 
         T2 = eltype(CMg0)
-        D0 = zeros(T2, 4, nx)
+        D0 = similar(CMg0, (4, nx))
 
         # iterate through D0 and compute the initial diffusion coefficients
         for j in axes(D0, 2)
             D0_view = @view D0[:, j]
 
+            T_K = (T[1] + 273.15) * u"K"
+            P_kbar = P[1] * u"kbar"
+            fO2 = (fugacity_O2[1])NoUnits
+
             # compute the diffusion coefficients for each point
-            D_update!(D0_view, T[1], P[1], diffcoef, CMg0[j], CFe0[j], CMn0[j], D0_data, fugacity_O2[1])  # compute initial diffusion coefficients
+            D_update!(D0_view, T_K, P_kbar, diffcoef, CMg0[j], CFe0[j], CMn0[j], D0_data, fO2)  # compute initial diffusion coefficients
         end
 
-        D = (DMgMg = zeros(T2, nx),
-             DMgFe = zeros(T2, nx),
-             DMgMn = zeros(T2, nx),
-             DFeMg = zeros(T2, nx),
-             DFeFe = zeros(T2, nx),
-             DFeMn = zeros(T2, nx),
-             DMnMg = zeros(T2, nx),
-             DMnFe = zeros(T2, nx),
-             DMnMn = zeros(T2, nx))  # matrix of interdiffusion coefficients
+        D = (DMgMg = similar(CMg0, nx),
+             DMgFe = similar(CMg0, nx),
+             DMgMn = similar(CMg0, nx),
+             DFeMg = similar(CMg0, nx),
+             DFeFe = similar(CMg0, nx),
+             DFeMn = similar(CMg0, nx),
+             DMnMg = similar(CMg0, nx),
+             DMnFe = similar(CMg0, nx),
+             DMnMn = similar(CMg0, nx))  # matrix of interdiffusion coefficients
+
+        for i in eachindex(D)
+            D[i] .= 0  # copy the initial diffusion coefficients to the interdiffusion coefficients
+        end
 
         u0 = similar(CMg0, (nx, 3))
         u0[:,1] .= CMg0
@@ -389,25 +397,33 @@ end
 
         T2 = eltype(CMg0)
 
-        D0 = zeros(T2, 4, nr)
+        D0 = similar(CMg0, (4, nr))
 
         # iterate through D0 and compute the initial diffusion coefficients
         for j in axes(D0, 2)
             D0_view = @view D0[:, j]
 
+            T_K = (T[1] + 273.15) * u"K"
+            P_kbar = P[1] * u"kbar"
+            fO2 = (fugacity_O2[1])NoUnits
+
             # compute the diffusion coefficients for each point
-            D_update!(D0_view, T[1], P[1], diffcoef, CMg0[j], CFe0[j], CMn0[j], D0_data, fugacity_O2[1])  # compute initial diffusion coefficients
+            D_update!(D0_view, T_K, P_kbar, diffcoef, CMg0[j], CFe0[j], CMn0[j], D0_data, fO2)  # compute initial diffusion coefficients
         end
 
-        D = (DMgMg = zeros(T2, nr),
-             DMgFe = zeros(T2, nr),
-             DMgMn = zeros(T2, nr),
-             DFeMg = zeros(T2, nr),
-             DFeFe = zeros(T2, nr),
-             DFeMn = zeros(T2, nr),
-             DMnMg = zeros(T2, nr),
-             DMnFe = zeros(T2, nr),
-             DMnMn = zeros(T2, nr))  # matrix of interdiffusion coefficients
+        D = (DMgMg = similar(CMg0, nr),
+             DMgFe = similar(CMg0, nr),
+             DMgMn = similar(CMg0, nr),
+             DFeMg = similar(CMg0, nr),
+             DFeFe = similar(CMg0, nr),
+             DFeMn = similar(CMg0, nr),
+             DMnMg = similar(CMg0, nr),
+             DMnFe = similar(CMg0, nr),
+             DMnMn = similar(CMg0, nr))  # matrix of interdiffusion coefficients
+
+        for i in eachindex(D)
+            D[i] .= 0
+        end
 
         u0::Matrix{T2} = similar(CMg0, (nr, 3))
         u0[:,1] .= CMg0
@@ -464,7 +480,7 @@ end
             error("T, P and time_update should have the same size.")
         end
 
-        @unpack nx, ny, Δx, Δy, tfinal, Lx, CMg0, CFe0, CMn0 = IC
+        @unpack nx, ny, Δx, Δy, tfinal, Lx, CMg0, CFe0, CMn0, grt_position, grt_boundary = IC
 
         # define the trace diffusion coefficients based on the chosen dataset
         if diffcoef == 1
@@ -491,18 +507,27 @@ end
 
         T_tuplediffdata = typeof(D0_data)
 
-        T2 = eltype(CMg0)
-        D0 = zeros(T2, 4, nx, ny)
+        D0 = similar(CMg0, (4, nx, ny))
 
-        D = (DMgMg = zeros(T2, nx, ny),
-             DMgFe = zeros(T2, nx, ny),
-             DMgMn = zeros(T2, nx, ny),
-             DFeMg = zeros(T2, nx, ny),
-             DFeFe = zeros(T2, nx, ny),
-             DFeMn = zeros(T2, nx, ny),
-             DMnMg = zeros(T2, nx, ny),
-             DMnFe = zeros(T2, nx, ny),
-             DMnMn = zeros(T2, nx, ny))  # matrix of interdiffusion coefficients
+        T_K = (T[1] + 273.15) * u"K"
+        P_kbar = P[1] * u"kbar"
+        fO2 = (fugacity_O2[1])NoUnits
+
+        @parallel D_update_2D!(D0, T_K, P_kbar, diffcoef, CMg0, CFe0, CMn0, D0_data, fO2, grt_position, grt_boundary)
+
+        D = (DMgMg = similar(CMg0, (nx, ny)),
+             DMgFe = similar(CMg0, (nx, ny)),
+             DMgMn = similar(CMg0, (nx, ny)),
+             DFeMg = similar(CMg0, (nx, ny)),
+             DFeFe = similar(CMg0, (nx, ny)),
+             DFeMn = similar(CMg0, (nx, ny)),
+             DMnMg = similar(CMg0, (nx, ny)),
+             DMnFe = similar(CMg0, (nx, ny)),
+             DMnMn = similar(CMg0, (nx, ny)))  # matrix of interdiffusion coefficients
+
+        for i in eachindex(D)
+            D[i] .= 0
+        end
 
         u0 = similar(CMg0, (nx, ny, 3))
         u0[:, :, 1] .= CMg0
@@ -517,7 +542,7 @@ end
         Δxad_ = 1 / (Δx / L_charact)  # inverse of nondimensionalised Δx
         Δyad_ = 1 / (Δy / L_charact)  # inverse of nondimensionalised Δy
         tfinal_ad = tfinal / t_charact  # nondimensionalised total time
-        time_update_ad = time_update / t_charact  # nondimensionalised time update
+        time_update_ad = time_update ./ t_charact  # nondimensionalised time update
 
         T2 = typeof(t_charact)
         T3 = typeof(D0)
@@ -550,7 +575,7 @@ end
     time_update_ad::T1
     function Domain3DMajor(IC::InitialConditions3DMajor, T::T1, P::T1, time_update::T1, fugacity_O2::T1, diffcoef::Int) where {T1 <: Union{Float64, Array{Float64, 1}}}
 
-        @unpack nx, ny, nz, Δx, Δy, Δz, tfinal, Lx, CMg0, CFe0, CMn0 = IC
+        @unpack nx, ny, nz, Δx, Δy, Δz, tfinal, Lx, CMg0, CFe0, CMn0, grt_position, grt_boundary = IC
 
         # define the trace diffusion coefficients based on the chosen dataset
         if diffcoef == 1
@@ -577,17 +602,27 @@ end
 
         T_tuplediffdata = typeof(D0_data)
 
-        D0 = similar(CMg0, 4, nx, ny, nz)
+        D0 = similar(CMg0, (4, nx, ny, nz))
 
-        D = (DMgMg = zeros(eltype(CMg0), nx, ny, nz),
-        DMgFe = zeros(eltype(CMg0), nx, ny, nz),
-        DMgMn = zeros(eltype(CMg0), nx, ny, nz),
-        DFeMg = zeros(eltype(CMg0), nx, ny, nz),
-        DFeFe = zeros(eltype(CMg0), nx, ny, nz),
-        DFeMn = zeros(eltype(CMg0), nx, ny, nz),
-        DMnMg = zeros(eltype(CMg0), nx, ny, nz),
-        DMnFe = zeros(eltype(CMg0), nx, ny, nz),
-        DMnMn = zeros(eltype(CMg0), nx, ny, nz))  # matrix of interdiffusion coefficients
+        T_K = (T[1] + 273.15) * u"K"
+        P_kbar = P[1] * u"kbar"
+        fO2 = (fugacity_O2[1])NoUnits
+
+        @parallel D_update_3D!(D0, T_K, P_kbar, diffcoef, CMg0, CFe0, CMn0, D0_data, fO2, grt_position, grt_boundary)
+
+        D = (DMgMg = similar(CMg0, (nx, ny, nz)),
+             DMgFe = similar(CMg0, (nx, ny, nz)),
+             DMgMn = similar(CMg0, (nx, ny, nz)),
+             DFeMg = similar(CMg0, (nx, ny, nz)),
+             DFeFe = similar(CMg0, (nx, ny, nz)),
+             DFeMn = similar(CMg0, (nx, ny, nz)),
+             DMnMg = similar(CMg0, (nx, ny, nz)),
+             DMnFe = similar(CMg0, (nx, ny, nz)),
+             DMnMn = similar(CMg0, (nx, ny, nz)))  # matrix of interdiffusion coefficients
+
+        for i in eachindex(D)
+            D[i] .= 0
+        end
 
         u0 = similar(CMg0, (nx, ny, nz, 3))
         u0[:, :, :, 1] .= CMg0
@@ -603,7 +638,7 @@ end
         Δyad_ = 1 / (Δy / L_charact)  # inverse of nondimensionalised Δy
         Δzad_ = 1 / (Δz / L_charact)  # inverse of nondimensionalised Δz
         tfinal_ad = tfinal / t_charact  # nondimensionalised total time
-        time_update_ad = time_update / t_charact  # nondimensionalised time update
+        time_update_ad = time_update ./ t_charact  # nondimensionalised time update
 
         T2 = typeof(t_charact)
         T3 = typeof(D0)
