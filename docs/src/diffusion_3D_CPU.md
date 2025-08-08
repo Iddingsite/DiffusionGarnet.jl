@@ -7,7 +7,7 @@ The 3D geometry of garnets can be obtained from micro-computed tomography (µCT)
 
 In this tutorial, we will reproduce the results from the publication "Simulating major element diffusion in garnet using realistic 3D geometries" by Dominguez et al. (in review).
 
-To do so, we will use a callback function to save the results of the simulation to disk at regular intervals to be able to visualize the results using the software [ParaView](https://www.paraview.org/).
+To do so, we will use a callback function to save the results of the simulation to disk at regular intervals to be able to visualise the results using the software [ParaView](https://www.paraview.org/).
 
 As mentioned in the tutorial for [2D modelling](@ref 2D_diffusion_CPU) DiffusionGarnet internally uses the package [ParallelStencil.jl](https://github.com/omlins/ParallelStencil.jl). Make sure to start with multiple threads to get the most out of this approach if you run the model on CPU.
 
@@ -87,7 +87,7 @@ IC3D = nothing
 ```
 
 !!! note
-    Only the boundary between the garnet and the matrix is defined specifically in the data. Concerning the contact between garnet and inclusions, it is defined as a homogeneous boundary condition by default, meaning that no fluxes are exchanged between the garnet and the inclusions.
+    Only the boundary between the garnet and the matrix is defined specifically in the data. Concerning the contact between garnet and inclusions, it is defined as a homogeneous boundary condition by default, meaning that no flux is exchanged between the garnet and the inclusions.
 
 Now, let's define a callback function to save the results of the simulation in a HDF5 file, similar to the tutorial [Saving output as HDF5 files](@ref saving_output):
 
@@ -102,7 +102,7 @@ time_save_ad = ustrip.(u"Myr", time_save) ./ t_charact  # convert to Myr, remove
 # create the callback function
 save_data_callback = PresetTimeCallback(time_save_ad, save_data_paraview, save_positions=(false,false))
 
-path_save = "data_model_10_Ma.h5"  # chose the name and the path of the HDF5 output file (make sure to add .h5 or .hdf5 at the end)
+path_save = "data_model_10_Ma.h5"  # choose the name and the path of the HDF5 output file (make sure to add .h5 or .hdf5 at the end)
 ```
 
 !!! note
@@ -122,3 +122,7 @@ Two files should have been created in the same folder as your current session at
 
 !!! warning
     For any visualisation software, make sure you open the XDMF file and not the HDF5 file. For [ParaView](https://www.paraview.org/), select the `XDMF Reader` as the reader when you open your data. Only Paraview has been tested with this package, but other software should work as well.
+
+Here is a video obtained from the results of Fe for the high resolution model (768³) using ParaView:
+
+![2D diffusion of a garnet](./assets/img/Fe_3D.gif)

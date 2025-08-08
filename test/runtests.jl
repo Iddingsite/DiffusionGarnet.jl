@@ -546,12 +546,3 @@ end
 # plot(sol[1])
 # plot!(sol[end])
 
-
-
-# using GeoParams.Garnet:Grt_Mg_Chakraborty1992
-
-# Grt_Mg = Grt_Mg_Chakraborty1992
-
-# Grt_Mg = SetChemicalDiffusion(Grt_Mg)
-
-# typeof(Grt_Mg) <: AbstractChemicalDiffusion
