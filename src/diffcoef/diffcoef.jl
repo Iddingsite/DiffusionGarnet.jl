@@ -110,6 +110,7 @@ end
 
                 X = CFe[ix,iy] * a0_Fe + CMg[ix,iy] * a0_Mg + CMn[ix,iy] * a0_Mn + (1 - (CMg[ix,iy] + CFe[ix,iy] + CMn[ix,iy])) * a0_Ca
                 X = convert(Float64, X)NoUnits
+
                 D0_Mg = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mg, T = T_K, P = P_kbar, fO2 = fugacity_O2, X = X)))
                 D0_Fe = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Fe, T = T_K, P = P_kbar, fO2 = fugacity_O2, X = X)))
                 D0_Mn = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mn, T = T_K, P = P_kbar, fO2 = fugacity_O2, X = X)))
