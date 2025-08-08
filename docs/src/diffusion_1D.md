@@ -39,7 +39,7 @@ which outputs:
 
 ![Initial conditions.](./assets/img/1D_IC.png)
 
-Then, we will define 2 structures from the constructors [`InitialConditions1D`](https://iddingsite.github.io/DiffusionGarnet.jl/dev/reference/#DiffusionGarnet.InitialConditions1D-Tuple{AbstractVector{%3C:Real},%20AbstractVector{%3C:Real},%20AbstractVector{%3C:Real},%20Union{Quantity{T,%20%F0%9D%90%8B,%20U},%20Level{L,%20S,%20Quantity{T,%20%F0%9D%90%8B,%20U}}%20where%20{L,%20S}}%20where%20{T,%20U},%20Union{Quantity{T,%20%F0%9D%90%93,%20U},%20Level{L,%20S,%20Quantity{T,%20%F0%9D%90%93,%20U}}%20where%20{L,%20S}}%20where%20{T,%20U}}) and [`Domain`](https://iddingsite.github.io/DiffusionGarnet.jl/dev/reference/#DiffusionGarnet.Domain), which will contain all the information DiffusionGarnet needs to run a simulation.
+Then, we will define 2 structures from the constructors [`IC1DMajor`](https://iddingsite.github.io/DiffusionGarnet.jl/dev/reference/#DiffusionGarnet.InitialConditions1D-Tuple{AbstractVector{%3C:Real},%20AbstractVector{%3C:Real},%20AbstractVector{%3C:Real},%20Union{Quantity{T,%20%F0%9D%90%8B,%20U},%20Level{L,%20S,%20Quantity{T,%20%F0%9D%90%8B,%20U}}%20where%20{L,%20S}}%20where%20{T,%20U},%20Union{Quantity{T,%20%F0%9D%90%93,%20U},%20Level{L,%20S,%20Quantity{T,%20%F0%9D%90%93,%20U}}%20where%20{L,%20S}}%20where%20{T,%20U}}) and [`Domain`](https://iddingsite.github.io/DiffusionGarnet.jl/dev/reference/#DiffusionGarnet.Domain), which will contain all the information DiffusionGarnet needs to run a simulation.
 
 ```julia
 Lx = (data[end,1] - data[1,1])u"µm"  # length in x of the model, here in µm
@@ -59,7 +59,7 @@ domain1D = Domain(IC1D, T, P)
 !!! note
     `Lx`, `tfinal`, `T` and `P` need to contain units, following the syntax of the package [Unitful](https://painterqubits.github.io/Unitful.jl/stable/). This allows the user to specify the units that suit their problem.
 
-`Domain1D` contains all the information that DiffusionGarnet needs to solve our coupled diffusion problem, at 900 °C and 0.6 GPa for a duration of 15 Myr.
+`domain1D` contains all the information that DiffusionGarnet needs to solve our coupled diffusion problem, at 900 °C and 0.6 GPa for a duration of 15 Myr.
 
 This can be achieved with the function `simulate()`:
 ```julia
@@ -67,7 +67,7 @@ This can be achieved with the function `simulate()`:
 sol = simulate(domain1D)
 ```
 
-which outputs the time spent on the solver, for example, on the second run:
+which outputs the time spent on the solver, for example, on the second run on my machine:
 
 ```
   0.399870 seconds (31.93 k allocations: 18.212 MiB)
@@ -78,13 +78,10 @@ which outputs the time spent on the solver, for example, on the second run:
 We can now plot the solution to our problem.
 
 ```julia
-# extract characteristic time to convert back to dimensional time
-@unpack t_charact = domain1D
-
 anim = @animate for i = LinRange(0, sol.t[end], 100)
     l = @layout [a ; b]
 
-    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = @sprintf("Total Time = %.2f Ma | T = %.0f °C | P = %.1f GPa", i*t_charact, T[1].val, P[1].val), legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
+    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = @sprintf("Total Time = %.2f Ma | T = %.0f °C | P = %.1f GPa", i, T[1].val, P[1].val), legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
     p1 = plot!(distance, sol(i)[:,2], label="Fe",linecolor=1, linewidth=1)
 
     p2 = plot(distance, Mg0, label="Mg initial", linestyle = :dash, linewidth=1, dpi=200,legend=:outerbottomright,linecolor=2,xlabel = "Distance (µm)")

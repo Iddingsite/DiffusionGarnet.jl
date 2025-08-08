@@ -1,25 +1,47 @@
 import Base.@propagate_inbounds
 
-@parallel_indices (ix, iy) function Diffusion_coef_2D_major!(DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn, CMg, CFe ,CMn, D0, D_charact, grt_position)
+@parallel_indices (ix, iy) function Diffusion_coef_2D_major!(D, CMg, CFe ,CMn, D0, D_charact, grt_position, grt_boundary, diffcoef, D0_data, T_K, P_kbar, fO2)
 
-    @propagate_inbounds @inline sum_D(CMg, CFe, CMn, D0, ix, iy) = D0[1] * CMg[ix, iy] + D0[2] * CFe[ix, iy] + D0[3] * CMn[ix, iy] +
-        D0[4] * (1 - CMg[ix, iy] - CFe[ix, iy] - CMn[ix, iy])
+    @propagate_inbounds @inline sum_D(CMg, CFe, CMn, D0, ix, iy) = D0[1, ix, iy] * CMg[ix, iy] + D0[2, ix, iy] * CFe[ix, iy] + D0[3, ix, iy] * CMn[ix, iy] +
+        D0[4, ix, iy] * (1 - CMg[ix, iy] - CFe[ix, iy] - CMn[ix, iy])
+
+    DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn = D
 
     D_charact_ = 1 / D_charact
 
+
     if ix>1 && ix<size(DMgMg,1) && iy>1 && iy<size(DMgMg,2)
-        if grt_position[ix,iy] == 1.0
+        if grt_position[ix,iy] == 1.0 || grt_boundary[ix,iy] == 1.0
+
+            # there is a composition dependence in the self-diffusion coefficients for C12 and CA15
+            if diffcoef == 2 || diffcoef == 3
+
+                # end-member unit-cell dimensions for C12 and CA15
+                a0_Fe = 1.1525
+                a0_Mg = 1.1456
+                a0_Mn = 1.1614
+                a0_Ca = 1.1852
+
+                X = CFe[ix,iy] * a0_Fe + CMg[ix,iy] * a0_Mg + CMn[ix,iy] * a0_Mn + (1 - (CMg[ix,iy] + CFe[ix,iy] + CMn[ix,iy])) * a0_Ca
+                X = convert(Float64, X)NoUnits
+
+                D0[1, ix, iy] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mg, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
+                D0[2, ix, iy] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Fe, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
+                D0[3, ix, iy] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mn, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
+                D0[4, ix, iy] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Ca, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
+            end
+
             sum_D_ = 1 / (sum_D(CMg,CFe,CMn,D0,ix,iy))
 
-            DMgMg[ix,iy] = (D0[1] - D0[1] * CMg[ix,iy] * sum_D_ * (D0[1] - D0[end])) * D_charact_
-            DMgFe[ix,iy] = (      - D0[1] * CMg[ix,iy] * sum_D_ * (D0[2] - D0[end])) * D_charact_
-            DMgMn[ix,iy] = (      - D0[1] * CMg[ix,iy] * sum_D_ * (D0[3] - D0[end])) * D_charact_
-            DFeMg[ix,iy] = (      - D0[2] * CFe[ix,iy] * sum_D_ * (D0[1] - D0[end])) * D_charact_
-            DFeFe[ix,iy] = (D0[2] - D0[2] * CFe[ix,iy] * sum_D_ * (D0[2] - D0[end])) * D_charact_
-            DFeMn[ix,iy] = (      - D0[2] * CFe[ix,iy] * sum_D_ * (D0[3] - D0[end])) * D_charact_
-            DMnMg[ix,iy] = (      - D0[3] * CMn[ix,iy] * sum_D_ * (D0[1] - D0[end])) * D_charact_
-            DMnFe[ix,iy] = (      - D0[3] * CMn[ix,iy] * sum_D_ * (D0[2] - D0[end])) * D_charact_
-            DMnMn[ix,iy] = (D0[3] - D0[3] * CMn[ix,iy] * sum_D_ * (D0[3] - D0[end])) * D_charact_
+            DMgMg[ix,iy] = (D0[1, ix, iy] - D0[1, ix, iy] * CMg[ix,iy] * sum_D_ * (D0[1, ix, iy] - D0[end, ix, iy])) * D_charact_
+            DMgFe[ix,iy] = (      - D0[1, ix, iy] * CMg[ix,iy] * sum_D_ * (D0[2, ix, iy] - D0[end, ix, iy])) * D_charact_
+            DMgMn[ix,iy] = (      - D0[1, ix, iy] * CMg[ix,iy] * sum_D_ * (D0[3, ix, iy] - D0[end, ix, iy])) * D_charact_
+            DFeMg[ix,iy] = (      - D0[2, ix, iy] * CFe[ix,iy] * sum_D_ * (D0[1, ix, iy] - D0[end, ix, iy])) * D_charact_
+            DFeFe[ix,iy] = (D0[2, ix, iy] - D0[2, ix, iy] * CFe[ix,iy] * sum_D_ * (D0[2, ix, iy] - D0[end, ix, iy])) * D_charact_
+            DFeMn[ix,iy] = (      - D0[2, ix, iy] * CFe[ix,iy] * sum_D_ * (D0[3, ix, iy] - D0[end, ix, iy])) * D_charact_
+            DMnMg[ix,iy] = (      - D0[3, ix, iy] * CMn[ix,iy] * sum_D_ * (D0[1, ix, iy] - D0[end, ix, iy])) * D_charact_
+            DMnFe[ix,iy] = (      - D0[3, ix, iy] * CMn[ix,iy] * sum_D_ * (D0[2, ix, iy] - D0[end, ix, iy])) * D_charact_
+            DMnMn[ix,iy] = (D0[3, ix, iy] - D0[3, ix, iy] * CMn[ix,iy] * sum_D_ * (D0[3, ix, iy] - D0[end, ix, iy])) * D_charact_
         end
     end
 
@@ -27,7 +49,7 @@ import Base.@propagate_inbounds
 end
 
 
-@parallel_indices (ix, iy) function stencil_diffusion_2D_major!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn, position_Grt, Grt_boundaries, Δxad_, Δyad_)
+@parallel_indices (ix, iy) function stencil_diffusion_2D_major!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, position_Grt, Grt_boundaries, Δxad_, Δyad_)
 
     @propagate_inbounds @inline av_D_x(D, ix, iy)       = 0.5 * (D[ix,iy] + D[ix+1,iy])
     @propagate_inbounds @inline av_D_y(D, ix, iy)       = 0.5 * (D[ix,iy] + D[ix,iy+1])
@@ -42,6 +64,8 @@ end
                      (qy(D2,C2,ix,iy,Δyad_) - qy(D2,C2,ix,iy-1,Δyad_)) * Δyad_ +
                      (qy(D3,C3,ix,iy,Δyad_) - qy(D3,C3,ix,iy-1,Δyad_)) * Δyad_
     end
+
+    DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn = D
 
     # iterate inside the arrays
     if ix>1 && ix<size(dtCMg,1) && iy>1 && iy<size(dtCMg,2)
@@ -122,11 +146,10 @@ end
 end
 
 
-function semi_discretisation_diffusion_cartesian(du::T,u::T,p,t) where T <: AbstractArray{<:Real, 3}
+function semi_discretisation_diffusion_cartesian(du::Array_T,u::Array_T,p,t) where Array_T <: AbstractArray{<:Real, 3}
 
-    @unpack D, D0, D_charact, Δxad_, Δyad_ = p.domain
-    @unpack grt_position, grt_boundary     = p.domain.IC
-    DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn = D
+    @unpack D, D0, D_charact, Δxad_, Δyad_, diffcoef, D0_data, T, P, fugacity_O2, time_update_ad = p.domain
+    @unpack grt_position, grt_boundary = p.domain.IC
 
     CMg = @view u[:,:,1]
     CFe = @view u[:,:,2]
@@ -136,14 +159,22 @@ function semi_discretisation_diffusion_cartesian(du::T,u::T,p,t) where T <: Abst
     dtCFe = @view du[:,:,2]
     dtCMn = @view du[:,:,3]
 
+    # find current T, P, and fugacity_O2
+    # to do this, we need to find the lower bound of t in time_update_ad
+    index = findfirst(x -> x >= t, time_update_ad)
+    if index === nothing
+        index = length(time_update_ad)
+    end
+
+    P_kbar = P[index] * 1u"kbar"
+    T_K = (T[index]+273.15) * 1u"K"
+    fO2 = (fugacity_O2[index])NoUnits
+
     # update diffusive parameters
-    @parallel Diffusion_coef_2D_major!(DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn,
-                                 CMg, CFe ,CMn, D0, D_charact, grt_position)
+    @parallel Diffusion_coef_2D_major!(D, CMg, CFe ,CMn, D0, D_charact, grt_position, grt_boundary, diffcoef, D0_data, T_K, P_kbar, fO2)
 
 
     # semi-discretization
-    @parallel stencil_diffusion_2D_major!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn,
-                                 DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn,
-                                 grt_position, grt_boundary, Δxad_, Δyad_)
+    @parallel stencil_diffusion_2D_major!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, grt_position, grt_boundary, Δxad_, Δyad_)
 end
 

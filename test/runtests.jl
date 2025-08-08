@@ -54,15 +54,15 @@ using LinearAlgebra: norm
         P = 2u"GPa"
         domain1D = Domain(IC1D, T, P)
         @test domain1D.L_charact == ustrip(u"µm",Lx)
-        @test domain1D.t_charact ≈ 0.2224999357930375
-        @test domain1D.tfinal_ad ≈ 4.494383319418882
+        @test domain1D.t_charact ≈ 1
+        @test domain1D.tfinal_ad ≈ 1
         @test domain1D.Δxad_[1] == 4.0
 
         domainSph = Domain(ICSph, T, P)
         @test domainSph.L_charact == ustrip(u"µm",Lx)
-        @test domainSph.t_charact ≈ 0.2224999357930375
-        @test domainSph.tfinal_ad ≈ 4.494383319418882
-        @test domainSph.Δrad_[1] == 4.0
+        @test domainSph.t_charact ≈ 1
+        @test domainSph.tfinal_ad ≈ 1
+        @test domainSph.Δr_ad_[1] == 4.0
         @test domainSph.r_ad[end] == 1.0
 
         domain2D = Domain(IC2D, T, P)
@@ -105,8 +105,25 @@ using LinearAlgebra: norm
         # test Domain
         T=650  # in °C
         P=2  # in kbar
+        diffcoef = 1  # Chakraborty and Ganguly 1992 diffusion coefficients
+        CMg0 = 0.1
+        CFe0 = 0.1
+        CMn0 = 0.1
+
+        Grt_Mg = SetChemicalDiffusion(Garnet.Grt_Mg_Chakraborty1992)
+        Grt_Fe = SetChemicalDiffusion(Garnet.Grt_Fe_Chakraborty1992)
+        Grt_Mn = SetChemicalDiffusion(Garnet.Grt_Mn_Chakraborty1992)
+
+        D0_data = (Grt_Mg=Grt_Mg, Grt_Fe=Grt_Fe, Grt_Mn=Grt_Mn)
+
         D0 = zeros(Float64, 4)
-        DiffusionGarnet.D_ini!(D0,T,P)
+
+        T_K = (T + 273.15) * u"K"
+        P_kbar = P * u"kbar"
+        fugacity_O2 = 1e-25NoUnits  # default value
+
+
+        DiffusionGarnet.D_update!(D0,T_K,P_kbar,diffcoef,CMg0,CFe0,CMn0,D0_data)
 
         @test D0[1] ≈ 241.5563196143817
         @test D0[2] ≈ 455.8752224396371
@@ -137,18 +154,18 @@ using LinearAlgebra: norm
 
         @unpack D, D0, D_charact, Δxad_, bc_neumann = domain1D
 
-        DiffusionGarnet.Diffusion_coef_1D_major!(domain1D.D, Mg0, Fe0, Mn0, domain1D.D0, domain1D.D_charact)
-        DiffusionGarnet.Diffusion_coef_spherical_major!(domainSph.D, Mg0, Fe0, Mn0, domainSph.D0, domainSph.D_charact)
+        DiffusionGarnet.Diffusion_coef_1D_major!(domain1D.D, Mg0, Fe0, Mn0, domain1D.D0, domain1D.D_charact, domain1D, 0)
+        DiffusionGarnet.Diffusion_coef_1D_major!(domainSph.D, Mg0, Fe0, Mn0, domainSph.D0, domainSph.D_charact, domainSph, 0)
 
-        @test domain1D.D.DMgMg[1] ≈ 0.27756534824753715
-        @test domain1D.D.DMgFe[1] ≈ -0.02575729575705166
-        @test domain1D.D.DMgMn[1] ≈ -0.35582434974845456
-        @test domain1D.D.DFeFe[1] ≈ 0.24039414025060646
-        @test domain1D.D.DFeMg[1] ≈ -0.06679903115794805
-        @test domain1D.D.DFeMn[1] ≈ -2.437175247864287
-        @test domain1D.D.DMnMn[1] ≈ 3.015178710791253
-        @test domain1D.D.DMnMg[1] ≈ -0.001981077957486304
-        @test domain1D.D.DMnFe[1] ≈ -0.00523218102384065
+        @test domain1D.D.DMgMg[1] ≈ 0.00688293300181906
+        @test domain1D.D.DMgFe[1] ≈ -0.0006387171241768935
+        @test domain1D.D.DMgMn[1] ≈ -0.008823562361791238
+        @test domain1D.D.DFeFe[1] ≈ 0.005961179130686035
+        @test domain1D.D.DFeMg[1] ≈ -0.0016564504861627976
+        @test domain1D.D.DFeMn[1] ≈ -0.06043590833889515
+        @test domain1D.D.DMnMn[1] ≈ 0.0747689622855202
+        @test domain1D.D.DMnMg[1] ≈ -4.912582546362481e-5
+        @test domain1D.D.DMnFe[1] ≈ -0.00012974512729293407
 
         @test domainSph.D.DMgMg[1] ≈ domain1D.D.DMgMg[1]
         @test domainSph.D.DMgFe[1] ≈ domain1D.D.DMgFe[1]
@@ -159,7 +176,6 @@ using LinearAlgebra: norm
         @test domainSph.D.DMnMn[1] ≈ domain1D.D.DMnMn[1]
         @test domainSph.D.DMnMg[1] ≈ domain1D.D.DMnMg[1]
         @test domainSph.D.DMnFe[1] ≈ domain1D.D.DMnFe[1]
-
 
         # check diffusion coefficients from Bloch et al. 2020 from GeoParams
         Grt_Mg = Garnet.Grt_REE_Bloch2020_slow
@@ -193,7 +209,7 @@ using LinearAlgebra: norm
 
         domain1D = Domain(IC1D, T, P)
 
-        sol = simulate(domain1D; progress=false, abstol=1e-6,reltol=1e-6, save_everystep=false, save_start=false)
+        sol = simulate(domain1D; progress=false, save_everystep=false, save_start=false)
 
         @test norm(sum.(sol.u[end][:,1] .+ sol.u[end][:,2] .+ sol.u[end][:,3])) ≈ 28.653159661729227 rtol=1e-5
     end
@@ -220,7 +236,7 @@ using LinearAlgebra: norm
 
         domainSph = Domain(ICSph, T, P)
 
-        sol = simulate(domainSph; progress=false, abstol=1e-6,reltol=1e-6, save_everystep=false, save_start=false)
+        sol = simulate(domainSph; progress=false, save_everystep=false, save_start=false)
 
         @test norm(sum.(sol.u[end][:,1] .+ sol.u[end][:,2] .+ sol.u[end][:,3])) ≈ 20.272049461615836 rtol=1e-5
     end
@@ -240,7 +256,7 @@ using LinearAlgebra: norm
 
         Lx = 900.0u"µm"
         Ly = 900.0u"µm"
-        tfinal = 1.0u"Myr"
+        tfinal = 15.0u"Myr"
         T = 900u"°C"
         P = 0.6u"GPa"
 
@@ -322,7 +338,7 @@ using LinearAlgebra: norm
         IC2D = IC2DMajor(;CMg0, CFe0, CMn0, Lx, Ly, tfinal, grt_boundary)
         domain2D = Domain(IC2D, T, P, time_update)
 
-        @test domain2D.D0[1] ≈ 153548.37186274922
+        @test domain2D.D0[589] ≈ 153548.37186274922
 
         @unpack time_update_ad = domainSph
 
@@ -342,11 +358,27 @@ using LinearAlgebra: norm
         T=600  # in °C
         P=3  # in kbar
         D0 = zeros(Float64, 4)
-        DiffusionGarnet.D_ini!(D0,T,P)
+        diffcoef = 1  # Chakraborty and Ganguly 1992 diffusion coefficients
+        CMg0 = 0.1
+        CFe0 = 0.1
+        CMn0 = 0.1
+
+        Grt_Mg = SetChemicalDiffusion(Garnet.Grt_Mg_Chakraborty1992)
+        Grt_Fe = SetChemicalDiffusion(Garnet.Grt_Fe_Chakraborty1992)
+        Grt_Mn = SetChemicalDiffusion(Garnet.Grt_Mn_Chakraborty1992)
+
+        D0_data = (Grt_Mg=Grt_Mg, Grt_Fe=Grt_Fe, Grt_Mn=Grt_Mn)
+
+        D0 = zeros(Float64, 4)
+
+        T_K = (T + 273.15) * u"K"
+        P_kbar = P * u"kbar"
+
+        DiffusionGarnet.D_update!(D0,T_K,P_kbar,diffcoef,CMg0,CFe0,CMn0,D0_data)
 
         @test sol_1D.prob.p.domain.D0[1] ≈ D0[1]
         @test sol_sph.prob.p.domain.D0[1] ≈ D0[1]
-        @test sol_2D.prob.p.domain.D0[1] ≈ D0[1]
+        @test sol_2D.prob.p.domain.D0[589] ≈ D0[1]
     end
 
     @testset "Callback output" begin
@@ -523,5 +555,3 @@ end
 # Grt_Mg = SetChemicalDiffusion(Grt_Mg)
 
 # typeof(Grt_Mg) <: AbstractChemicalDiffusion
-
-

@@ -29,8 +29,6 @@ update_diffusion_coef_call = PresetTimeCallback(time_update_ad, update_diffusion
 
 sol = simulate(domain1D; callback=update_diffusion_coef_call);
 
-@unpack t_charact = domain1D
-
 # plotting
 anim = @animate for i = LinRange(0, sol.t[end], 100)
     l = @layout [a ; b]
@@ -41,9 +39,9 @@ anim = @animate for i = LinRange(0, sol.t[end], 100)
     # plot title with pressure and temperature
     j = findfirst(x -> i < x, time_update_ad)
     if j !== nothing
-        title!(p1, @sprintf("Total Time = %.2f Ma | T = %.0f °C | P = %.1f GPa", i*t_charact, T[j].val, P[j].val))
+        title!(p1, @sprintf("Total Time = %.2f Ma | T = %.0f °C | P = %.1f GPa", i, T[j].val, P[j].val))
     else
-        title!(p1, @sprintf("Total Time = %.2f Ma | T = %.0f °C | P = %.1f GPa", i*t_charact, T[end].val, P[end].val))
+        title!(p1, @sprintf("Total Time = %.2f Ma | T = %.0f °C | P = %.1f GPa", i, T[end].val, P[end].val))
     end
 
     p2 = plot(distance, Mg0, label="Mg initial", linestyle = :dash, linewidth=1, dpi=200,legend=:outerbottomright,linecolor=2,xlabel = "Distance (µm)")

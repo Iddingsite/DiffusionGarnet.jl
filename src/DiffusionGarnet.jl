@@ -12,10 +12,11 @@ using Reexport: @reexport
 using Logging: global_logger
 using TerminalLoggers: TerminalLogger
 using OrdinaryDiffEqStabilizedRK: ODEProblem, solve
-# using OrdinaryDiffEqSDIRK: TRBDF2
 using ParallelStencil
 using GeoParams: compute_D, SetChemicalDiffusion, AbstractChemicalDiffusion
 using GeoParams.Garnet: Grt_Fe_Chakraborty1992, Grt_Mg_Chakraborty1992, Grt_Mn_Chakraborty1992
+using GeoParams.Garnet: Grt_Fe_Carlson2006, Grt_Mg_Carlson2006, Grt_Mn_Carlson2006, Grt_Ca_Carlson2006
+using GeoParams.Garnet: Grt_Fe_Chu2015, Grt_Mg_Chu2015, Grt_Mn_Chu2015, Grt_Ca_Chu2015
 using Preferences
 using HDF5: h5open, create_group, attributes, read_attribute
 using DelimitedFiles
@@ -41,26 +42,28 @@ export backend, set_backend
 
 function __init__()
     # thanks Pascal Aellig for this!
-    printstyled("""
+    if Base.PkgId(@__MODULE__) == Base.__toplevel__
+        printstyled("""
 
-        ▐▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▌
-        ▐ ██████╗ ██╗███████╗███████╗██╗   ██╗███████╗██╗ ██████╗ ███╗   ██╗   ▌
-        ▐ ██╔══██╗██║██╔════╝██╔════╝██║   ██║██╔════╝██║██╔═══██╗████╗  ██║   ▌
-        ▐ ██║  ██║██║█████╗  █████╗  ██║   ██║███████╗██║██║   ██║██╔██╗ ██║   ▌
-        ▐ ██║  ██║██║██╔══╝  ██╔══╝  ██║   ██║╚════██║██║██║   ██║██║╚██╗██║   ▌
-        ▐ ██████╔╝██║██║     ██║     ╚██████╔╝███████║██║╚██████╔╝██║ ╚████║   ▌
-        ▐ ╚═════╝ ╚═╝╚═╝     ╚═╝      ╚═════╝ ╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝   ▌
-        ▐  ██████╗  █████╗ ██████╗ ███╗   ██╗███████╗████████╗     ██╗██╗      ▌
-        ▐ ██╔════╝ ██╔══██╗██╔══██╗████╗  ██║██╔════╝╚══██╔══╝     ██║██║      ▌
-        ▐ ██║  ███╗███████║██████╔╝██╔██╗ ██║█████╗     ██║        ██║██║      ▌
-        ▐ ██║   ██║██╔══██║██╔══██╗██║╚██╗██║██╔══╝     ██║   ██   ██║██║      ▌
-        ▐ ╚██████╔╝██║  ██║██║  ██║██║ ╚████║███████╗   ██║██╗╚█████╔╝███████╗ ▌
-        ▐  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝   ╚═╝╚═╝ ╚════╝ ╚══════╝ ▌
-        ▐▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▌
+            ▐▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▌
+            ▐ ██████╗ ██╗███████╗███████╗██╗   ██╗███████╗██╗ ██████╗ ███╗   ██╗   ▌
+            ▐ ██╔══██╗██║██╔════╝██╔════╝██║   ██║██╔════╝██║██╔═══██╗████╗  ██║   ▌
+            ▐ ██║  ██║██║█████╗  █████╗  ██║   ██║███████╗██║██║   ██║██╔██╗ ██║   ▌
+            ▐ ██║  ██║██║██╔══╝  ██╔══╝  ██║   ██║╚════██║██║██║   ██║██║╚██╗██║   ▌
+            ▐ ██████╔╝██║██║     ██║     ╚██████╔╝███████║██║╚██████╔╝██║ ╚████║   ▌
+            ▐ ╚═════╝ ╚═╝╚═╝     ╚═╝      ╚═════╝ ╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝   ▌
+            ▐  ██████╗  █████╗ ██████╗ ███╗   ██╗███████╗████████╗     ██╗██╗      ▌
+            ▐ ██╔════╝ ██╔══██╗██╔══██╗████╗  ██║██╔════╝╚══██╔══╝     ██║██║      ▌
+            ▐ ██║  ███╗███████║██████╔╝██╔██╗ ██║█████╗     ██║        ██║██║      ▌
+            ▐ ██║   ██║██╔══██║██╔══██╗██║╚██╗██║██╔══╝     ██║   ██   ██║██║      ▌
+            ▐ ╚██████╔╝██║  ██║██║  ██║██║ ╚████║███████╗   ██║██╗╚█████╔╝███████╗ ▌
+            ▐  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝   ╚═╝╚═╝ ╚════╝ ╚══════╝ ▌
+            ▐▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▌
 
 
-    Version: $(TOML.parsefile(joinpath(@__DIR__, "..", "Project.toml"))["version"])
-    """, bold=true, color=:default)
+        Version: $(TOML.parsefile(joinpath(@__DIR__, "..", "Project.toml"))["version"])
+        """, bold=true, color=:default)
+    end
 
     # initialise global logger for OrdinaryDiffEq
     global_logger(TerminalLogger())
@@ -77,6 +80,7 @@ let
     end
 end
 
+include("diffcoef/diffcoef.jl")
 include("input/initialconditions.jl")
 include("callbacks/update_diffusion_coef_TP.jl")
 include("callbacks/output.jl")
