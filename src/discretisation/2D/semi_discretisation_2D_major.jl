@@ -22,7 +22,7 @@ import Base.@propagate_inbounds
             if diffcoef == 2 || diffcoef == 3
 
                 X = CFe[ix,iy] * a0_Fe + CMg[ix,iy] * a0_Mg + CMn[ix,iy] * a0_Mn + (1 - (CMg[ix,iy] + CFe[ix,iy] + CMn[ix,iy])) * a0_Ca
-                X = convert(Float, X)NoUnits
+                X = convert(Float64, X)NoUnits
 
                 D0[1, ix, iy] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mg, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
                 D0[2, ix, iy] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Fe, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
