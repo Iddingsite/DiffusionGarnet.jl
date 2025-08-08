@@ -7,8 +7,12 @@ Update the diffusion coefficients `D0` based on the temperature `T`, pressure `P
 """
 function D_update!(D0, T, P, diffcoef, CMg, CFe, CMn, D0_data, fugacity_O2=1e-25)  # by defaut 1e-25 Pa is graphite buffer
 
+    @info "Hi2"
+
     T_K = (T+273.15) * 1u"K"
     P_kbar = P * 1u"kbar"
+
+    @info "Hi3"
 
     X = 0NoUnits  # default value for CG92, no composition dependence
 
@@ -26,6 +30,9 @@ function D_update!(D0, T, P, diffcoef, CMg, CFe, CMn, D0_data, fugacity_O2=1e-25
     DFe = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Fe, T = T_K, P = P_kbar, fO2 = (fugacity_O2)NoUnits, X = X)))
     DMn = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mn, T = T_K, P = P_kbar, fO2 = (fugacity_O2)NoUnits, X = X)))
 
+
+    @info "Hi4"
+
     DCa = 0.0
 
     if diffcoef == 1
@@ -35,6 +42,6 @@ function D_update!(D0, T, P, diffcoef, CMg, CFe, CMn, D0_data, fugacity_O2=1e-25
     end
 
 
-    @info "Hi2"
+    @info "Hi5"
     D0 .= (float(DMg), float(DFe), float(DMn), float(DCa))   # in µm^2/Myr
 end
