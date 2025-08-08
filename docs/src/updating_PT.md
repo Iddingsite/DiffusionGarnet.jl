@@ -77,12 +77,10 @@ New temperature and pressure: 550.0 °C and 3.0 kbar, updated at 14.0 Myr.
 We can now plot our results and see how the change in PT has affected our diffusion profiles:
 
 ```julia
-@unpack tfinal_ad = domain1D
-
-anim = @animate for i = LinRange(0, tfinal_ad, 100)
+anim = @animate for i = LinRange(0, sol.t[end], 100)
     l = @layout [a ; b]
 
-    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = "Total Time = $(round(((i));digits=2)) Ma", legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
+    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = "Total Time = $(round(((i));digits=2)) Myr", legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
     p1 = plot!(distance, sol(i)[:,2], label="Fe",linecolor=1, linewidth=1)
 
 
@@ -106,6 +104,6 @@ println("...Done!")
 
 which outputs:
 
-![1D diffusion profil of a garnet with PT](./assets/img/Grt_1D_var_TP.gif)
+![1D diffusion profile of a garnet with PT](./assets/img/Grt_1D_var_TP.gif)
 
 We can clearly observe the slowing down of the diffusion processes as the PT conditions decrease with time.

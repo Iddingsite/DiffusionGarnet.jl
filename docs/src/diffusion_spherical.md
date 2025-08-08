@@ -78,7 +78,7 @@ and compare the 2 solutions:
 anim = @animate for i = LinRange(0, sol_sph.t[end], 100)
     l = @layout [a ; b]
 
-    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = @sprintf("Total Time = %.2f Ma | T = %.0f °C | P = %.1f GPa", i*t_charact, T[1].val, P[1].val), legend=:outerbottomright, linecolor=1,xlabel = "Distance from the core (µm)")
+    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = @sprintf("Total Time = %.2f Myr | T = %.0f °C | P = %.1f GPa", i*t_charact, T[1].val, P[1].val), legend=:outerbottomright, linecolor=1,xlabel = "Distance from the core (µm)")
     p1 = plot!(distance, sol_sph(i)[:,2], label="Fe Sph",linecolor=1, linewidth=1)
     p1 = plot!(distance, sol_1D(i)[:,2], label="Fe 1D",linecolor=5, linewidth=1)
 
@@ -107,4 +107,4 @@ With the resulting gif:
 
 ![Spherical diffusion profil of a garnet](./assets/img/Grt_Spherical+1D.gif)
 
-It shows that using spherical coordinates makes the garnet diffuse faster. Using 1D Cartesian coordinates can overestimate the equilibration time.
+It shows that using spherical coordinates makes the garnet diffuse faster in this case but that is dependent on the initial conditions.

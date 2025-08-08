@@ -55,7 +55,6 @@ P = 0.6u"GPa"
 # define a Domain struct containing the definition of our problem and nondimensionalised variables
 domain1D = Domain(IC1D, T, P)
 ```
-
 !!! note
     `Lx`, `tfinal`, `T` and `P` need to contain units, following the syntax of the package [Unitful](https://painterqubits.github.io/Unitful.jl/stable/). This allows the user to specify the units that suit their problem.
 
@@ -81,7 +80,7 @@ We can now plot the solution to our problem.
 anim = @animate for i = LinRange(0, sol.t[end], 100)
     l = @layout [a ; b]
 
-    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = @sprintf("Total Time = %.2f Ma | T = %.0f °C | P = %.1f GPa", i, T[1].val, P[1].val), legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
+    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = @sprintf("Total Time = %.2f Myr | T = %.0f °C | P = %.1f GPa", i, T[1].val, P[1].val), legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
     p1 = plot!(distance, sol(i)[:,2], label="Fe",linecolor=1, linewidth=1)
 
     p2 = plot(distance, Mg0, label="Mg initial", linestyle = :dash, linewidth=1, dpi=200,legend=:outerbottomright,linecolor=2,xlabel = "Distance (µm)")
