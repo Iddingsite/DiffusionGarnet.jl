@@ -26,7 +26,7 @@ function D_update!(D0, T, P, diffcoef, CMg, CFe, CMn, D0_data, fugacity_O2=1e-25
     DFe = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Fe, T = T_K, P = P_kbar, fO2 = (fugacity_O2)NoUnits, X = X)))
     DMn = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mn, T = T_K, P = P_kbar, fO2 = (fugacity_O2)NoUnits, X = X)))
 
-    DCa = 0
+    DCa = 0.0
 
     if diffcoef == 1
         DCa = 0.5 * DFe
@@ -34,5 +34,5 @@ function D_update!(D0, T, P, diffcoef, CMg, CFe, CMn, D0_data, fugacity_O2=1e-25
         DCa = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Ca, T = T_K, P = P_kbar, fO2 = (fugacity_O2)NoUnits, X = (X)NoUnits)))
     end
 
-    D0 .= (DMg, DFe, DMn, DCa)   # in µm^2/Myr
+    D0 .= (float(DMg), float(DFe), float(DMn), float(DCa))   # in µm^2/Myr
 end
