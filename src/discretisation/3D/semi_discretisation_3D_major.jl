@@ -10,11 +10,7 @@ import Base.@propagate_inbounds
 
     D_charact_ = 1 / D_charact
 
-    # end-member unit-cell dimensions for C12 and CA15
-    a0_Fe = 1.1525
-    a0_Mg = 1.1456
-    a0_Mn = 1.1614
-    a0_Ca = 1.1852
+
 
     if ix>1 && ix<size(DMgMg,1) && iy>1 && iy<size(DMgMg,2) && iz>1 && iz<size(DMgMg,3)
         if grt_position[ix,iy,iz] == 1.0
@@ -22,7 +18,13 @@ import Base.@propagate_inbounds
             # there is a composition dependence in the self-diffusion coefficients for C12 and CA15
             if diffcoef == 2 || diffcoef == 3
 
-                X = CFe[ix,iy] * a0_Fe + CMg[ix,iy] * a0_Mg + CMn[ix,iy] * a0_Mn + (1 - (CMg[ix,iy] + CFe[ix,iy] + CMn[ix,iy])) * a0_Ca
+                # end-member unit-cell dimensions for C12 and CA15
+                a0_Fe = 1.1525
+                a0_Mg = 1.1456
+                a0_Mn = 1.1614
+                a0_Ca = 1.1852
+
+                X = CFe[ix,iy,iz] * a0_Fe + CMg[ix,iy,iz] * a0_Mg + CMn[ix,iy,iz] * a0_Mn + (1 - (CMg[ix,iy,iz] + CFe[ix,iy,iz] + CMn[ix,iy,iz])) * a0_Ca
                 X = convert(Float64, X)NoUnits
 
                 D0[1, ix, iy, iz] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mg, T = T_K, P = P_kbar, fO2 = fO2, X = X)))

@@ -39,7 +39,7 @@ which outputs:
 
 ![Initial conditions.](./assets/img/1D_IC.png)
 
-Then, we will define 2 structures from the constructors [`InitialConditions1D`](https://iddingsite.github.io/DiffusionGarnet.jl/dev/reference/#DiffusionGarnet.InitialConditions1D-Tuple{AbstractVector{%3C:Real},%20AbstractVector{%3C:Real},%20AbstractVector{%3C:Real},%20Union{Quantity{T,%20%F0%9D%90%8B,%20U},%20Level{L,%20S,%20Quantity{T,%20%F0%9D%90%8B,%20U}}%20where%20{L,%20S}}%20where%20{T,%20U},%20Union{Quantity{T,%20%F0%9D%90%93,%20U},%20Level{L,%20S,%20Quantity{T,%20%F0%9D%90%93,%20U}}%20where%20{L,%20S}}%20where%20{T,%20U}}) and [`Domain`](https://iddingsite.github.io/DiffusionGarnet.jl/dev/reference/#DiffusionGarnet.Domain), which will contain all the information DiffusionGarnet needs to run a simulation.
+Then, we will define 2 structures from the constructors [`IC1DMajor`](https://iddingsite.github.io/DiffusionGarnet.jl/dev/reference/#DiffusionGarnet.InitialConditions1D-Tuple{AbstractVector{%3C:Real},%20AbstractVector{%3C:Real},%20AbstractVector{%3C:Real},%20Union{Quantity{T,%20%F0%9D%90%8B,%20U},%20Level{L,%20S,%20Quantity{T,%20%F0%9D%90%8B,%20U}}%20where%20{L,%20S}}%20where%20{T,%20U},%20Union{Quantity{T,%20%F0%9D%90%93,%20U},%20Level{L,%20S,%20Quantity{T,%20%F0%9D%90%93,%20U}}%20where%20{L,%20S}}%20where%20{T,%20U}}) and [`Domain`](https://iddingsite.github.io/DiffusionGarnet.jl/dev/reference/#DiffusionGarnet.Domain), which will contain all the information DiffusionGarnet needs to run a simulation.
 
 ```julia
 Lx = (data[end,1] - data[1,1])u"µm"  # length in x of the model, here in µm
@@ -59,7 +59,7 @@ domain1D = Domain(IC1D, T, P)
 !!! note
     `Lx`, `tfinal`, `T` and `P` need to contain units, following the syntax of the package [Unitful](https://painterqubits.github.io/Unitful.jl/stable/). This allows the user to specify the units that suit their problem.
 
-`Domain1D` contains all the information that DiffusionGarnet needs to solve our coupled diffusion problem, at 900 °C and 0.6 GPa for a duration of 15 Myr.
+`domain1D` contains all the information that DiffusionGarnet needs to solve our coupled diffusion problem, at 900 °C and 0.6 GPa for a duration of 15 Myr.
 
 This can be achieved with the function `simulate()`:
 ```julia
@@ -67,7 +67,7 @@ This can be achieved with the function `simulate()`:
 sol = simulate(domain1D)
 ```
 
-which outputs the time spent on the solver, for example, on the second run:
+which outputs the time spent on the solver, for example, on the second run on my machine:
 
 ```
   0.399870 seconds (31.93 k allocations: 18.212 MiB)

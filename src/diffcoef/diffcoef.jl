@@ -50,10 +50,10 @@ end
                 D0_Mn = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mn, T = T_K, P = P_kbar, fO2 = fugacity_O2, X = X)))
                 D0_Ca = 0.5 * D0_Fe
 
-                D0[1, ix, iy, iz] = D0_Mg
-                D0[2, ix, iy, iz] = D0_Fe
-                D0[3, ix, iy, iz] = D0_Mn
-                D0[4, ix, iy, iz] = D0_Ca
+                D0[1, ix, iy] = D0_Mg
+                D0[2, ix, iy] = D0_Fe
+                D0[3, ix, iy] = D0_Mn
+                D0[4, ix, iy] = D0_Ca
 
             elseif diffcoef == 2 || diffcoef == 3
 
@@ -70,10 +70,10 @@ end
                 D0_Mn = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mn, T = T_K, P = P_kbar, fO2 = fugacity_O2, X = X)))
                 D0_Ca = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Ca, T = T_K, P = P_kbar, fO2 = fugacity_O2, X = X)))
 
-                D0[1, ix, iy, iz] = D0_Mg
-                D0[2, ix, iy, iz] = D0_Fe
-                D0[3, ix, iy, iz] = D0_Mn
-                D0[4, ix, iy, iz] = D0_Ca
+                D0[1, ix, iy] = D0_Mg
+                D0[2, ix, iy] = D0_Fe
+                D0[3, ix, iy] = D0_Mn
+                D0[4, ix, iy] = D0_Ca
             end
         end
     end
@@ -108,7 +108,7 @@ end
                 a0_Mn = 1.1614
                 a0_Ca = 1.1852
 
-                X = CFe[ix,iy] * a0_Fe + CMg[ix,iy] * a0_Mg + CMn[ix,iy] * a0_Mn + (1 - (CMg[ix,iy] + CFe[ix,iy] + CMn[ix,iy])) * a0_Ca
+                X = CFe[ix,iy,iz] * a0_Fe + CMg[ix,iy,iz] * a0_Mg + CMn[ix,iy,iz] * a0_Mn + (1 - (CMg[ix,iy,iz] + CFe[ix,iy,iz] + CMn[ix,iy,iz])) * a0_Ca
                 X = convert(Float64, X)NoUnits
 
                 D0_Mg = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mg, T = T_K, P = P_kbar, fO2 = fugacity_O2, X = X)))
