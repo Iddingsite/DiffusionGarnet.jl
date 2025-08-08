@@ -35,6 +35,6 @@ function D_update!(D0, T, P, diffcoef, CMg, CFe, CMn, D0_data, fugacity_O2=1e-25
     end
 
 
-    println("Hi2")
+    @info "Hi2"
     D0 .= (float(DMg), float(DFe), float(DMn), float(DCa))   # in µm^2/Myr
 end

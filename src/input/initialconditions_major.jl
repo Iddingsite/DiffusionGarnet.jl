@@ -605,6 +605,7 @@ end
                 for l in axes(D0, 4)
                     D0_view = @view D0[:, j, k, l]
                     # compute the diffusion coefficients for each point
+                    @info "Hi"
                     D_update!(D0_view, T[1], P[1], diffcoef, CMg0[j, k, l], CFe0[j, k, l], CMn0[j, k, l], D0_data, fugacity_O2[1])  #
                 end
             end
