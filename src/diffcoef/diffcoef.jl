@@ -34,5 +34,7 @@ function D_update!(D0, T, P, diffcoef, CMg, CFe, CMn, D0_data, fugacity_O2=1e-25
         DCa = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Ca, T = T_K, P = P_kbar, fO2 = (fugacity_O2)NoUnits, X = (X)NoUnits)))
     end
 
+
+    println("Hi2")
     D0 .= (float(DMg), float(DFe), float(DMn), float(DCa))   # in µm^2/Myr
 end
