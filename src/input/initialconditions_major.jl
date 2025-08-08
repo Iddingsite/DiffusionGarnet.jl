@@ -494,16 +494,6 @@ end
         T2 = eltype(CMg0)
         D0 = zeros(T2, 4, nx, ny)
 
-        # iterate through D0 and compute the initial diffusion coefficients
-        for j in axes(D0, 2)
-            for k in axes(D0, 3)
-                D0_view = @view D0[:, j, k]
-
-                # compute the diffusion coefficients for each point
-                D_update!(D0_view, T[1], P[1], diffcoef, CMg0[j, k], CFe0[j, k], CMn0[j, k], D0_data, fugacity_O2[1])  # compute initial diffusion coefficients
-            end
-        end
-
         D = (DMgMg = zeros(T2, nx, ny),
              DMgFe = zeros(T2, nx, ny),
              DMgMn = zeros(T2, nx, ny),
@@ -519,15 +509,6 @@ end
         u0[:, :, 2] .= CFe0
         u0[:, :, 3] .= CMn0
 
-        # to estimate D_charact in 2D and 3D, we simply take a fake composition of garnet.
-        # this is because if D0 is composition dependent, some of them have wrong values for non-garnet compositions.
-        # D0_charact = zeros(4)
-        # D_update!(D0_charact, T[1], P[1], diffcoef, 0.25, 0.7, 0.025, D0_data, fugacity_O2[1])
-
-        # L_charact = copy(Lx)  # characteristic length
-        # D_charact = mean(D0_charact)  # characteristic
-        # t_charact = L_charact^2 / D_charact  # characteristic time
-
         # Now fix t to be 1 and make D_charact = L_charact^2 / t_charact
         L_charact = Lx  # characteristic length
         t_charact = 1.0
@@ -537,7 +518,6 @@ end
         Δyad_ = 1 / (Δy / L_charact)  # inverse of nondimensionalised Δy
         tfinal_ad = tfinal / t_charact  # nondimensionalised total time
         time_update_ad = time_update / t_charact  # nondimensionalised time update
-
 
         T2 = typeof(t_charact)
         T3 = typeof(D0)
@@ -599,41 +579,20 @@ end
 
         D0 = similar(CMg0, 4, nx, ny, nz)
 
-        # iterate through D0 and compute the initial diffusion coefficients
-        for j in axes(D0, 2)
-            for k in axes(D0, 3)
-                for l in axes(D0, 4)
-                    D0_view = @view D0[:, j, k, l]
-                    # compute the diffusion coefficients for each point
-                    @info "Hi"
-                    D_update!(D0_view, T[1], P[1], diffcoef, CMg0[j, k, l], CFe0[j, k, l], CMn0[j, k, l], D0_data, fugacity_O2[1])  #
-                end
-            end
-        end
-
         D = (DMgMg = zeros(eltype(CMg0), nx, ny, nz),
-             DMgFe = zeros(eltype(CMg0), nx, ny, nz),
-             DMgMn = zeros(eltype(CMg0), nx, ny, nz),
-             DFeMg = zeros(eltype(CMg0), nx, ny, nz),
-             DFeFe = zeros(eltype(CMg0), nx, ny, nz),
-             DFeMn = zeros(eltype(CMg0), nx, ny, nz),
-             DMnMg = zeros(eltype(CMg0), nx, ny, nz),
-             DMnFe = zeros(eltype(CMg0), nx, ny, nz),
-             DMnMn = zeros(eltype(CMg0), nx, ny, nz))  # matrix of interdiffusion coefficients
+        DMgFe = zeros(eltype(CMg0), nx, ny, nz),
+        DMgMn = zeros(eltype(CMg0), nx, ny, nz),
+        DFeMg = zeros(eltype(CMg0), nx, ny, nz),
+        DFeFe = zeros(eltype(CMg0), nx, ny, nz),
+        DFeMn = zeros(eltype(CMg0), nx, ny, nz),
+        DMnMg = zeros(eltype(CMg0), nx, ny, nz),
+        DMnFe = zeros(eltype(CMg0), nx, ny, nz),
+        DMnMn = zeros(eltype(CMg0), nx, ny, nz))  # matrix of interdiffusion coefficients
 
         u0 = similar(CMg0, (nx, ny, nz, 3))
         u0[:, :, :, 1] .= CMg0
         u0[:, :, :, 2] .= CFe0
         u0[:, :, :, 3] .= CMn0
-
-        # to estimate D_charact in 2D and 3D, we simply take a fake composition of garnet.
-        # this is because if D0 is composition dependent, some of them have wrong values for non-garnet compositions.
-        # D0_charact = zeros(4)
-        # D_update!(D0_charact, T[1], P[1], diffcoef, 0.25, 0.7, 0.025, D0_data, fugacity_O2[1])
-
-        # L_charact = copy(Lx)  # characteristic length
-        # D_charact = mean(D0_charact)  # characteristic
-        # t_charact = L_charact^2 / D_charact  # characteristic time
 
         # Now fix t to be 1 and make D_charact = L_charact^2 / t_charact
         L_charact = Lx  # characteristic length
