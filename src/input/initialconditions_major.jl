@@ -238,7 +238,7 @@ end
     time_update::T1
     diffcoef::Int
     D0_data::T_tuplediffdata  # tuple of diffusion coefficients data
-    D0::Matrix{T2}  # diffusion coefficients
+    D0::Vector{T2}  # diffusion coefficients
     D::NamedTuple{(:DMgMg, :DMgFe, :DMgMn, :DFeMg, :DFeFe, :DFeMn, :DMnMg, :DMnFe, :DMnMn),
                   NTuple{9, Vector{T2}}}  # matrix of interdiffusion coefficients
     L_charact::T2
@@ -258,6 +258,9 @@ end
 
         @unpack nx, Δx, tfinal, Lx, CMg0, CFe0, CMn0 = IC
 
+        D0 = similar(CMg0, 4)
+        D0 .= (0.0, 0.0, 0.0, 0.0)
+
         # define the trace diffusion coefficients based on the chosen dataset
         if diffcoef == 1
             Grt_Mg = SetChemicalDiffusion(Grt_Mg_Chakraborty1992)
@@ -265,6 +268,19 @@ end
             Grt_Mn = SetChemicalDiffusion(Grt_Mn_Chakraborty1992)
 
             D0_data = (Grt_Mg=Grt_Mg, Grt_Fe=Grt_Fe, Grt_Mn=Grt_Mn)
+
+            T_K = (T[1] + 273.15) * u"K"
+            P_kbar = P[1] * u"kbar"
+            fO2 = (fugacity_O2[1])NoUnits
+
+            DMg = ustrip(uconvert(u"µm^2/Myr",compute_D(Grt_Mg, T = T_K, P = P_kbar, fO2=fO2)))
+            DFe = ustrip(uconvert(u"µm^2/Myr",compute_D(Grt_Fe, T = T_K, P = P_kbar, fO2=fO2)))
+            DMn = ustrip(uconvert(u"µm^2/Myr",compute_D(Grt_Mn, T = T_K, P = P_kbar, fO2=fO2)))
+            DCa = 0.5 * DFe
+
+            # update D0 with the diffusion coefficients only for Chakraborty1992
+            D0 .= (DMg, DFe, DMn, DCa)
+
         elseif diffcoef == 2
             Grt_Mg = SetChemicalDiffusion(Grt_Mg_Carlson2006)
             Grt_Fe = SetChemicalDiffusion(Grt_Fe_Carlson2006)
@@ -284,19 +300,6 @@ end
         T_tuplediffdata = typeof(D0_data)
 
         T2 = eltype(CMg0)
-        D0 = similar(CMg0, (4, nx))
-
-        # iterate through D0 and compute the initial diffusion coefficients
-        for j in axes(D0, 2)
-            D0_view = @view D0[:, j]
-
-            T_K = (T[1] + 273.15) * u"K"
-            P_kbar = P[1] * u"kbar"
-            fO2 = (fugacity_O2[1])NoUnits
-
-            # compute the diffusion coefficients for each point
-            D_update!(D0_view, T_K, P_kbar, diffcoef, CMg0[j], CFe0[j], CMn0[j], D0_data, fO2)  # compute initial diffusion coefficients
-        end
 
         D = (DMgMg = similar(CMg0, nx),
              DMgFe = similar(CMg0, nx),
@@ -349,7 +352,7 @@ end
     time_update::T1
     diffcoef::Int
     D0_data::T_tuplediffdata  # tuple of diffusion coefficients data
-    D0::Matrix{T2}
+    D0::Vector{T2}
     D::NamedTuple{(:DMgMg, :DMgFe, :DMgMn, :DFeMg, :DFeFe, :DFeMn, :DMnMg, :DMnFe, :DMnMn),
                   NTuple{9, Vector{T2}}}  # matrix of interdiffusion coefficients
     L_charact::T2
@@ -370,6 +373,9 @@ end
 
         @unpack nr, Δr, r, tfinal, Lr, CMg0, CFe0, CMn0 = IC
 
+        D0 = similar(CMg0, 4)
+        D0 .= (0.0, 0.0, 0.0, 0.0)
+
         # define the trace diffusion coefficients based on the chosen dataset
         if diffcoef == 1
             Grt_Mg = SetChemicalDiffusion(Grt_Mg_Chakraborty1992)
@@ -377,6 +383,19 @@ end
             Grt_Mn = SetChemicalDiffusion(Grt_Mn_Chakraborty1992)
 
             D0_data = (Grt_Mg=Grt_Mg, Grt_Fe=Grt_Fe, Grt_Mn=Grt_Mn)
+
+            T_K = (T[1] + 273.15) * u"K"
+            P_kbar = P[1] * u"kbar"
+            fO2 = (fugacity_O2[1])NoUnits
+
+            DMg = ustrip(uconvert(u"µm^2/Myr",compute_D(Grt_Mg, T = T_K, P = P_kbar, fO2=fO2)))
+            DFe = ustrip(uconvert(u"µm^2/Myr",compute_D(Grt_Fe, T = T_K, P = P_kbar, fO2=fO2)))
+            DMn = ustrip(uconvert(u"µm^2/Myr",compute_D(Grt_Mn, T = T_K, P = P_kbar, fO2=fO2)))
+            DCa = 0.5 * DFe
+
+            # update D0 with the diffusion coefficients only for Chakraborty1992
+            D0 .= (DMg, DFe, DMn, DCa)
+
         elseif diffcoef == 2
             Grt_Mg = SetChemicalDiffusion(Grt_Mg_Carlson2006)
             Grt_Fe = SetChemicalDiffusion(Grt_Fe_Carlson2006)
@@ -397,19 +416,7 @@ end
 
         T2 = eltype(CMg0)
 
-        D0 = similar(CMg0, (4, nr))
 
-        # iterate through D0 and compute the initial diffusion coefficients
-        for j in axes(D0, 2)
-            D0_view = @view D0[:, j]
-
-            T_K = (T[1] + 273.15) * u"K"
-            P_kbar = P[1] * u"kbar"
-            fO2 = (fugacity_O2[1])NoUnits
-
-            # compute the diffusion coefficients for each point
-            D_update!(D0_view, T_K, P_kbar, diffcoef, CMg0[j], CFe0[j], CMn0[j], D0_data, fO2)  # compute initial diffusion coefficients
-        end
 
         D = (DMgMg = similar(CMg0, nr),
              DMgFe = similar(CMg0, nr),
@@ -463,7 +470,7 @@ end
     time_update::T1
     diffcoef::Int
     D0_data::T_tuplediffdata  # tuple of diffusion coefficients data
-    D0::T5
+    D0::T3
     D::T4  # matrix of interdiffusion coefficients
     L_charact::T2
     D_charact::T2
@@ -482,6 +489,10 @@ end
 
         @unpack nx, ny, Δx, Δy, tfinal, Lx, CMg0, CFe0, CMn0, grt_position, grt_boundary = IC
 
+
+        D0 = similar(CMg0, 4)
+        D0 .= (0.0, 0.0, 0.0, 0.0)
+
         # define the trace diffusion coefficients based on the chosen dataset
         if diffcoef == 1
             Grt_Mg = SetChemicalDiffusion(Grt_Mg_Chakraborty1992)
@@ -489,6 +500,19 @@ end
             Grt_Mn = SetChemicalDiffusion(Grt_Mn_Chakraborty1992)
 
             D0_data = (Grt_Mg=Grt_Mg, Grt_Fe=Grt_Fe, Grt_Mn=Grt_Mn, Grt_Ca=Grt_Fe) # fake Grt_Ca to make parallelStencil happy!!
+
+            T_K = (T[1] + 273.15) * u"K"
+            P_kbar = P[1] * u"kbar"
+            fO2 = (fugacity_O2[1])NoUnits
+
+            DMg = ustrip(uconvert(u"µm^2/Myr",compute_D(Grt_Mg, T = T_K, P = P_kbar, fO2 = fO2)))
+            DFe = ustrip(uconvert(u"µm^2/Myr",compute_D(Grt_Fe, T = T_K, P = P_kbar, fO2 = fO2)))
+            DMn = ustrip(uconvert(u"µm^2/Myr",compute_D(Grt_Mn, T = T_K, P = P_kbar, fO2 = fO2)))
+            DCa = 0.5 * DFe
+
+            # update D0 with the diffusion coefficients only for Chakraborty1992
+            D0 .= (DMg, DFe, DMn, DCa)
+
         elseif diffcoef == 2
             Grt_Mg = SetChemicalDiffusion(Grt_Mg_Carlson2006)
             Grt_Fe = SetChemicalDiffusion(Grt_Fe_Carlson2006)
@@ -496,6 +520,7 @@ end
             Grt_Ca = SetChemicalDiffusion(Grt_Ca_Carlson2006)
 
             D0_data = (Grt_Mg=Grt_Mg, Grt_Fe=Grt_Fe, Grt_Mn=Grt_Mn, Grt_Ca=Grt_Ca)
+
         elseif diffcoef == 3
             Grt_Mg = SetChemicalDiffusion(Grt_Mg_Chu2015)
             Grt_Fe = SetChemicalDiffusion(Grt_Fe_Chu2015)
@@ -506,14 +531,6 @@ end
         end
 
         T_tuplediffdata = typeof(D0_data)
-
-        D0 = similar(CMg0, (4, nx, ny))
-
-        T_K = (T[1] + 273.15) * u"K"
-        P_kbar = P[1] * u"kbar"
-        fO2 = (fugacity_O2[1])NoUnits
-
-        @parallel D_update_2D!(D0, T_K, P_kbar, diffcoef, CMg0, CFe0, CMn0, D0_data, fO2, grt_position, grt_boundary)
 
         D = (DMgMg = similar(CMg0, (nx, ny)),
              DMgFe = similar(CMg0, (nx, ny)),
@@ -577,6 +594,9 @@ end
 
         @unpack nx, ny, nz, Δx, Δy, Δz, tfinal, Lx, CMg0, CFe0, CMn0, grt_position, grt_boundary = IC
 
+        D0 = similar(CMg0, 4)
+        D0 .= (0.0, 0.0, 0.0, 0.0)
+
         # define the trace diffusion coefficients based on the chosen dataset
         if diffcoef == 1
             Grt_Mg = SetChemicalDiffusion(Grt_Mg_Chakraborty1992)
@@ -585,6 +605,19 @@ end
             Grt_Ca = SetChemicalDiffusion(Grt_Fe_Chakraborty1992)  # fake one to make GPU happy
 
             D0_data = (Grt_Mg=Grt_Mg, Grt_Fe=Grt_Fe, Grt_Mn=Grt_Mn, Grt_Ca=Grt_Ca)
+
+            T_K = (T[1] + 273.15) * u"K"
+            P_kbar = P[1] * u"kbar"
+            fO2 = (fugacity_O2[1])NoUnits
+
+            DMg = ustrip(uconvert(u"µm^2/Myr",compute_D(Grt_Mg, T = T_K, P = P_kbar, fO2=fO2)))
+            DFe = ustrip(uconvert(u"µm^2/Myr",compute_D(Grt_Fe, T = T_K, P = P_kbar, fO2=fO2)))
+            DMn = ustrip(uconvert(u"µm^2/Myr",compute_D(Grt_Mn, T = T_K, P = P_kbar, fO2=fO2)))
+            DCa = 0.5 * DFe
+
+            # update D0 with the diffusion coefficients only for Chakraborty1992
+            D0 .= (DMg, DFe, DMn, DCa)
+
         elseif diffcoef == 2
             Grt_Mg = SetChemicalDiffusion(Grt_Mg_Carlson2006)
             Grt_Fe = SetChemicalDiffusion(Grt_Fe_Carlson2006)
@@ -602,14 +635,6 @@ end
         end
 
         T_tuplediffdata = typeof(D0_data)
-
-        D0 = similar(CMg0, (4, nx, ny, nz))
-
-        T_K = (T[1] + 273.15) * u"K"
-        P_kbar = P[1] * u"kbar"
-        fO2 = (fugacity_O2[1])NoUnits
-
-        @parallel D_update_3D!(D0, T_K, P_kbar, diffcoef, CMg0, CFe0, CMn0, D0_data, fO2, grt_position, grt_boundary)
 
         D = (DMgMg = similar(CMg0, (nx, ny, nz)),
              DMgFe = similar(CMg0, (nx, ny, nz)),

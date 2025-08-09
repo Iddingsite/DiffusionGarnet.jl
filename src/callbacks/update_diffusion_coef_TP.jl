@@ -1,59 +1,41 @@
 
 """
-    update_diffusion_coef(integrator)
+    D_update!(D0, T_K, P_kbar, diffcoef, CMg, CFe, CMn, X, fugacity_O2=1e-25NoUnits)
 
-Callback function to update the diffusion coefficients at a given time from a new pressure and temperature. To use with the callback `PresetTimeCallback` (https://docs.sciml.ai/stable/basics/callbacks/#PresetTimeCallback-1).
-
-Follows the syntax of callback functions defined by DiffEqCallbacks.jl (https://docs.sciml.ai/DiffEqCallbacks/stable/).
+Update the diffusion coefficients `D0` based on the temperature `T_K`, pressure `P_kbar`, and the chemical compositions `CMg`, `CFe`, and `CMn`. The optional parameter `fugacity_O2` is used to set the oxygen fugacity, defaulting to 1e-25 Pa (graphite buffer).
 """
+function D_update!(D0, T_K, P_kbar, D0_data, fugacity_O2=1e-25NoUnits)  # by defaut 1e-25 Pa is graphite buffer
+
+    DMg = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mg, T = T_K, P = P_kbar, fO2 = fugacity_O2)))
+    DFe = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Fe, T = T_K, P = P_kbar, fO2 = fugacity_O2)))
+    DMn = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mn, T = T_K, P = P_kbar, fO2 = fugacity_O2)))
+
+    DCa = 0.5 * DFe
+
+    D0 .= (DMg, DFe, DMn, DCa)   # in µm^2/Myr
+end
+
+
 function update_diffusion_coef(integrator)
 
-    @unpack D0, P, T, fugacity_O2, time_update_ad, t_charact, diffcoef, D0_data = integrator.p.domain
+    @unpack D0, P, T, time_update_ad, t_charact, D0_data, diffcoef = integrator.p.domain
 
     # find the index of the time_update_ad that is equal to t
     index = findfirst(x -> x == integrator.t, time_update_ad)
 
-    nd = ndims(integrator.u)
-    idx = ntuple(_ -> Colon(), nd - 1)
-    CMg = @view integrator.u[idx..., 1]
-    CFe = @view integrator.u[idx..., 2]
-    CMn = @view integrator.u[idx..., 3]
-
+    #! integrator.opts.callback
 
     # update diffusion coefficients
     if index !== nothing
 
-        if length(idx) == 1
-            for I in CartesianIndices(CMg)
-                I_tuple = Tuple(I)  # convert CartesianIndex to Tuple for indexing
-                # D0 is indexed as D0[:, I...]
-                D0_view = @view D0[:, I_tuple...]
 
-                # Extract local values at spatial index I
-                cMg = CMg[I_tuple...]
-                cFe = CFe[I_tuple...]
-                cMn = CMn[I_tuple...]
-                T_local = (T[index]+273.15) * 1u"K"
-                P_local = P[index] * 1u"kbar"
-                fO2_local = (fugacity_O2[index])NoUnits
+        if diffcoef == 1
 
-                # Update diffusion coefficients at this point
-                D_update!(D0_view, T_local, P_local, diffcoef, cMg, cFe, cMn, D0_data, fO2_local)
-            end
-        elseif length(idx) == 2
             T_K = (T[index]+273.15) * 1u"K"
             P_kbar = P[index] * 1u"kbar"
-            fO2 = (fugacity_O2[index])NoUnits
+            fO2 = (1e-25)NoUnits  # default value for graphite
 
-            # use parallelstencil
-            @parallel D_update_2D!(D0, T_K, P_kbar, diffcoef, CMg, CFe, CMn, D0_data, fO2, integrator.p.domain.IC.grt_position, integrator.p.domain.IC.grt_boundary)
-        elseif length(idx) == 3
-            T_K = (T[index]+273.15) * 1u"K"
-            P_kbar = P[index] * 1u"kbar"
-            fO2 = (fugacity_O2[index])NoUnits
-
-            # use parallelstencil
-            @parallel D_update_3D!(D0, T_K, P_kbar, diffcoef, CMg, CFe, CMn, D0_data, fO2, integrator.p.domain.IC.grt_position, integrator.p.domain.IC.grt_boundary)
+            D_update!(D0, T_K, P_kbar, D0_data, fO2)
         end
 
         if integrator.t ≠ 0.0

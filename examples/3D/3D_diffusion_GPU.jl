@@ -57,7 +57,7 @@ Mn0 = convert(CuArray{Float32}, Mn0)
 Ca0 = convert(CuArray{Float32}, Ca0)
 grt_boundary = convert(CuArray{Float32}, grt_boundary)
 
-IC3D = DiffusionGarnet.IC3DMajor(;CMg0=Mg0, CFe0=Fe0, CMn0=Mn0, Lx, Ly, Lz, tfinal, grt_boundary)
+IC3D = IC3DMajor(;CMg0=Mg0, CFe0=Fe0, CMn0=Mn0, Lx, Ly, Lz, tfinal, grt_boundary)
 domain3D = Domain(IC3D, T, P)
 
 # free memory, as 3D data is large
