@@ -23,7 +23,7 @@ import Base.@propagate_inbounds
                 a0_Mn = 1.1614
                 a0_Ca = 1.1852
 
-                @inbounds @muladd X = CFe[ix,iy,iz] * a0_Fe + CMg[ix,iy,iz] * a0_Mg + CMn[ix,iy,iz] * a0_Mn + (1 - (CMg[ix,iy,iz] + CFe[ix,iy,iz] + CMn[ix,iy,iz])) * a0_Ca
+                @inbounds X = CFe[ix,iy,iz] * a0_Fe + CMg[ix,iy,iz] * a0_Mg + CMn[ix,iy,iz] * a0_Mn + (1 - (CMg[ix,iy,iz] + CFe[ix,iy,iz] + CMn[ix,iy,iz])) * a0_Ca
                 X = convert(Float64, X)NoUnits
 
                 D0Mg = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mg, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
@@ -49,15 +49,15 @@ import Base.@propagate_inbounds
             D0FeCFe = D0Fe * cFe
             D0MnCMn = D0Mn * cMn
 
-            @inbounds @muladd DMgMg[ix,iy,iz] = (D0Mg - D0MgCMg * sum_DMg) * D_charact_
-            @inbounds         DMgFe[ix,iy,iz] = (     - D0MgCMg * sum_DFe) * D_charact_
-            @inbounds         DMgMn[ix,iy,iz] = (     - D0MgCMg * sum_DMn) * D_charact_
-            @inbounds         DFeMg[ix,iy,iz] = (     - D0FeCFe * sum_DMg) * D_charact_
-            @inbounds @muladd DFeFe[ix,iy,iz] = (D0Fe - D0FeCFe * sum_DFe) * D_charact_
-            @inbounds         DFeMn[ix,iy,iz] = (     - D0FeCFe * sum_DMn) * D_charact_
-            @inbounds         DMnMg[ix,iy,iz] = (     - D0MnCMn * sum_DMg) * D_charact_
-            @inbounds         DMnFe[ix,iy,iz] = (     - D0MnCMn * sum_DFe) * D_charact_
-            @inbounds @muladd DMnMn[ix,iy,iz] = (D0Mn - D0MnCMn * sum_DMn) * D_charact_
+            @inbounds DMgMg[ix,iy,iz] = (D0Mg - D0MgCMg * sum_DMg) * D_charact_
+            @inbounds DMgFe[ix,iy,iz] = (     - D0MgCMg * sum_DFe) * D_charact_
+            @inbounds DMgMn[ix,iy,iz] = (     - D0MgCMg * sum_DMn) * D_charact_
+            @inbounds DFeMg[ix,iy,iz] = (     - D0FeCFe * sum_DMg) * D_charact_
+            @inbounds DFeFe[ix,iy,iz] = (D0Fe - D0FeCFe * sum_DFe) * D_charact_
+            @inbounds DFeMn[ix,iy,iz] = (     - D0FeCFe * sum_DMn) * D_charact_
+            @inbounds DMnMg[ix,iy,iz] = (     - D0MnCMn * sum_DMg) * D_charact_
+            @inbounds DMnFe[ix,iy,iz] = (     - D0MnCMn * sum_DFe) * D_charact_
+            @inbounds DMnMn[ix,iy,iz] = (D0Mn - D0MnCMn * sum_DMn) * D_charact_
 
         end
     end
@@ -77,7 +77,7 @@ end
 
 
     @propagate_inbounds @inline function update_dtC(dtC, D1, D2, D3, C1, C2, C3, ix, iy, iz, Δxad_, Δyad_, Δzad_)
-        @muladd dtC[ix,iy,iz] = (qx(D1,C1,ix,iy,iz,Δxad_) - qx(D1,C1,ix-1,iy,iz,Δxad_)) * Δxad_ +
+        dtC[ix,iy,iz] = (qx(D1,C1,ix,iy,iz,Δxad_) - qx(D1,C1,ix-1,iy,iz,Δxad_)) * Δxad_ +
                         (qx(D2,C2,ix,iy,iz,Δxad_) - qx(D2,C2,ix-1,iy,iz,Δxad_)) * Δxad_ +
                         (qx(D3,C3,ix,iy,iz,Δxad_) - qx(D3,C3,ix-1,iy,iz,Δxad_)) * Δxad_ +
                         (qy(D1,C1,ix,iy,iz,Δyad_) - qy(D1,C1,ix,iy-1,iz,Δyad_)) * Δyad_ +
@@ -100,73 +100,73 @@ end
             # first order Neumann if inclusions
             # south
             if position_Grt[ix-1,iy,iz] == 0.0
-                @inbounds @muladd dtCMg[ix,iy,iz] -= - qx(DMgMg,CMg,ix-1,iy,iz,Δxad_) * Δxad_ -
+                @inbounds dtCMg[ix,iy,iz] -= - qx(DMgMg,CMg,ix-1,iy,iz,Δxad_) * Δxad_ -
                                   qx(DMgFe,CFe,ix-1,iy,iz,Δxad_) * Δxad_ -
                                   qx(DMgMn,CMn,ix-1,iy,iz,Δxad_) * Δxad_
-                @inbounds @muladd dtCFe[ix,iy,iz] -= - qx(DFeMg,CMg,ix-1,iy,iz,Δxad_) * Δxad_ -
+                @inbounds dtCFe[ix,iy,iz] -= - qx(DFeMg,CMg,ix-1,iy,iz,Δxad_) * Δxad_ -
                                   qx(DFeFe,CFe,ix-1,iy,iz,Δxad_) * Δxad_ -
                                   qx(DFeMn,CMn,ix-1,iy,iz,Δxad_) * Δxad_
-                @inbounds @muladd dtCMn[ix,iy,iz] -= - qx(DMnMg,CMg,ix-1,iy,iz,Δxad_) * Δxad_ -
+                @inbounds dtCMn[ix,iy,iz] -= - qx(DMnMg,CMg,ix-1,iy,iz,Δxad_) * Δxad_ -
                                   qx(DMnFe,CFe,ix-1,iy,iz,Δxad_) * Δxad_ -
                                   qx(DMnMn,CMn,ix-1,iy,iz,Δxad_) * Δxad_
             end
             # north
             if position_Grt[ix+1,iy,iz] == 0.0
-                @inbounds @muladd dtCMg[ix,iy,iz] -= qx(DMgMg,CMg,ix,iy,iz,Δxad_) * Δxad_ +
+                @inbounds dtCMg[ix,iy,iz] -= qx(DMgMg,CMg,ix,iy,iz,Δxad_) * Δxad_ +
                                 qx(DMgFe,CFe,ix,iy,iz,Δxad_) * Δxad_ +
                                 qx(DMgMn,CMn,ix,iy,iz,Δxad_) * Δxad_
-                @inbounds @muladd dtCFe[ix,iy,iz] -= qx(DFeMg,CMg,ix,iy,iz,Δxad_) * Δxad_ +
+                @inbounds dtCFe[ix,iy,iz] -= qx(DFeMg,CMg,ix,iy,iz,Δxad_) * Δxad_ +
                                 qx(DFeFe,CFe,ix,iy,iz,Δxad_) * Δxad_ +
                                 qx(DFeMn,CMn,ix,iy,iz,Δxad_) * Δxad_
-                @inbounds @muladd dtCMn[ix,iy,iz] -= qx(DMnMg,CMg,ix,iy,iz,Δxad_) * Δxad_ +
+                @inbounds dtCMn[ix,iy,iz] -= qx(DMnMg,CMg,ix,iy,iz,Δxad_) * Δxad_ +
                                 qx(DMnFe,CFe,ix,iy,iz,Δxad_) * Δxad_ +
                                 qx(DMnMn,CMn,ix,iy,iz,Δxad_) * Δxad_
             end
             # west
             if position_Grt[ix,iy-1,iz] == 0.0
-                @inbounds @muladd dtCMg[ix,iy,iz] -= - qy(DMgMg,CMg,ix,iy-1,iz,Δyad_) * Δyad_ -
+                @inbounds dtCMg[ix,iy,iz] -= - qy(DMgMg,CMg,ix,iy-1,iz,Δyad_) * Δyad_ -
                                   qy(DMgFe,CFe,ix,iy-1,iz,Δyad_) * Δyad_ -
                                   qy(DMgMn,CMn,ix,iy-1,iz,Δyad_) * Δyad_
-                @inbounds @muladd dtCFe[ix,iy,iz] -= - qy(DFeMg,CMg,ix,iy-1,iz,Δyad_) * Δyad_ -
+                @inbounds dtCFe[ix,iy,iz] -= - qy(DFeMg,CMg,ix,iy-1,iz,Δyad_) * Δyad_ -
                                   qy(DFeFe,CFe,ix,iy-1,iz,Δyad_) * Δyad_ -
                                   qy(DFeMn,CMn,ix,iy-1,iz,Δyad_) * Δyad_
-                @inbounds @muladd dtCMn[ix,iy,iz] -= - qy(DMnMg,CMg,ix,iy-1,iz,Δyad_) * Δyad_ -
+                @inbounds dtCMn[ix,iy,iz] -= - qy(DMnMg,CMg,ix,iy-1,iz,Δyad_) * Δyad_ -
                                   qy(DMnFe,CFe,ix,iy-1,iz,Δyad_) * Δyad_ -
                                   qy(DMnMn,CMn,ix,iy-1,iz,Δyad_) * Δyad_
             end
             # east
             if position_Grt[ix,iy+1,iz] == 0.0
-                @inbounds @muladd dtCMg[ix,iy,iz] -= qy(DMgMg,CMg,ix,iy,iz,Δyad_) * Δyad_ +
+                @inbounds dtCMg[ix,iy,iz] -= qy(DMgMg,CMg,ix,iy,iz,Δyad_) * Δyad_ +
                                 qy(DMgFe,CFe,ix,iy,iz,Δyad_) * Δyad_ +
                                 qy(DMgMn,CMn,ix,iy,iz,Δyad_) * Δyad_
-                @inbounds @muladd dtCFe[ix,iy,iz] -= qy(DFeMg,CMg,ix,iy,iz,Δyad_) * Δyad_ +
+                @inbounds dtCFe[ix,iy,iz] -= qy(DFeMg,CMg,ix,iy,iz,Δyad_) * Δyad_ +
                                 qy(DFeFe,CFe,ix,iy,iz,Δyad_) * Δyad_ +
                                 qy(DFeMn,CMn,ix,iy,iz,Δyad_) * Δyad_
-                @inbounds @muladd dtCMn[ix,iy,iz] -= qy(DMnMg,CMg,ix,iy,iz,Δyad_) * Δyad_ +
+                @inbounds dtCMn[ix,iy,iz] -= qy(DMnMg,CMg,ix,iy,iz,Δyad_) * Δyad_ +
                                 qy(DMnFe,CFe,ix,iy,iz,Δyad_) * Δyad_ +
                                 qy(DMnMn,CMn,ix,iy,iz,Δyad_) * Δyad_
             end
             # bottom
             if position_Grt[ix,iy,iz-1] == 0.0
-                @inbounds @muladd dtCMg[ix,iy,iz] -= - qz(DMgMg,CMg,ix,iy,iz-1,Δzad_) * Δzad_ -
+                @inbounds dtCMg[ix,iy,iz] -= - qz(DMgMg,CMg,ix,iy,iz-1,Δzad_) * Δzad_ -
                                   qz(DMgFe,CFe,ix,iy,iz-1,Δzad_) * Δzad_ -
                                   qz(DMgMn,CMn,ix,iy,iz-1,Δzad_) * Δzad_
-                @inbounds @muladd dtCFe[ix,iy,iz] -= - qz(DFeMg,CMg,ix,iy,iz-1,Δzad_) * Δzad_ -
+                @inbounds dtCFe[ix,iy,iz] -= - qz(DFeMg,CMg,ix,iy,iz-1,Δzad_) * Δzad_ -
                                   qz(DFeFe,CFe,ix,iy,iz-1,Δzad_) * Δzad_ -
                                   qz(DFeMn,CMn,ix,iy,iz-1,Δzad_) * Δzad_
-                @inbounds @muladd dtCMn[ix,iy,iz] -= - qz(DMnMg,CMg,ix,iy,iz-1,Δzad_) * Δzad_ -
+                @inbounds dtCMn[ix,iy,iz] -= - qz(DMnMg,CMg,ix,iy,iz-1,Δzad_) * Δzad_ -
                                   qz(DMnFe,CFe,ix,iy,iz-1,Δzad_) * Δzad_ -
                                   qz(DMnMn,CMn,ix,iy,iz-1,Δzad_) * Δzad_
             end
             # top
             if position_Grt[ix,iy,iz+1] == 0.0
-                @inbounds @muladd dtCMg[ix,iy,iz] -= qz(DMgMg,CMg,ix,iy,iz,Δzad_) * Δzad_ +
+                @inbounds dtCMg[ix,iy,iz] -= qz(DMgMg,CMg,ix,iy,iz,Δzad_) * Δzad_ +
                                 qz(DMgFe,CFe,ix,iy,iz,Δzad_) * Δzad_ +
                                 qz(DMgMn,CMn,ix,iy,iz,Δzad_) * Δzad_
-                @inbounds @muladd dtCFe[ix,iy,iz] -= qz(DFeMg,CMg,ix,iy,iz,Δzad_) * Δzad_ +
+                @inbounds dtCFe[ix,iy,iz] -= qz(DFeMg,CMg,ix,iy,iz,Δzad_) * Δzad_ +
                                 qz(DFeFe,CFe,ix,iy,iz,Δzad_) * Δzad_ +
                                 qz(DFeMn,CMn,ix,iy,iz,Δzad_) * Δzad_
-                @inbounds @muladd dtCMn[ix,iy,iz] -= qz(DMnMg,CMg,ix,iy,iz,Δzad_) * Δzad_ +
+                @inbounds dtCMn[ix,iy,iz] -= qz(DMnMg,CMg,ix,iy,iz,Δzad_) * Δzad_ +
                                 qz(DMnFe,CFe,ix,iy,iz,Δzad_) * Δzad_ +
                                 qz(DMnMn,CMn,ix,iy,iz,Δzad_) * Δzad_
             end
