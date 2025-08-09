@@ -33,13 +33,13 @@ function update_diffusion_coef(integrator)
 
             T_K = (T[index]+273.15) * 1u"K"
             P_kbar = P[index] * 1u"kbar"
-            fO2 = (fugacity_O2)NoUnits  # default value for graphite
+            fO2 = (fugacity_O2[index])NoUnits  # default value for graphite
 
             D_update!(D0, T_K, P_kbar, D0_data, fO2)
         end
 
         if integrator.t ≠ 0.0
-            @info "New temperature and pressure: $round(T[index],digits=2) °C and $(round(P[index]*0.1, digits=2)) GPa, updated at $(round((integrator.t), digits=2)) Myr."
+            @info "New temperature and pressure: $(round(T[index],digits=2)) °C and $(round(P[index]*0.1, digits=2)) GPa, updated at $(round((integrator.t), digits=2)) Myr."
         end
     end
 end
