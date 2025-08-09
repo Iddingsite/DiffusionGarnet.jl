@@ -80,7 +80,6 @@ let
     end
 end
 
-include("diffcoef/diffcoef.jl")
 include("input/initialconditions.jl")
 include("callbacks/update_diffusion_coef_TP.jl")
 include("callbacks/output.jl")

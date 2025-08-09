@@ -8,8 +8,8 @@ function Diffusion_coef_1D_major!(D, CMg, CFe, CMn, D0, D_charact, domain, t)
 
     D_charact_ = 1 / D_charact
 
-    @propagate_inbounds @inline sum_D(CMg, CFe, CMn, D0, I) = D0[1, I] * CMg[I] + D0[2, I] * CFe[I] + D0[3, I] * CMn[I] +
-    D0[4, I] * (1 - CMg[I] - CFe[I] - CMn[I])
+    @propagate_inbounds @inline sum_D(CMg, CFe, CMn, D0, I) = D0[1] * CMg[I] + D0[2] * CFe[I] + D0[3] * CMn[I] +
+    D0[4] * (1 - CMg[I] - CFe[I] - CMn[I])
 
 
     # end-member unit-cell dimensions for C12 and CA15
@@ -37,25 +37,25 @@ function Diffusion_coef_1D_major!(D, CMg, CFe, CMn, D0, D_charact, domain, t)
 
             X = (CFe[I] * a0_Fe + CMg[I] * a0_Mg + CMn[I] * a0_Mn + (1 - (CMg[I] + CFe[I] + CMn[I])) * a0_Ca)NoUnits
 
-            D0[1, I] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mg, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
-            D0[2, I] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Fe, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
-            D0[3, I] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mn, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
-            D0[4, I] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Ca, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
+            D0[1] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mg, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
+            D0[2] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Fe, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
+            D0[3] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mn, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
+            D0[4] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Ca, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
         end
 
         sum_D_ = 1 / (sum_D(CMg, CFe, CMn, D0, I))
 
-        DMgMg[I] = (D0[1, I] - D0[1, I] * CMg[I] * sum_D_ * (D0[1, I] - D0[end, I])) * D_charact_
-        DMgFe[I] = (      - D0[1, I] * CMg[I] * sum_D_ * (D0[2, I] - D0[end, I])) * D_charact_
-        DMgMn[I] = (      - D0[1, I] * CMg[I] * sum_D_ * (D0[3, I] - D0[end, I])) * D_charact_
+        DMgMg[I] = (D0[1] - D0[1] * CMg[I] * sum_D_ * (D0[1] - D0[end])) * D_charact_
+        DMgFe[I] = (      - D0[1] * CMg[I] * sum_D_ * (D0[2] - D0[end])) * D_charact_
+        DMgMn[I] = (      - D0[1] * CMg[I] * sum_D_ * (D0[3] - D0[end])) * D_charact_
 
-        DFeMg[I] = (      - D0[2, I] * CFe[I] * sum_D_ * (D0[1, I] - D0[end, I])) * D_charact_
-        DFeFe[I] = (D0[2, I] - D0[2, I] * CFe[I] * sum_D_ * (D0[2, I] - D0[end, I])) * D_charact_
-        DFeMn[I] = (      - D0[2, I] * CFe[I] * sum_D_ * (D0[3, I] - D0[end, I])) * D_charact_
+        DFeMg[I] = (      - D0[2] * CFe[I] * sum_D_ * (D0[1] - D0[end])) * D_charact_
+        DFeFe[I] = (D0[2] - D0[2] * CFe[I] * sum_D_ * (D0[2] - D0[end])) * D_charact_
+        DFeMn[I] = (      - D0[2] * CFe[I] * sum_D_ * (D0[3] - D0[end])) * D_charact_
 
-        DMnMg[I] = (      - D0[3, I] * CMn[I] * sum_D_ * (D0[1, I] - D0[end, I])) * D_charact_
-        DMnFe[I] = (      - D0[3, I] * CMn[I] * sum_D_ * (D0[2, I] - D0[end, I])) * D_charact_
-        DMnMn[I] = (D0[3, I] - D0[3, I] * CMn[I] * sum_D_ * (D0[3, I] - D0[end, I])) * D_charact_
+        DMnMg[I] = (      - D0[3] * CMn[I] * sum_D_ * (D0[1] - D0[end])) * D_charact_
+        DMnFe[I] = (      - D0[3] * CMn[I] * sum_D_ * (D0[2] - D0[end])) * D_charact_
+        DMnMn[I] = (D0[3] - D0[3] * CMn[I] * sum_D_ * (D0[3] - D0[end])) * D_charact_
     end
 end
 
