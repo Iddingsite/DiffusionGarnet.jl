@@ -7,58 +7,60 @@ import Base.@propagate_inbounds
 
     DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn = D
 
-    if ix>1 && ix<size(DMgMg,1) && iy>1 && iy<size(DMgMg,2) && iz>1 && iz<size(DMgMg,3)
-        if grt_position[ix,iy,iz] == 1.0
+    @inbounds begin
+        if ix>1 && ix<size(DMgMg,1) && iy>1 && iy<size(DMgMg,2) && iz>1 && iz<size(DMgMg,3)
+            if grt_position[ix,iy,iz] == 1.0
 
-            D0Mg = D0[1]
-            D0Fe = D0[2]
-            D0Mn = D0[3]
-            D0Ca = D0[4]
+                D0Mg = D0[1]
+                D0Fe = D0[2]
+                D0Mn = D0[3]
+                D0Ca = D0[4]
 
-            if diffcoef == 2 || diffcoef == 3
+                if diffcoef == 2 || diffcoef == 3
 
-                # end-member unit-cell dimensions for C12 and CA15
-                a0_Fe = 1.1525
-                a0_Mg = 1.1456
-                a0_Mn = 1.1614
-                a0_Ca = 1.1852
+                    # end-member unit-cell dimensions for C12 and CA15
+                    a0_Fe = 1.1525
+                    a0_Mg = 1.1456
+                    a0_Mn = 1.1614
+                    a0_Ca = 1.1852
 
-                @inbounds X = CFe[ix,iy,iz] * a0_Fe + CMg[ix,iy,iz] * a0_Mg + CMn[ix,iy,iz] * a0_Mn + (1 - (CMg[ix,iy,iz] + CFe[ix,iy,iz] + CMn[ix,iy,iz])) * a0_Ca
-                X = convert(Float64, X)NoUnits
+                    X = CFe[ix,iy,iz] * a0_Fe + CMg[ix,iy,iz] * a0_Mg + CMn[ix,iy,iz] * a0_Mn + (1 - (CMg[ix,iy,iz] + CFe[ix,iy,iz] + CMn[ix,iy,iz])) * a0_Ca
+                    X = convert(Float64, X)NoUnits
 
-                D0Mg = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mg, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
-                D0Fe = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Fe, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
-                D0Mn = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mn, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
-                D0Ca = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Ca, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
+                    D0Mg = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mg, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
+                    D0Fe = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Fe, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
+                    D0Mn = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mn, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
+                    D0Ca = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Ca, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
+                end
+
+                # prevent reading 3 times the same value on GPU
+                cMg = CMg[ix,iy,iz]
+                cFe = CFe[ix,iy,iz]
+                cMn = CMn[ix,iy,iz]
+
+                # factor that repeats 3 times for each diffusion coefficient
+                sum_D_ = 1 / sum_D(CMg,CFe,CMn,D0Mg,D0Fe,D0Mn,D0Ca,ix,iy,iz)
+
+                sum_DMg = sum_D_ * (D0Mg - D0Ca)
+                sum_DFe = sum_D_ * (D0Fe - D0Ca)
+                sum_DMn = sum_D_ * (D0Mn - D0Ca)
+
+                # factor that repeats 3 times for each diffusion coefficient
+                D0MgCMg = D0Mg * cMg
+                D0FeCFe = D0Fe * cFe
+                D0MnCMn = D0Mn * cMn
+
+                DMgMg[ix,iy,iz] = (D0Mg - D0MgCMg * sum_DMg) * D_charact_
+                DMgFe[ix,iy,iz] = (     - D0MgCMg * sum_DFe) * D_charact_
+                DMgMn[ix,iy,iz] = (     - D0MgCMg * sum_DMn) * D_charact_
+                DFeMg[ix,iy,iz] = (     - D0FeCFe * sum_DMg) * D_charact_
+                DFeFe[ix,iy,iz] = (D0Fe - D0FeCFe * sum_DFe) * D_charact_
+                DFeMn[ix,iy,iz] = (     - D0FeCFe * sum_DMn) * D_charact_
+                DMnMg[ix,iy,iz] = (     - D0MnCMn * sum_DMg) * D_charact_
+                DMnFe[ix,iy,iz] = (     - D0MnCMn * sum_DFe) * D_charact_
+                DMnMn[ix,iy,iz] = (D0Mn - D0MnCMn * sum_DMn) * D_charact_
+
             end
-
-            # prevent reading 3 times the same value on GPU
-            @inbounds cMg = CMg[ix,iy,iz]
-            @inbounds cFe = CFe[ix,iy,iz]
-            @inbounds cMn = CMn[ix,iy,iz]
-
-            # factor that repeats 3 times for each diffusion coefficient
-            @inbounds sum_D_ = 1 / sum_D(CMg,CFe,CMn,D0Mg,D0Fe,D0Mn,D0Ca,ix,iy,iz)
-
-            sum_DMg = sum_D_ * (D0Mg - D0Ca)
-            sum_DFe = sum_D_ * (D0Fe - D0Ca)
-            sum_DMn = sum_D_ * (D0Mn - D0Ca)
-
-            # factor that repeats 3 times for each diffusion coefficient
-            D0MgCMg = D0Mg * cMg
-            D0FeCFe = D0Fe * cFe
-            D0MnCMn = D0Mn * cMn
-
-            @inbounds DMgMg[ix,iy,iz] = (D0Mg - D0MgCMg * sum_DMg) * D_charact_
-            @inbounds DMgFe[ix,iy,iz] = (     - D0MgCMg * sum_DFe) * D_charact_
-            @inbounds DMgMn[ix,iy,iz] = (     - D0MgCMg * sum_DMn) * D_charact_
-            @inbounds DFeMg[ix,iy,iz] = (     - D0FeCFe * sum_DMg) * D_charact_
-            @inbounds DFeFe[ix,iy,iz] = (D0Fe - D0FeCFe * sum_DFe) * D_charact_
-            @inbounds DFeMn[ix,iy,iz] = (     - D0FeCFe * sum_DMn) * D_charact_
-            @inbounds DMnMg[ix,iy,iz] = (     - D0MnCMn * sum_DMg) * D_charact_
-            @inbounds DMnFe[ix,iy,iz] = (     - D0MnCMn * sum_DFe) * D_charact_
-            @inbounds DMnMn[ix,iy,iz] = (D0Mn - D0MnCMn * sum_DMn) * D_charact_
-
         end
     end
 
