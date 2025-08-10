@@ -30,12 +30,12 @@ function Diffusion_coef_1D_major!(D, CMg, CFe, CMn, D0, D_charact, domain, t)
     fO2 = (fugacity_O2[index])NoUnits
 
     # @inbounds for I in eachindex(DMgMg)
-    for I in eachindex(DMgMg)
+    @inbounds for I in eachindex(DMgMg)
 
         # there is a composition dependence in the self-diffusion coefficients for C12 and CA15
         if diffcoef == 2 || diffcoef == 3
 
-            X = (CFe[I] * a0_Fe + CMg[I] * a0_Mg + CMn[I] * a0_Mn + (1 - (CMg[I] + CFe[I] + CMn[I])) * a0_Ca)NoUnits
+            X = @muladd (CFe[I] * a0_Fe + CMg[I] * a0_Mg + CMn[I] * a0_Mn + (1 - (CMg[I] + CFe[I] + CMn[I])) * a0_Ca)NoUnits
 
             D0[1] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mg, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
             D0[2] = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Fe, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
@@ -75,7 +75,7 @@ function stencil_diffusion_1D_major!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δxa
                   (qx(D3,C3,ix,Δxad_) - qx(D3,C3,ix-1,Δxad_)) * Δxad_centered
     end
 
-    for ix in eachindex(dtCMg)
+    @inbounds for ix in eachindex(dtCMg)
         if ix > 1 && ix < size(dtCMg, 1)
             update_dtC(dtCMg, DMgMg, DMgFe, DMgMn, CMg, CFe, CMn, ix, Δxad_)
             update_dtC(dtCFe, DFeMg, DFeFe, DFeMn, CMg, CFe, CMn, ix, Δxad_)
@@ -86,50 +86,50 @@ function stencil_diffusion_1D_major!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, Δxa
     # neumann boundary conditions
     if bc_neumann[1] == true
         ix = 1
-        Δxad_centered = Δxad_[ix]
+        Δxad_centered_right = Δxad_[ix]
 
-        dtCMg[1] = qx(DMgMg,CMg,ix,Δxad_) * Δxad_centered +
-                   qx(DMgFe,CFe,ix,Δxad_) * Δxad_centered +
-                   qx(DMgMn,CMn,ix,Δxad_) * Δxad_centered
-        dtCFe[1] = qx(DFeMg,CMg,ix,Δxad_) * Δxad_centered +
-                   qx(DFeFe,CFe,ix,Δxad_) * Δxad_centered +
-                   qx(DFeMn,CMn,ix,Δxad_) * Δxad_centered
-        dtCMn[1] = qx(DMnMg,CMg,ix,Δxad_) * Δxad_centered +
-                   qx(DMnFe,CFe,ix,Δxad_) * Δxad_centered +
-                   qx(DMnMn,CMn,ix,Δxad_) * Δxad_centered
-        dtCMg[1] += neumann_left(DMgMg,CMg,ix,Δxad_) * Δxad_centered +
-                    neumann_left(DMgFe,CFe,ix,Δxad_) * Δxad_centered +
-                    neumann_left(DMgMn,CMn,ix,Δxad_) * Δxad_centered
-        dtCFe[1] += neumann_left(DFeMg,CMg,ix,Δxad_) * Δxad_centered +
-                    neumann_left(DFeFe,CFe,ix,Δxad_) * Δxad_centered +
-                    neumann_left(DFeMn,CMn,ix,Δxad_) * Δxad_centered
-        dtCMn[1] += neumann_left(DMnMg,CMg,ix,Δxad_) * Δxad_centered +
-                    neumann_left(DMnFe,CFe,ix,Δxad_) * Δxad_centered +
-                    neumann_left(DMnMn,CMn,ix,Δxad_) * Δxad_centered
+        dtCMg[1] = qx(DMgMg,CMg,ix,Δxad_) * Δxad_centered_right +
+                   qx(DMgFe,CFe,ix,Δxad_) * Δxad_centered_right +
+                   qx(DMgMn,CMn,ix,Δxad_) * Δxad_centered_right
+        dtCFe[1] = qx(DFeMg,CMg,ix,Δxad_) * Δxad_centered_right +
+                   qx(DFeFe,CFe,ix,Δxad_) * Δxad_centered_right +
+                   qx(DFeMn,CMn,ix,Δxad_) * Δxad_centered_right
+        dtCMn[1] = qx(DMnMg,CMg,ix,Δxad_) * Δxad_centered_right +
+                   qx(DMnFe,CFe,ix,Δxad_) * Δxad_centered_right +
+                   qx(DMnMn,CMn,ix,Δxad_) * Δxad_centered_right
+        dtCMg[1] += neumann_left(DMgMg,CMg,ix,Δxad_) * Δxad_centered_right +
+                    neumann_left(DMgFe,CFe,ix,Δxad_) * Δxad_centered_right +
+                    neumann_left(DMgMn,CMn,ix,Δxad_) * Δxad_centered_right
+        dtCFe[1] += neumann_left(DFeMg,CMg,ix,Δxad_) * Δxad_centered_right +
+                    neumann_left(DFeFe,CFe,ix,Δxad_) * Δxad_centered_right +
+                    neumann_left(DFeMn,CMn,ix,Δxad_) * Δxad_centered_right
+        dtCMn[1] += neumann_left(DMnMg,CMg,ix,Δxad_) * Δxad_centered_right +
+                    neumann_left(DMnFe,CFe,ix,Δxad_) * Δxad_centered_right +
+                    neumann_left(DMnMn,CMn,ix,Δxad_) * Δxad_centered_right
     end
 
     if bc_neumann[2] == true
         ix = last_index(dtCMg)
-        Δxad_centered = Δxad_[ix]
+        Δxad_centered_left = Δxad_[ix]
 
-        dtCMg[end] = - qx(DMgMg,CMg,ix,Δxad_) * Δxad_centered -
-                       qx(DMgFe,CFe,ix,Δxad_) * Δxad_centered -
-                       qx(DMgMn,CMn,ix,Δxad_) * Δxad_centered
-        dtCFe[end] = - qx(DFeMg,CMg,ix,Δxad_) * Δxad_centered -
-                       qx(DFeFe,CFe,ix,Δxad_) * Δxad_centered -
-                       qx(DFeMn,CMn,ix,Δxad_) * Δxad_centered
-        dtCMn[end] = - qx(DMnMg,CMg,ix,Δxad_) * Δxad_centered -
-                       qx(DMnFe,CFe,ix,Δxad_) * Δxad_centered -
-                       qx(DMnMn,CMn,ix,Δxad_) * Δxad_centered
-        dtCMg[end] += neumann_right(DMgMg,CMg,ix,Δxad_) * Δxad_centered +
-                      neumann_right(DMgFe,CFe,ix,Δxad_) * Δxad_centered +
-                      neumann_right(DMgMn,CMn,ix,Δxad_) * Δxad_centered
-        dtCFe[end] += neumann_right(DFeMg,CMg,ix,Δxad_) * Δxad_centered +
-                      neumann_right(DFeFe,CFe,ix,Δxad_) * Δxad_centered +
-                      neumann_right(DFeMn,CMn,ix,Δxad_) * Δxad_centered
-        dtCMn[end] += neumann_right(DMnMg,CMg,ix,Δxad_) * Δxad_centered +
-                      neumann_right(DMnFe,CFe,ix,Δxad_) * Δxad_centered +
-                      neumann_right(DMnMn,CMn,ix,Δxad_) * Δxad_centered
+        dtCMg[end] = - qx(DMgMg,CMg,ix,Δxad_) * Δxad_centered_left -
+                       qx(DMgFe,CFe,ix,Δxad_) * Δxad_centered_left -
+                       qx(DMgMn,CMn,ix,Δxad_) * Δxad_centered_left
+        dtCFe[end] = - qx(DFeMg,CMg,ix,Δxad_) * Δxad_centered_left -
+                       qx(DFeFe,CFe,ix,Δxad_) * Δxad_centered_left -
+                       qx(DFeMn,CMn,ix,Δxad_) * Δxad_centered_left
+        dtCMn[end] = - qx(DMnMg,CMg,ix,Δxad_) * Δxad_centered_left -
+                       qx(DMnFe,CFe,ix,Δxad_) * Δxad_centered_left -
+                       qx(DMnMn,CMn,ix,Δxad_) * Δxad_centered_left
+        dtCMg[end] += neumann_right(DMgMg,CMg,ix,Δxad_) * Δxad_centered_left +
+                      neumann_right(DMgFe,CFe,ix,Δxad_) * Δxad_centered_left +
+                      neumann_right(DMgMn,CMn,ix,Δxad_) * Δxad_centered_left
+        dtCFe[end] += neumann_right(DFeMg,CMg,ix,Δxad_) * Δxad_centered_left +
+                      neumann_right(DFeFe,CFe,ix,Δxad_) * Δxad_centered_left +
+                      neumann_right(DFeMn,CMn,ix,Δxad_) * Δxad_centered_left
+        dtCMn[end] += neumann_right(DMnMg,CMg,ix,Δxad_) * Δxad_centered_left +
+                      neumann_right(DMnFe,CFe,ix,Δxad_) * Δxad_centered_left +
+                      neumann_right(DMnMn,CMn,ix,Δxad_) * Δxad_centered_left
     end
 end
 
