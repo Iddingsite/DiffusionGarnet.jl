@@ -5,7 +5,7 @@
 
 The 3D geometry of garnets can be obtained from micro-computed tomography (µCT) scans or other similar techniques. Combined with an initial composition, the full grain can be modelled with realistic geometry.
 
-In this tutorial, we will reproduce the results from the publication "Simulating major element diffusion in garnet using realistic 3D geometries" by Dominguez et al. (in review).
+In this tutorial, we will reproduce the results from the publication "Simulating major element diffusion in garnet using realistic 3D geometries" by [Dominguez et al. (2025)](https://doi.org/10.1016/j.cageo.2025.106023).
 
 To do so, we will use a callback function to save the results of the simulation to disk at regular intervals to be able to visualise the results using the software [ParaView](https://www.paraview.org/).
 
