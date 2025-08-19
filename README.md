@@ -80,7 +80,7 @@ Here is the gif obtained:
 
 ### 3D simulations
 
-Bellow is an example of a 3D simulation of garnet diffusion using the same data as in the publication "Simulating major element diffusion in garnet using realistic 3D geometries" by Dominguez et al. (in review). The results are saved in a HDF5 file that can be visualised with [ParaView](https://www.paraview.org/). The equivalent simulation running on GPU is shown in the [documentation](https://iddingsite.github.io/DiffusionGarnet.jl/dev/diffusion_3D_GPU/).
+Bellow is an example of a 3D simulation of garnet diffusion using the same data as in the publication "Simulating major element diffusion in garnet using realistic 3D geometries" by [Dominguez et al. (2025)](https://doi.org/10.1016/j.cageo.2025.106023). The results are saved in a HDF5 file that can be visualised with [ParaView](https://www.paraview.org/). The equivalent simulation running on GPU is shown in the [documentation](https://iddingsite.github.io/DiffusionGarnet.jl/dev/diffusion_3D_GPU/).
 
 ```julia
 using Downloads
