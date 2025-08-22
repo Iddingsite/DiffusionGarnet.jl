@@ -12,4 +12,4 @@ jobs:
       - name: Check spelling
         uses: crate-ci/typos@v1.35.5
         with:
-          config: ./myconfig.toml
+          config: ./_typo.toml
