@@ -20,7 +20,11 @@ TerminalLoggers = "5d786b92-1e48-4d6f-9151-6b4477ca9bed"
 UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
+[weakdeps]
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+
 [compat]
+CUDA = "5"
 DiffEqBase = "6"
 DiffEqCallbacks = "3, 4"
 GeoParams = "0.7.6"
