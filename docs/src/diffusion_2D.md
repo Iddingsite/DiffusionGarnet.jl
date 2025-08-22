@@ -86,7 +86,7 @@ domain2D = Domain(IC2D, T, P)
 ```
 
 !!! note
-    The argument `grt_boundary` is a binary array specifiying the coordinates where the homogeneous Dirichlet boundaries are to be enforced, here on the contour of the grain. If not provided, the homogeneous Dirichlet boundaries are applied to the sides of the domain.
+    The argument `grt_boundary` is a binary array specifying the coordinates where the homogeneous Dirichlet boundaries are to be enforced, here on the contour of the grain. If not provided, the homogeneous Dirichlet boundaries are applied to the sides of the domain.
 
 Using the function `simulate()` to solve our system:
 

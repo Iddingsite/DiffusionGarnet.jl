@@ -54,7 +54,8 @@ Mg0 = convert(Array{Float32}, Mg0)
 Fe0 = convert(Array{Float32}, Fe0)
 Mn0 = convert(Array{Float32}, Mn0)
 Ca0 = convert(Array{Float32}, Ca0)
-grt_boundary = convert(Array{Float32}, grt_boundary)
+grt_boundary = convert(Array{Bool}, grt_boundary)
+
 
 IC3D = IC3DMajor(;CMg0=Mg0, CFe0=Fe0, CMn0=Mn0, Lx, Ly, Lz, tfinal, grt_boundary)
 domain3D = Domain(IC3D, T, P)
