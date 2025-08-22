@@ -4,7 +4,7 @@
 
 Update the diffusion coefficients `D0` based on the temperature `T_K`, pressure `P_kbar`, and the chemical compositions `CMg`, `CFe`, and `CMn`. The optional parameter `fugacity_O2` is used to set the oxygen fugacity, defaulting to 1e-25 Pa (graphite buffer).
 """
-function D_update!(D0, T_K, P_kbar, D0_data, fugacity_O2=1e-25NoUnits)  # by defaut 1e-25 Pa is graphite buffer
+function D_update!(D0, T_K, P_kbar, D0_data, fugacity_O2=1e-25NoUnits)  # by default 1e-25 Pa is graphite buffer
 
     DMg = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mg, T = T_K, P = P_kbar, fO2 = fugacity_O2)))
     DFe = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Fe, T = T_K, P = P_kbar, fO2 = fugacity_O2)))
