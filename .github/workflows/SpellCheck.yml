@@ -9,7 +9,9 @@ jobs:
     steps:
       - name: Checkout Actions Repository
         uses: actions/checkout@v5
+
+      - name: Copy typos config
+        run: cp .github/config/typos.toml ./typos.toml
+
       - name: Check spelling
-        run: |
-          cargo install typos-cli --version 1.35.5
-          typos --config .github/config/typos.toml
+        uses: crate-ci/typos@v1.34.0
