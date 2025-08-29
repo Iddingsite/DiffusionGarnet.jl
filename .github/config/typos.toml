@@ -1,0 +1,7 @@
+[files]
+extend-exclude = ["src/generated/*", "docs/old/*"]
+
+[default.extend-words]
+# Don't correct the word "iy"
+iy = "iy"
+ficks = "ficks"
