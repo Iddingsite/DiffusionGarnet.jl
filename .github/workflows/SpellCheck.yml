@@ -10,4 +10,6 @@ jobs:
       - name: Checkout Actions Repository
         uses: actions/checkout@v5
       - name: Check spelling
-        uses: crate-ci/typos@v1.35.5
+        run: |
+          cargo install typos-cli --version 1.35.5
+          typos --config .github/config/typos.toml
