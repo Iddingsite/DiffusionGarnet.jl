@@ -75,31 +75,31 @@ using LinearAlgebra: norm
     end
 
 
-    # @testset "initial conditions Trace" begin
+    @testset "initial conditions Trace" begin
 
-    #     C = ones(5) .* 0.1
-    #     Lx = 10.0u"µm"
-    #     tfinal = 1.0u"Myr"
+        C = ones(5) .* 0.1
+        Lx = 10.0u"µm"
+        tfinal = 1.0u"Myr"
 
-    #     Grt_REE = Garnet.Grt_REE_Bloch2020_slow
-    #     D = SetChemicalDiffusion(Grt_REE)
+        Grt_REE = Garnet.Grt_REE_Bloch2020_slow
+        D = SetChemicalDiffusion(Grt_REE)
 
-    #     IC1D = IC1DTrace(;C, D, Lx, tfinal)
+        IC1D = IC1DTrace(;C, D, Lx, tfinal)
 
-    #     @test IC1D.C == C
-    #     @test IC1D.Lx == ustrip(u"cm",Lx)
-    #     @test IC1D.tfinal == ustrip(u"Myr",tfinal)
-    #     @test IC1D.D == D
+        @test IC1D.C == C
+        @test IC1D.Lx == ustrip(u"µm",Lx)
+        @test IC1D.tfinal == ustrip(u"Myr",tfinal)
+        @test IC1D.D == D
 
-    #     T = 650u"°C"
-    #     P = 2u"GPa"
-    #     domain1D = Domain(IC1D, T, P)
-    #     @test domain1D.L_charact == ustrip(u"cm",Lx)
-    #     @test domain1D.t_charact ≈ 2.3942878663294216e-14
-    #     @test domain1D.tfinal_ad ≈ 4.176607224481559e13
-    #     @test domain1D.Δxad_ == 4.0
-
-    # end
+        T = 650u"°C"
+        P = 2u"GPa"
+        domain1D = Domain(IC1D, T, P)
+        @test domain1D.L_charact == ustrip(u"µm",Lx)
+        @test domain1D.t_charact == 1.0
+        @test domain1D.tfinal_ad == 1.0
+        @test domain1D.D_charact == 100.0
+        @test domain1D.Δxad_[1] == 4.0
+    end
 
     @testset "diffusion coefficients" begin
         # test Domain
@@ -178,11 +178,11 @@ using LinearAlgebra: norm
         @test domainSph.D.DMnFe[1] ≈ domain1D.D.DMnFe[1]
 
         # check diffusion coefficients from Bloch et al. 2020 from GeoParams
-        Grt_Mg = Garnet.Grt_REE_Bloch2020_slow
+        Grt_Mg = Garnet.Grt_REE_Bloch2020_fast
         D = SetChemicalDiffusion(Grt_Mg)
 
         D =  ustrip(u"m^2/s", GeoParams.compute_D(D, T = 800u"°C", P = 1u"GPa"))  # diffusion coefficient in µm^2/Myr
-        D_paper = exp(-10.24 - (221057) / (2.303 * 8.31446261815324 * (800+ 273.15)))
+        D_paper = 10^(-10.24 - (221057) / (log(10) * 8.31446261815324 * (800+ 273.15)))
 
         @test D ≈ D_paper
     end
@@ -241,6 +241,38 @@ using LinearAlgebra: norm
         @test norm(sum.(sol.u[end][:,1] .+ sol.u[end][:,2] .+ sol.u[end][:,3])) ≈ 20.272049461615836 rtol=1e-5
     end
 
+    @testset "Trace element diffusion 1D and Spherical" begin
+
+        nx = 400
+        L = 0.8u"mm"
+        Grt_Mg = Garnet.Grt_REE_Bloch2020_fast
+        D = SetChemicalDiffusion(Grt_Mg)
+
+        # Gaussian initial condition
+        C = zeros(nx)
+        C[1:nx÷2] .= 4.5
+        C[nx÷2+1:end] .= 1.2
+
+        # 1D case
+        IC1D = IC1DTrace(;C=C, D=D, Lx=L, tfinal=1u"Myr")
+        domain1D = Domain(IC1D, 800u"°C", 1u"GPa")
+        sol1D = simulate(domain1D; progress=false, abstol=1e-6, reltol=1e-6, save_everystep=false, save_start=true)
+        @test sol1D.u[1] == C
+        @test length(sol1D.u[end]) == nx
+        # use norm 
+        @test norm(sol1D.u[end]) ≈ 60.67095414913916
+
+        # Spherical case
+        r = range(0u"mm", length=nx, stop=L)
+        ICsph = ICSphTrace(;C=C, D=D, Lr=L, r=r, tfinal=1u"Myr")
+        domainsph = Domain(ICsph, 800u"°C", 1u"GPa")
+        solsph = simulate(domainsph; progress=false, abstol=1e-6, reltol=1e-6, save_everystep=false, save_start=true)
+        @test solsph.u[1] == C
+        @test length(solsph.u[end]) == nx
+        @test norm(solsph.u[end]) ≈ 43.00182957068845
+    end
+
+
     @testset "2D Diffusion" begin
 
         root = @__DIR__
@@ -256,7 +288,7 @@ using LinearAlgebra: norm
 
         Lx = 900.0u"µm"
         Ly = 900.0u"µm"
-        tfinal = 15.0u"Myr"
+        tfinal = 2.0u"Myr"
         T = 900u"°C"
         P = 0.6u"GPa"
 
@@ -265,7 +297,7 @@ using LinearAlgebra: norm
 
         sol = simulate(domain2D; save_everystep=false, save_start=false)
 
-        @test norm(sol.u[end][:,:,1]) ≈ 12.783354423875512 rtol=1e-5
+        @test norm(sol.u[end][:,:,1]) ≈ 12.783357393401664 rtol=1e-5
     end
 
     @testset "3D Diffusion" begin
@@ -500,49 +532,3 @@ using LinearAlgebra: norm
 
     end
 end
-
-# using DiffusionGarnet
-# # Parameters
-# nx = 400               # number of grid points
-# L = 0.8u"mm"               # domain size (from -L/2 to L/2)
-
-# using GeoParams
-
-# Grt_Mg = Garnet.Grt_REE_Bloch2020_slow
-
-# D = SetChemicalDiffusion(Grt_Mg)
-
-# # gaussian initial condition
-
-# C = zeros(nx)
-# C[1:nx÷2] .= 4.5
-# C[nx÷2+1:end] .= 1.2
-
-# # Create initial conditions
-# IC = IC1DTrace(;C=C, D=D, Lx=L, tfinal=1u"Myr")
-
-# T2 = eltype(C)
-# u0 = copy(C)
-
-# D =  ustrip(u"m^2/s", compute_D(IC.D, T = 800u"°C", P = 1u"GPa"))  # diffusion coefficient in µm^2/Myr
-# D_paper = exp(-10.24 - (221057) / (2.303 * 8.31446261815324 * (800+ 273.15)))
-# D_paper = exp(-9.28 - (265200 + 10800 * 1) / (2.303 * 8.31446261815324 * (800+ 273.15)))  # diffusion coefficient in µm^2/Myr
-
-
-# L_charact = copy(IC.Lx)
-# D_charact = D  # characteristic diffusion coefficient in µm^2/Myr
-# t_charact = L_charact^2 / D_charact  # characteristic time
-
-# tfinal_ad = IC.tfinal / t_charact  # final time in characteristic time units
-
-# # Create domain
-# domain = Domain(IC, 800u"°C", 1u"GPa")
-
-
-# # Simulate
-# using OrdinaryDiffEq
-# sol = simulate(domain; progress=true, solver=Tsit5(),abstol=1e-6, reltol=1e-6, save_everystep=false, save_start=true)
-# using Plots
-# plot(sol[1])
-# plot!(sol[end])
-

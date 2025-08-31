@@ -48,11 +48,11 @@ D_i^* = D_{0,i} \exp \left( -\frac{E_{a,i} - (P-P_0)\Delta V^+_i}{RT} \right),
 
 with ``D_{0,i}`` the pre-exponential constant, ``E_{a,i}`` the activation energy of diffusion, ``\Delta V^+_i`` the activation volume of diffusion, ``P_0`` the pressure of calibration, ``R`` the universal gas constant, ``T`` the temperature, and ``P`` the pressure.
 
-In DiffusionGarnet.jl, ``D_{0,i}``, ``E_{a,i}``, and ``\Delta V^+_i`` are those of Chakraborty & Ganguly (1992) [[2]](@ref refs). The tracer diffusion coefficient of Ca is defined as ``0.5D_{Fe}^*``, following the approach of Loomis et al. (1985) [[3]](@ref refs).
+In DiffusionGarnet.jl, ``D_{0,i}``, ``E_{a,i}``, and ``\Delta V^+_i`` are those by default from Chakraborty & Ganguly (1992) [[2]](@ref refs). In this case, the tracer diffusion coefficient of Ca is defined as ``0.5D_{Fe}^*``, following the approach of Loomis et al. (1985) [[3]](@ref refs). But other diffusion parameters can be used.
 
 ### Numerical approach
 
-By defining the *PT* conditions of the metamorphic event of interest, (3) can be solved for each component, and the diffusion coefficient tensor can be calculated using (2) from the initial major composition data. In DiffusionGarnet.jl, (1) is then discretised in space using finite differences, and the resulting system of ordinary differential equations is solved with ROCK2, a stabilised explicit method (Abdulle & Medovikov, 2001 [[4]](@ref refs)) using the [DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl) ecosystem.
+By defining the *PT* conditions of the metamorphic event of interest, (3) can be solved for each component, and the diffusion coefficient matrix can be calculated using (2) from the initial major composition data. In DiffusionGarnet.jl, (1) is then discretised in space using finite differences, and the resulting system of ordinary differential equations is solved with ROCK2, a stabilised explicit method (Abdulle & Medovikov, 2001 [[4]](@ref refs)) using the [DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl) ecosystem.
 
 ## [References](@id refs)
 

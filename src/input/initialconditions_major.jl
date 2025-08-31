@@ -682,7 +682,14 @@ end
 
 When applied to 1D initial conditions, define corresponding 1D domain. `bc_neumann` can be used to define Neumann boundary conditions on the left or right side of the domain if set to true.
 """
-function Domain(IC::InitialConditions1DMajor, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr", fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa";diffcoef::Symbol=:CG92, bc_neumann::Tuple=(false, false))
+function Domain(IC::InitialConditions1DMajor,
+                T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}},
+                P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}},
+                time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr",
+                fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa";
+                diffcoef::Symbol=:CG92,
+                bc_neumann::Tuple=(false, false)
+                )
 
     if diffcoef == :CG92
         diffcoef = 1

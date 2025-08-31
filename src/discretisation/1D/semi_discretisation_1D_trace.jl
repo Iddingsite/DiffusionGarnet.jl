@@ -2,12 +2,14 @@ import Base.@propagate_inbounds
 
 function stencil_diffusion_1D_trace!(dtC, C, D, Δxad_, bc_neumann)
 
-    @propagate_inbounds @inline qx(D, C, ix, Δxad_) = D * (C[ix+1]-C[ix]) * Δxad_
-    @propagate_inbounds @inline neumann_left(D, C, ix, Δxad_) = - D * (C[ix]-C[ix+1]) * Δxad_
-    @propagate_inbounds @inline neumann_right(D, C, ix, Δxad_) = D * (C[ix-1]-C[ix]) * Δxad_
+    @propagate_inbounds @inline qx(D, C, ix, Δxad_) = D * (C[ix+1]-C[ix]) * Δxad_[ix]
+    @propagate_inbounds @inline neumann_left(D, C, ix, Δxad_) = - D * (C[ix]-C[ix+1]) * Δxad_[ix]
+    @propagate_inbounds @inline neumann_right(D, C, ix, Δxad_) = D * (C[ix-1]-C[ix]) * Δxad_[ix-1]
 
     @propagate_inbounds @inline function update_dtC(dtC, D, C, ix, Δxad_)
-        dtC[ix] = (qx(D,C,ix,Δxad_) - qx(D,C,ix-1,Δxad_)) * Δxad_
+        Δxad_centered = (Δxad_[ix] + Δxad_[ix-1]) / 2
+
+        dtC[ix] = (qx(D,C,ix,Δxad_) - qx(D,C,ix-1,Δxad_)) * Δxad_centered
     end
 
     @inbounds for ix in eachindex(dtC)
@@ -19,14 +21,18 @@ function stencil_diffusion_1D_trace!(dtC, C, D, Δxad_, bc_neumann)
     # neumann boundary conditions
     if bc_neumann[1] == true
         ix = 1
-        dtC[1] = qx(D,C,ix,Δxad_) * Δxad
-        dtC[1] += neumann_left(D,C,ix,Δxad_) * Δxad_
+        Δxad_centered_right = Δxad_[ix]
+
+        dtC[1] = qx(D,C,ix,Δxad_) * Δxad_centered_right
+        dtC[1] += neumann_left(D,C,ix,Δxad_) * Δxad_centered_right
     end
 
     if bc_neumann[2] == true
         ix = last_index(dtC)
-        dtC[end] = - qx(D,C,ix,Δxad_) * Δxad_
-        dtC[end] += neumann_right(D,C,ix,Δxad_) * Δxad_
+        Δxad_centered_left = Δxad_[ix]
+
+        dtC[end] = - qx(D,C,ix,Δxad_) * Δxad_centered_left
+        dtC[end] += neumann_right(D,C,ix,Δxad_) * Δxad_centered_left
     end
 end
 
