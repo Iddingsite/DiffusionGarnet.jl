@@ -107,4 +107,4 @@ With the resulting gif:
 
 ![Spherical diffusion profil of a garnet](./assets/img/Grt_Spherical+1D.gif)
 
-It shows that using spherical coordinates makes the garnet diffuse faster in this case but that is dependent on the initial conditions.
+It shows that using spherical coordinates makes the garnet reequilibrate faster in this case but that is dependent on the initial conditions.
