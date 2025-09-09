@@ -12,7 +12,7 @@
     C[nx÷2+1:end] .= 1.2
 
     # 1D case
-    IC1D = IC1DTrace(;C=C, D=D, Lx=L, tfinal=1u"Myr")
+    IC1D = IC1DTrace(;C0=C, D=D, Lx=L, tfinal=1u"Myr")
     domain1D = Domain(IC1D, 800u"°C", 1u"GPa")
     sol1D = simulate(domain1D; progress=false, abstol=1e-6, reltol=1e-6, save_everystep=false, save_start=true)
     @test sol1D.u[1] == C
@@ -22,7 +22,7 @@
 
     # Spherical case
     r = range(0u"mm", length=nx, stop=L)
-    ICsph = ICSphTrace(;C=C, D=D, Lr=L, r=r, tfinal=1u"Myr")
+    ICsph = ICSphTrace(;C0=C, D=D, Lr=L, r=r, tfinal=1u"Myr")
     domainsph = Domain(ICsph, 800u"°C", 1u"GPa")
     solsph = simulate(domainsph; progress=false, abstol=1e-6, reltol=1e-6, save_everystep=false, save_start=true)
     @test solsph.u[1] == C
@@ -48,7 +48,7 @@ end
     Grt_Mg = Garnet.Grt_REE_Bloch2020_fast
     D = SetChemicalDiffusion(Grt_Mg)
 
-    IC2D = IC2DTrace(;C=CMg0, D=D, Lx, Ly, tfinal, grt_boundary)
+    IC2D = IC2DTrace(;C0=CMg0, D=D, Lx, Ly, tfinal, grt_boundary)
     domain2D = Domain(IC2D, 800u"°C", 1u"GPa")
 
     sol2D = simulate(domain2D; progress=false, abstol=1e-6, reltol=1e-6, save_everystep=false, save_start=true)
@@ -81,7 +81,7 @@ end
 
     Mg0 .= Mg0 .* 1e5
 
-    IC3D = IC3DTrace(;C=Mg0, D=D, Lx, Ly, Lz, tfinal, grt_boundary)
+    IC3D = IC3DTrace(;C0=Mg0, D=D, Lx, Ly, Lz, tfinal, grt_boundary)
     domain3D = Domain(IC3D, T, P)
 
     sol3D = simulate(domain3D; progress=false, abstol=1e-6, reltol=1e-6, save_everystep=false, save_start=true);

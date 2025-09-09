@@ -69,16 +69,16 @@
 
 
     @testset "initial conditions Trace" begin
-        C = ones(5) .* 0.1
+        C0 = ones(5) .* 0.1
         Lx = 10.0u"µm"
         tfinal = 1.0u"Myr"
 
         Grt_REE = Garnet.Grt_REE_Bloch2020_slow
         D = SetChemicalDiffusion(Grt_REE)
 
-        IC1D = IC1DTrace(;C, D, Lx, tfinal)
+        IC1D = IC1DTrace(;C0, D, Lx, tfinal)
 
-        @test IC1D.C == C
+        @test IC1D.C0 == C0
         @test IC1D.Lx == ustrip(u"µm",Lx)
         @test IC1D.tfinal == ustrip(u"Myr",tfinal)
         @test IC1D.D == D
@@ -93,9 +93,9 @@
         @test domain1D.Δxad_[1] == 4.0
 
         Lr = Lx
-        ICSph = ICSphTrace(;C, D, Lr, tfinal)
+        ICSph = ICSphTrace(;C0, D, Lr, tfinal)
 
-        @test ICSph.C == C
+        @test ICSph.C0 == C0
         @test ICSph.Lr == ustrip(u"µm",Lr)
         @test ICSph.tfinal == ustrip(u"Myr",tfinal)
         @test ICSph.D == D
@@ -120,9 +120,9 @@
         Ly = 10.0u"µm"
         tfinal = 1.0u"Myr"
 
-        IC2D = IC2DTrace(;C=CMg0, D=D, Lx, Ly, tfinal, grt_boundary)
+        IC2D = IC2DTrace(;C0=CMg0, D=D, Lx, Ly, tfinal, grt_boundary)
 
-        @test IC2D.C == CMg0
+        @test IC2D.C0 == CMg0
         @test IC2D.Lx == ustrip(u"µm",Lx)
         @test IC2D.Ly == ustrip(u"µm",Ly)
         @test IC2D.tfinal == ustrip(u"Myr",tfinal)
@@ -135,20 +135,20 @@
         @test domain2D.tfinal_ad == 1.0
         @test domain2D.D_charact == 100.0
 
-        C = ones(5, 5, 5) .* 0.1
+        C0 = ones(5, 5, 5) .* 0.1
 
         Lz = 10.0u"µm"
         tfinal = 1.0u"Myr"
 
-        IC3D = IC3DTrace(;C, D, Lx, Ly, Lz, tfinal)
+        IC3D = IC3DTrace(;C0, D, Lx, Ly, Lz, tfinal)
 
-        @test IC3D.C == C
+        @test IC3D.C0 == C0
         @test IC3D.Lx == ustrip(u"µm",Lx)
         @test IC3D.Ly == ustrip(u"µm",Ly)
         @test IC3D.Lz == ustrip(u"µm",Lz)
         @test IC3D.tfinal == ustrip(u"Myr",tfinal)
         @test IC3D.D == D
-        @test size(IC3D.C, 1) == 5
+        @test size(IC3D.C0, 1) == 5
 
         domain3D = Domain(IC3D, T, P)
 

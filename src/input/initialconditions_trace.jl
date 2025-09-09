@@ -1,42 +1,42 @@
 
 @kwdef struct InitialConditions1DTrace{T1, T2, T_float, T_Int, T_Vec} <: InitialConditions
-    C::T1
+    C0::T1
     D::T2
     Lx::T_float
     nx::T_Int
     Δx::T_Vec
     x::T_Vec
     tfinal::T_float
-    function InitialConditions1DTrace(C::T1, D::T2, Lx::T3, x::ArrayX, tfinal::T3) where {T1 <: AbstractArray{<:Real, 1}, T2 <: AbstractChemicalDiffusion, T3 <: Float64, ArrayX <: AbstractArray{<:Real, 1}}
+    function InitialConditions1DTrace(C0::T1, D::T2, Lx::T3, x::ArrayX, tfinal::T3) where {T1 <: AbstractArray{<:Real, 1}, T2 <: AbstractChemicalDiffusion, T3 <: Float64, ArrayX <: AbstractArray{<:Real, 1}}
         if Lx <= 0
             error("Length should be positive.")
         elseif tfinal <= 0
             error("Total time should be positive.")
         else
-            nx = size(C, 1)
+            nx = size(C0, 1)
             Δx = diff(x)
 
             T4 = typeof(nx)
 
-            new{T1, T2, T3, T4, ArrayX}(C, D, Lx, nx, Δx, x, tfinal)
+            new{T1, T2, T3, T4, ArrayX}(C0, D, Lx, nx, Δx, x, tfinal)
         end
     end
 end
 
 
 """
-    IC1DTrace(;C::Array{<:Real, 1}, D, Lx::Unitful.Length, tfinal::Unitful.Time)
+    IC1DTrace(;C0::Array{<:Real, 1}, D, Lx::Unitful.Length, tfinal::Unitful.Time)
 
 Return a structure containing the initial conditions for a 1D diffusion problem. C needs to be in µg/g. Convert the `Lx` and `tfinal` to cm and Myr respectively.
 """
-function IC1DTrace(;C::AbstractArray{<:Real, 1},
+function IC1DTrace(;C0::AbstractArray{<:Real, 1},
                     D,
                     Lx::Unitful.Length,
-                    x::AbstractArray{<:Unitful.Length}=range(0u"µm", length=size(C, 1), stop=Lx),
+                    x::AbstractArray{<:Unitful.Length}=range(0u"µm", length=size(C0, 1), stop=Lx),
                     tfinal::Unitful.Time
                     )
 
-    InitialConditions1DTrace(C, D, convert(Float64,ustrip(u"µm", Lx)), ustrip.(u"µm", x), convert(Float64,ustrip(u"Myr",tfinal)))
+    InitialConditions1DTrace(C0, D, convert(Float64,ustrip(u"µm", Lx)), ustrip.(u"µm", x), convert(Float64,ustrip(u"Myr",tfinal)))
 end
 
 
@@ -62,11 +62,10 @@ end
             error("T, P and time_update should have the same size.")
         end
 
-        @unpack nx, Δx, tfinal, Lx, C = IC
+        @unpack nx, Δx, tfinal, Lx, C0 = IC
 
-        T2 = eltype(C)
-
-        u0 = copy(C)
+        T2 = eltype(C0)
+        u0 = copy(C0)
 
         T_K = (T+273.15) * 1u"K"
         P_kbar = P * 1u"kbar"
@@ -106,39 +105,39 @@ function Domain(IC::InitialConditions1DTrace,
 end
 
 @kwdef struct InitialConditionsSphericalTrace{T1, T2, T_float, T_Int, T_Vec} <: InitialConditions
-    C::T1
+    C0::T1
     D::T2
     Lr::T_float
     nr::T_Int
     Δr::T_Vec
     r::T_Vec
     tfinal::T_float
-    function InitialConditionsSphericalTrace(C::T1, D::T2, Lr::T3, r::ArrayR, tfinal::T3) where {T1 <: AbstractArray{<:Real, 1}, T2 <: AbstractChemicalDiffusion, T3 <: Float64, ArrayR <: AbstractArray{<:Real, 1}}
+    function InitialConditionsSphericalTrace(C0::T1, D::T2, Lr::T3, r::ArrayR, tfinal::T3) where {T1 <: AbstractArray{<:Real, 1}, T2 <: AbstractChemicalDiffusion, T3 <: Float64, ArrayR <: AbstractArray{<:Real, 1}}
         if Lr <= 0
             error("Length should be positive.")
         elseif tfinal <= 0
             error("Total time should be positive.")
         else
-            nr = size(C, 1)
+            nr = size(C0, 1)
             Δr = diff(r)
             T4 = typeof(nr)
-            new{T1, T2, T3, T4, ArrayR}(C, D, Lr, nr, Δr, r, tfinal)
+            new{T1, T2, T3, T4, ArrayR}(C0, D, Lr, nr, Δr, r, tfinal)
         end
     end
 end
 
 """
-    ICSphTrace(;C::Array{<:Real, 1}, D, Lr::Unitful.Length, tfinal::Unitful.Time)
+    ICSphTrace(;C0::Array{<:Real, 1}, D, Lr::Unitful.Length, tfinal::Unitful.Time)
 
 Return a structure containing the initial conditions for a spherical diffusion problem. C needs to be in µg/g. Convert `Lr` and `tfinal` to µm and Myr respectively.
 """
-function ICSphTrace(;C::AbstractArray{<:Real, 1},
+function ICSphTrace(;C0::AbstractArray{<:Real, 1},
                     D,
                     Lr::Unitful.Length,
-                    r::AbstractArray{<:Unitful.Length}=range(0u"µm", length=size(C, 1), stop=Lr),
+                    r::AbstractArray{<:Unitful.Length}=range(0u"µm", length=size(C0, 1), stop=Lr),
                     tfinal::Unitful.Time
                     )
-    InitialConditionsSphericalTrace(C, D, convert(Float64,ustrip(u"µm", Lr)), ustrip.(u"µm", r), convert(Float64,ustrip(u"Myr",tfinal)))
+    InitialConditionsSphericalTrace(C0, D, convert(Float64,ustrip(u"µm", Lr)), ustrip.(u"µm", r), convert(Float64,ustrip(u"Myr",tfinal)))
 end
 
 @kwdef struct DomainSphericalTrace{T1, T2, T3, T_Vec} <: Domain
@@ -163,10 +162,10 @@ end
             error("T, P and time_update should have the same size.")
         end
 
-        @unpack nr, Δr, r, tfinal, Lr, C = IC
+        @unpack nr, Δr, r, tfinal, Lr, C0 = IC
 
-        T2 = eltype(C)
-        u0 = copy(C)
+        T2 = eltype(C0)
+        u0 = copy(C0)
 
         T_K = (T+273.15) * 1u"K"
         P_kbar = P * 1u"kbar"
@@ -206,7 +205,7 @@ end
 
 
 @kwdef struct InitialConditions2DTrace{T1, T2, T_float, T_Int, T_range, T_arr_bound} <: InitialConditions
-    C::T1
+    C0::T1
     D::T2
     Lx::T_float
     Ly::T_float
@@ -219,45 +218,45 @@ end
     grt_position::T_arr_bound
     grt_boundary::T_arr_bound
     tfinal::T_float
-    function InitialConditions2DTrace(C::T1, D::T2, Lx::T_float, Ly::T_float, tfinal::T_float, grt_boundary::T_arr_bound) where {T1 <: AbstractArray{<:Real, 2}, T2 <: AbstractChemicalDiffusion, T_float <: Float64, T_arr_bound <: Union{AbstractArray{<:Real, 2}, AbstractArray{<:Bool, 2}}}
+    function InitialConditions2DTrace(C0::T1, D::T2, Lx::T_float, Ly::T_float, tfinal::T_float, grt_boundary::T_arr_bound) where {T1 <: AbstractArray{<:Real, 2}, T2 <: AbstractChemicalDiffusion, T_float <: Float64, T_arr_bound <: Union{AbstractArray{<:Real, 2}, AbstractArray{<:Bool, 2}}}
         if Lx <= 0 || Ly <= 0
             error("Length should be positive.")
         elseif tfinal <= 0
             error("Total time should be positive.")
-        elseif size(C) != size(grt_boundary)
-            error("C and grt_boundary should have the same dimensions.")
+        elseif size(C0) != size(grt_boundary)
+            error("C0 and grt_boundary should have the same dimensions.")
         else
-            nx = size(C, 1)
-            ny = size(C, 2)
+            nx = size(C0, 1)
+            ny = size(C0, 2)
             Δx = Lx / (nx-1)
             Δy = Ly / (ny-1)
             x = range(0, length=nx, stop=Lx)
             y = range(0, length=ny, stop=Ly)
 
             grt_position = similar(grt_boundary)
-            grt_position .= (C .≠ 0)  # grt_position is 1 where there is garnet (grt_boundary is 0)
+            grt_position .= (C0 .≠ 0)  # grt_position is 1 where there is garnet (grt_boundary is 0)
 
             T_Int = typeof(nx)
             T_range = typeof(x)
 
-            new{T1, T2, T_float, T_Int, T_range,T_arr_bound}(C, D, Lx, Ly, nx, ny, Δx, Δy, x, y, grt_position, grt_boundary, tfinal)
+            new{T1, T2, T_float, T_Int, T_range,T_arr_bound}(C0, D, Lx, Ly, nx, ny, Δx, Δy, x, y, grt_position, grt_boundary, tfinal)
         end
     end
 end
 
 """
-    IC2DTrace(;C::Array{<:Real, 2}, D, Lx::Unitful.Length, Ly::Unitful.Length, tfinal::Unitful.Time)
+    IC2DTrace(;C0::Array{<:Real, 2}, D, Lx::Unitful.Length, Ly::Unitful.Length, tfinal::Unitful.Time)
 
 Return a structure containing the initial conditions for a 2D diffusion problem. C needs to be in µg/g. Convert `Lx`, `Ly` and `tfinal` to µm, µm and Myr respectively.
 """
-function IC2DTrace(;C::AbstractArray{<:Real, 2},
+function IC2DTrace(;C0::AbstractArray{<:Real, 2},
                    D,
                    Lx::Unitful.Length,
                    Ly::Unitful.Length,
                    tfinal::Unitful.Time,
-                   grt_boundary::Union{AbstractArray{<:Real, 2}, AbstractArray{<:Bool, 2}}=zeros(Bool, size(C)...)
+                   grt_boundary::Union{AbstractArray{<:Real, 2}, AbstractArray{<:Bool, 2}}=zeros(Bool, size(C0)...)
                    )
-    InitialConditions2DTrace(C, D, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"µm", Ly)), convert(Float64,ustrip(u"Myr",tfinal)), grt_boundary)
+    InitialConditions2DTrace(C0, D, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"µm", Ly)), convert(Float64,ustrip(u"Myr",tfinal)), grt_boundary)
 end
 
 @kwdef struct Domain2DTrace{T1, T2, T3, T_C} <: Domain
@@ -281,10 +280,10 @@ end
             error("T, P and time_update should have the same size.")
         end
 
-        @unpack nx, ny, Δx, Δy, x, y, tfinal, Lx, Ly, C = IC
+        @unpack nx, ny, Δx, Δy, x, y, tfinal, Lx, Ly, C0 = IC
 
-        T2 = eltype(C)
-        u0 = copy(C)
+        T2 = eltype(C0)
+        u0 = copy(C0)
 
         T_K = (T+273.15) * 1u"K"
         P_kbar = P * 1u"kbar"
@@ -322,7 +321,7 @@ function Domain(IC::InitialConditions2DTrace,
 end
 
 @kwdef struct InitialConditions3DTrace{T1, T2, T_float, T_Int, T_range, T_arr_bound} <: InitialConditions
-    C::T1
+    C0::T1
     D::T2
     Lx::T_float
     Ly::T_float
@@ -339,17 +338,17 @@ end
     grt_position::T_arr_bound
     grt_boundary::T_arr_bound
     tfinal::T_float
-    function InitialConditions3DTrace(C::T1, D::T2, Lx::T_float, Ly::T_float, Lz::T_float, tfinal::T_float, grt_boundary::T_arr_bound) where {T1 <: AbstractArray{<:Real, 3}, T2 <: AbstractChemicalDiffusion, T_float <: Float64, T_arr_bound <: Union{AbstractArray{<:Real, 3}, AbstractArray{<:Bool, 3}}}
+    function InitialConditions3DTrace(C0::T1, D::T2, Lx::T_float, Ly::T_float, Lz::T_float, tfinal::T_float, grt_boundary::T_arr_bound) where {T1 <: AbstractArray{<:Real, 3}, T2 <: AbstractChemicalDiffusion, T_float <: Float64, T_arr_bound <: Union{AbstractArray{<:Real, 3}, AbstractArray{<:Bool, 3}}}
         if Lx <= 0 || Ly <= 0 || Lz <= 0
             error("Length should be positive.")
         elseif tfinal <= 0
             error("Total time should be positive.")
-        elseif size(C) != size(grt_boundary)
-            error("C and grt_boundary should have the same dimensions.")
+        elseif size(C0) != size(grt_boundary)
+            error("C0 and grt_boundary should have the same dimensions.")
         else
-            nx = size(C, 1)
-            ny = size(C, 2)
-            nz = size(C, 3)
+            nx = size(C0, 1)
+            ny = size(C0, 2)
+            nz = size(C0, 3)
             Δx = Lx / (nx-1)
             Δy = Ly / (ny-1)
             Δz = Lz / (nz-1)
@@ -358,30 +357,30 @@ end
             z = range(0, length=nz, stop=Lz)
 
             grt_position = similar(grt_boundary)
-            grt_position .= (C .≠ 0)  # grt_position is 1 where there is garnet (grt_boundary is 0)
+            grt_position .= (C0 .≠ 0)  # grt_position is 1 where there is garnet (grt_boundary is 0)
 
             T_Int = typeof(nx)
             T_range = typeof(x)
 
-            new{T1, T2, T_float, T_Int, T_range, T_arr_bound}(C, D, Lx, Ly, Lz, nx, ny, nz, Δx, Δy, Δz, x, y, z, grt_position, grt_boundary, tfinal)
+            new{T1, T2, T_float, T_Int, T_range, T_arr_bound}(C0, D, Lx, Ly, Lz, nx, ny, nz, Δx, Δy, Δz, x, y, z, grt_position, grt_boundary, tfinal)
         end
     end
 end
 
 """
-    IC3DTrace(;C::Array{<:Real, 3}, D, Lx::Unitful.Length, Ly::Unitful.Length, Lz::Unitful.Length, tfinal::Unitful.Time)
+    IC3DTrace(;C0::Array{<:Real, 3}, D, Lx::Unitful.Length, Ly::Unitful.Length, Lz::Unitful.Length, tfinal::Unitful.Time)
 
 Return a structure containing the initial conditions for a 3D diffusion problem. C needs to be in µg/g. Convert `Lx`, `Ly`, `Lz` and `tfinal` to µm, µm, µm and Myr respectively.
 """
-function IC3DTrace(;C::AbstractArray{<:Real, 3},
+function IC3DTrace(;C0::AbstractArray{<:Real, 3},
                    D,
                    Lx::Unitful.Length,
                    Ly::Unitful.Length,
                    Lz::Unitful.Length,
                    tfinal::Unitful.Time,
-                   grt_boundary::Union{AbstractArray{<:Real, 3}, AbstractArray{<:Bool, 3}}=zeros(Bool, size(C)...)
+                   grt_boundary::Union{AbstractArray{<:Real, 3}, AbstractArray{<:Bool, 3}}=zeros(Bool, size(C0)...)
                    )
-    InitialConditions3DTrace(C, D,
+    InitialConditions3DTrace(C0, D,
         convert(Float64,ustrip(u"µm", Lx)),
         convert(Float64,ustrip(u"µm", Ly)),
         convert(Float64,ustrip(u"µm", Lz)),
@@ -411,10 +410,10 @@ end
             error("T, P and time_update should have the same size.")
         end
 
-        @unpack nx, ny, nz, Δx, Δy, Δz, x, y, z, tfinal, Lx, Ly, Lz, C = IC
+        @unpack nx, ny, nz, Δx, Δy, Δz, x, y, z, tfinal, Lx, Ly, Lz, C0 = IC
 
-        T2 = eltype(C)
-        u0 = copy(C)
+        T2 = eltype(C0)
+        u0 = copy(C0)
 
         T_K = (T+273.15) * 1u"K"
         P_kbar = P * 1u"kbar"
