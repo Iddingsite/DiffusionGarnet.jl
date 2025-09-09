@@ -205,31 +205,42 @@ function Domain(IC::InitialConditionsSphericalTrace,
 end
 
 
-@kwdef struct InitialConditions2DTrace{T1, T2, T_float, T_Int, T_VecX, T_VecY} <: InitialConditions
+@kwdef struct InitialConditions2DTrace{T1, T2, T_float, T_Int, T_range, T_arr_bound} <: InitialConditions
     C::T1
     D::T2
     Lx::T_float
     Ly::T_float
     nx::T_Int
     ny::T_Int
-    Δx::T_VecX
-    Δy::T_VecY
-    x::T_VecX
-    y::T_VecY
+    Δx::T_float
+    Δy::T_float
+    x::T_range
+    y::T_range
+    grt_position::T_arr_bound
+    grt_boundary::T_arr_bound
     tfinal::T_float
-    function InitialConditions2DTrace(C::T1, D::T2, Lx::T3, Ly::T3, x::ArrayX, y::ArrayY, tfinal::T3) where {T1 <: AbstractArray{<:Real, 2}, T2 <: AbstractChemicalDiffusion, T3 <: Float64, ArrayX <: AbstractArray{<:Real, 1}, ArrayY <: AbstractArray{<:Real, 1}}
+    function InitialConditions2DTrace(C::T1, D::T2, Lx::T_float, Ly::T_float, tfinal::T_float, grt_boundary::T_arr_bound) where {T1 <: AbstractArray{<:Real, 2}, T2 <: AbstractChemicalDiffusion, T_float <: Float64, T_arr_bound <: Union{AbstractArray{<:Real, 2}, AbstractArray{<:Bool, 2}}}
         if Lx <= 0 || Ly <= 0
             error("Length should be positive.")
         elseif tfinal <= 0
             error("Total time should be positive.")
+        elseif size(C) != size(grt_boundary)
+            error("C and grt_boundary should have the same dimensions.")
         else
             nx = size(C, 1)
             ny = size(C, 2)
-            Δx = diff(x)
-            Δy = diff(y)
-            T4 = typeof(nx)
-            T5 = typeof(ny)
-            new{T1, T2, T3, T4, ArrayX, ArrayY}(C, D, Lx, Ly, nx, ny, Δx, Δy, x, y, tfinal)
+            Δx = Lx / (nx-1)
+            Δy = Ly / (ny-1)
+            x = range(0, length=nx, stop=Lx)
+            y = range(0, length=ny, stop=Ly)
+
+            grt_position = similar(grt_boundary)
+            grt_position .= (C .≠ 0)  # grt_position is 1 where there is garnet (grt_boundary is 0)
+
+            T_Int = typeof(nx)
+            T_range = typeof(x)
+
+            new{T1, T2, T_float, T_Int, T_range,T_arr_bound}(C, D, Lx, Ly, nx, ny, Δx, Δy, x, y, grt_position, grt_boundary, tfinal)
         end
     end
 end
@@ -243,27 +254,25 @@ function IC2DTrace(;C::AbstractArray{<:Real, 2},
                    D,
                    Lx::Unitful.Length,
                    Ly::Unitful.Length,
-                   x::AbstractArray{<:Unitful.Length}=range(0u"µm", length=size(C, 1), stop=Lx),
-                   y::AbstractArray{<:Unitful.Length}=range(0u"µm", length=size(C, 2), stop=Ly),
-                   tfinal::Unitful.Time
+                   tfinal::Unitful.Time,
+                   grt_boundary::Union{AbstractArray{<:Real, 2}, AbstractArray{<:Bool, 2}}=zeros(Bool, size(C)...)
                    )
-    InitialConditions2DTrace(C, D, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"µm", Ly)), ustrip.(u"µm", x), ustrip.(u"µm", y), convert(Float64,ustrip(u"Myr",tfinal)))
+    InitialConditions2DTrace(C, D, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"µm", Ly)), convert(Float64,ustrip(u"Myr",tfinal)), grt_boundary)
 end
 
-@kwdef struct Domain2DTrace{T1, T2, T3, T4, T_VecX, T_VecY} <: Domain
-    IC::T4
+@kwdef struct Domain2DTrace{T1, T2, T3, T_C} <: Domain
+    IC::T3
     T::T1
     P::T1
     fugacity_O2::T1
     time_update::T1
     D::T2
-    L_charact_x::T2
-    L_charact_y::T2
+    L_charact::T2
     D_charact::T2
     t_charact::T2
-    Δxad_::T_VecX
-    Δyad_::T_VecY
-    u0::Vector{T2}
+    Δxad_::T2
+    Δyad_::T2
+    u0::T_C
     tfinal_ad::T2
     time_update_ad::T1
     function Domain2DTrace(IC::InitialConditions2DTrace, T::T1, P::T1, time_update::T1, fugacity_O2::T1) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}}
@@ -281,21 +290,19 @@ end
         P_kbar = P * 1u"kbar"
         D = ustrip(u"µm^2/Myr", compute_D(IC.D, T = T_K, P = P_kbar))  # diffusion coefficient in µm^2/Myr
 
-        L_charact_x = copy(Lx)
-        L_charact_y = copy(Ly)
+        L_charact = copy(Lx)
         t_charact = 1.0
-        D_charact = (L_charact_x^2 + L_charact_y^2) / (2 * t_charact)
+        D_charact = (L_charact^2) / (t_charact)
 
-        Δxad_ = 1 ./ (Δx ./ L_charact_x)
-        Δyad_ = 1 ./ (Δy ./ L_charact_y)
+        Δxad_ = 1 / (Δx / L_charact)
+        Δyad_ = 1 / (Δy / L_charact)
         tfinal_ad = tfinal / t_charact
         time_update_ad = time_update ./ t_charact
 
-        T4 = typeof(IC)
-        T_vecx = typeof(Δxad_)
-        T_vecy = typeof(Δyad_)
+        T3 = typeof(IC)
+        T_C = typeof(u0)
 
-        new{T1, T2, T3, T4, T_vecx, T_vecy}(IC, T, P, fugacity_O2, time_update, D, L_charact_x, L_charact_y, D_charact, t_charact, Δxad_, Δyad_, u0, tfinal_ad, time_update_ad)
+        new{T1, T2, T3, T_C}(IC, T, P, fugacity_O2, time_update, D, L_charact, D_charact, t_charact, Δxad_, Δyad_, u0, tfinal_ad, time_update_ad)
     end
 end
 
@@ -314,7 +321,7 @@ function Domain(IC::InitialConditions2DTrace,
     Domain2DTrace(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)))
 end
 
-@kwdef struct InitialConditions3DTrace{T1, T2, T_float, T_Int, T_VecX, T_VecY, T_VecZ} <: InitialConditions
+@kwdef struct InitialConditions3DTrace{T1, T2, T_float, T_Int, T_range, T_arr_bound} <: InitialConditions
     C::T1
     D::T2
     Lx::T_float
@@ -323,29 +330,40 @@ end
     nx::T_Int
     ny::T_Int
     nz::T_Int
-    Δx::T_VecX
-    Δy::T_VecY
-    Δz::T_VecZ
-    x::T_VecX
-    y::T_VecY
-    z::T_VecZ
+    Δx::T_float
+    Δy::T_float
+    Δz::T_float
+    x::T_range
+    y::T_range
+    z::T_range
+    grt_position::T_arr_bound
+    grt_boundary::T_arr_bound
     tfinal::T_float
-    function InitialConditions3DTrace(C::T1, D::T2, Lx::T3, Ly::T3, Lz::T3, x::ArrayX, y::ArrayY, z::ArrayZ, tfinal::T3) where {T1 <: AbstractArray{<:Real, 3}, T2 <: AbstractChemicalDiffusion, T3 <: Float64, ArrayX <: AbstractArray{<:Real, 1}, ArrayY <: AbstractArray{<:Real, 1}, ArrayZ <: AbstractArray{<:Real, 1}}
+    function InitialConditions3DTrace(C::T1, D::T2, Lx::T_float, Ly::T_float, Lz::T_float, tfinal::T_float, grt_boundary::T_arr_bound) where {T1 <: AbstractArray{<:Real, 3}, T2 <: AbstractChemicalDiffusion, T_float <: Float64, T_arr_bound <: Union{AbstractArray{<:Real, 3}, AbstractArray{<:Bool, 3}}}
         if Lx <= 0 || Ly <= 0 || Lz <= 0
             error("Length should be positive.")
         elseif tfinal <= 0
             error("Total time should be positive.")
+        elseif size(C) != size(grt_boundary)
+            error("C and grt_boundary should have the same dimensions.")
         else
             nx = size(C, 1)
             ny = size(C, 2)
             nz = size(C, 3)
-            Δx = diff(x)
-            Δy = diff(y)
-            Δz = diff(z)
-            T4 = typeof(nx)
-            T5 = typeof(ny)
-            T6 = typeof(nz)
-            new{T1, T2, T3, T4, ArrayX, ArrayY, ArrayZ}(C, D, Lx, Ly, Lz, nx, ny, nz, Δx, Δy, Δz, x, y, z, tfinal)
+            Δx = Lx / (nx-1)
+            Δy = Ly / (ny-1)
+            Δz = Lz / (nz-1)
+            x = range(0, length=nx, stop=Lx)
+            y = range(0, length=ny, stop=Ly)
+            z = range(0, length=nz, stop=Lz)
+
+            grt_position = similar(grt_boundary)
+            grt_position .= (C .≠ 0)  # grt_position is 1 where there is garnet (grt_boundary is 0)
+
+            T_Int = typeof(nx)
+            T_range = typeof(x)
+
+            new{T1, T2, T_float, T_Int, T_range, T_arr_bound}(C, D, Lx, Ly, Lz, nx, ny, nz, Δx, Δy, Δz, x, y, z, grt_position, grt_boundary, tfinal)
         end
     end
 end
@@ -360,37 +378,31 @@ function IC3DTrace(;C::AbstractArray{<:Real, 3},
                    Lx::Unitful.Length,
                    Ly::Unitful.Length,
                    Lz::Unitful.Length,
-                   x::AbstractArray{<:Unitful.Length}=range(0u"µm", length=size(C, 1), stop=Lx),
-                   y::AbstractArray{<:Unitful.Length}=range(0u"µm", length=size(C, 2), stop=Ly),
-                   z::AbstractArray{<:Unitful.Length}=range(0u"µm", length=size(C, 3), stop=Lz),
-                   tfinal::Unitful.Time
+                   tfinal::Unitful.Time,
+                   grt_boundary::Union{AbstractArray{<:Real, 3}, AbstractArray{<:Bool, 3}}=zeros(Bool, size(C)...)
                    )
     InitialConditions3DTrace(C, D,
         convert(Float64,ustrip(u"µm", Lx)),
         convert(Float64,ustrip(u"µm", Ly)),
         convert(Float64,ustrip(u"µm", Lz)),
-        ustrip.(u"µm", x),
-        ustrip.(u"µm", y),
-        ustrip.(u"µm", z),
-        convert(Float64,ustrip(u"Myr",tfinal)))
+        convert(Float64,ustrip(u"Myr",tfinal)), grt_boundary)
+
 end
 
-@kwdef struct Domain3DTrace{T1, T2, T3, T4, T_VecX, T_VecY, T_VecZ} <: Domain
-    IC::T4
+@kwdef struct Domain3DTrace{T1, T2, T3, T_C} <: Domain
+    IC::T3
     T::T1
     P::T1
     fugacity_O2::T1
     time_update::T1
     D::T2
-    L_charact_x::T2
-    L_charact_y::T2
-    L_charact_z::T2
+    L_charact::T2
     D_charact::T2
     t_charact::T2
-    Δxad_::T_VecX
-    Δyad_::T_VecY
-    Δzad_::T_VecZ
-    u0::Vector{T2}
+    Δxad_::T2
+    Δyad_::T2
+    Δzad_::T2
+    u0::T_C
     tfinal_ad::T2
     time_update_ad::T1
     function Domain3DTrace(IC::InitialConditions3DTrace, T::T1, P::T1, time_update::T1, fugacity_O2::T1) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}}
@@ -408,24 +420,20 @@ end
         P_kbar = P * 1u"kbar"
         D = ustrip(u"µm^2/Myr", compute_D(IC.D, T = T_K, P = P_kbar))  # diffusion coefficient in µm^2/Myr
 
-        L_charact_x = copy(Lx)
-        L_charact_y = copy(Ly)
-        L_charact_z = copy(Lz)
+        L_charact = copy(Lx)
         t_charact = 1.0
-        D_charact = (L_charact_x^2 + L_charact_y^2 + L_charact_z^2) / (3 * t_charact)
+        D_charact = (L_charact^2) / (t_charact)
 
-        Δxad_ = 1 ./ (Δx ./ L_charact_x)
-        Δyad_ = 1 ./ (Δy ./ L_charact_y)
-        Δzad_ = 1 ./ (Δz ./ L_charact_z)
+        Δxad_ = 1 / (Δx / L_charact)
+        Δyad_ = 1 / (Δy / L_charact)
+        Δzad_ = 1 / (Δz / L_charact)
         tfinal_ad = tfinal / t_charact
         time_update_ad = time_update ./ t_charact
 
-        T4 = typeof(IC)
-        T_vecx = typeof(Δxad_)
-        T_vecy = typeof(Δyad_)
-        T_vecz = typeof(Δzad_)
+        T3 = typeof(IC)
+        T_C = typeof(u0)
 
-        new{T1, T2, T3, T4, T_vecx, T_vecy, T_vecz}(IC, T, P, fugacity_O2, time_update, D, L_charact_x, L_charact_y, L_charact_z, D_charact, t_charact, Δxad_, Δyad_, Δzad_, u0, tfinal_ad, time_update_ad)
+        new{T1, T2, T3, T_C}(IC, T, P, fugacity_O2, time_update, D, L_charact, D_charact, t_charact, Δxad_, Δyad_, Δzad_, u0, tfinal_ad, time_update_ad)
     end
 end
 
