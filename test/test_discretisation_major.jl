@@ -68,7 +68,7 @@ end
 
     Lx = 900.0u"µm"
     Ly = 900.0u"µm"
-    tfinal = 2.0u"Myr"
+    tfinal = 1.0u"Myr"
     T = 900u"°C"
     P = 0.6u"GPa"
 
@@ -77,7 +77,7 @@ end
 
     sol = simulate(domain2D; save_everystep=false, save_start=false)
 
-    @test norm(sol.u[end][:,:,1]) ≈ 12.783357393401664 rtol=1e-5
+    @test norm(sol.u[end][:,:,1]) ≈ 12.783354423890986 rtol=1e-7
 end
 
 @testset "3D Diffusion" begin

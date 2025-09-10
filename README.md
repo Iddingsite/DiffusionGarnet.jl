@@ -7,7 +7,7 @@
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
 [docs-dev-url]: https://iddingsite.github.io/DiffusionGarnet.jl/dev/
 
-DiffusionGarnet is a Julia package that can be used to do coupled diffusion modelling of major elements on natural garnet data. It currently supports 1D, 2D, 3D, and spherical coordinates and was developed with performance in mind.
+DiffusionGarnet is a Julia package that can be used to model linear diffusion or coupled diffusion in trace and major elements using natural garnet data. It currently supports 1D, 2D, 3D, and spherical coordinates and was developed with performance in mind.
 
 It is built on top of the [DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl) package ecosystem and uses [Unitful.jl](https://github.com/PainterQubits/Unitful.jl) to allow the user to define appropriate units for their problems. For 2D and 3D models, it uses [ParallelStencil.jl](https://github.com/omlins/ParallelStencil.jl) to support multithreading on CPU and parallel computing on GPU.
 
@@ -15,7 +15,7 @@ To know more about this package, don't hesitate to refer to the [documentation](
 
 Below we give a number of examples to get you started with DiffusionGarnet.jl.
 
-### 1D simulations
+### 1D simulations for multicomponent diffusion
 
 A simple 1D example from a real chemical garnet profile for constant pressure and temperature conditions is shown bellow. The diffusion coefficients used by default are those of [Chakraborty & Ganguly (1992)](https://doi.org/10.1007/BF00296579) but other datasets are also available, see the documentation.
 
@@ -80,7 +80,7 @@ Here is the gif obtained:
 
 ### 3D simulations
 
-Bellow is an example of a 3D simulation of garnet diffusion using the same data as in the publication "Simulating major element diffusion in garnet using realistic 3D geometries" by [Dominguez et al. (2025)](https://doi.org/10.1016/j.cageo.2025.106023). The results are saved in a HDF5 file that can be visualised with [ParaView](https://www.paraview.org/). The equivalent simulation running on GPU is shown in the [documentation](https://iddingsite.github.io/DiffusionGarnet.jl/dev/diffusion_3D_GPU/).
+Bellow is an example of a 3D simulation of garnet diffusion using the same data as in the publication "Simulating major element diffusion in garnet using realistic 3D geometries" by [Dominguez et al. (2026)](https://doi.org/10.1016/j.cageo.2025.106023). The results are saved in a HDF5 file that can be visualised with [ParaView](https://www.paraview.org/). The equivalent simulation running on GPU is shown in the [documentation](https://iddingsite.github.io/DiffusionGarnet.jl/dev/diffusion_3D_GPU/).
 
 ```julia
 using Downloads
@@ -156,7 +156,7 @@ path_save = "data_model_10_Ma_CPU.h5"  # choose the name and the path of the HDF
 sol = simulate(domain3D; callback=save_data_callback, path_save=path_save, save_everystep=false,  save_start=false, progress=true, progress_steps=1, solver=ROCK2());
 ```
 
-Here are the results for the Fe diffusion for instance, visualised with ParaView:
+Here are the results with a higher resolution for the Fe diffusion, visualised with ParaView:
 
 ![3D diffusion profile of a garnet](docs/src/assets/img/Fe_3D.gif)
 

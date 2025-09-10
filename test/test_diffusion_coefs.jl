@@ -20,8 +20,10 @@
     P_kbar = P * u"kbar"
     fugacity_O2 = 1e-25NoUnits  # default value
 
-
-    DiffusionGarnet.D_update!(D0,T_K,P_kbar,D0_data)
+    D0[1] = ustrip(u"µm^2/Myr", compute_D(Grt_Mg, T = T_K, P = P_kbar, fO2 = fugacity_O2))
+    D0[2] = ustrip(u"µm^2/Myr", compute_D(Grt_Fe, T = T_K, P = P_kbar, fO2 = fugacity_O2))
+    D0[3] = ustrip(u"µm^2/Myr", compute_D(Grt_Mn, T = T_K, P = P_kbar, fO2 = fugacity_O2))
+    D0[4] = 0.5 * D0[2]  # DCa = 0.5 * DFe
 
     @test D0[1] ≈ 241.5563196143817
     @test D0[2] ≈ 455.8752224396371

@@ -55,7 +55,7 @@ function semi_discretisation_diffusion_cartesian_trace(du::Array_T,u::Array_T,p,
     @unpack D, D_charact, Δxad_, Δyad_ = p.domain
     @unpack grt_position, grt_boundary = p.domain.IC
 
-    D_ad = D / D_charact
+    D_ad = D[1] / D_charact
 
     # semi-discretization
     @parallel stencil_diffusion_2D_trace!(du, u, D_ad, grt_position, grt_boundary, Δxad_, Δyad_)

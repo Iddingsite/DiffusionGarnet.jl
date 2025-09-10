@@ -1,8 +1,27 @@
 # [Background](@id background)
 
-### Theory
-
 Garnet is a mineral commonly used in metamorphic petrology to better understand geological processes, as it occurs in a variety of rock types. This mineral often exhibits a wide range of compositional zoning, which can be interpreted as recording ranges of pressure and temperature (*PT*) conditions. Modelling diffusion processes can help to better understand this zoning and better constrain the pressure-temperature-time (*PTt*) conditions of the metamorphic event of interest.
+
+
+### Linear diffusion theory
+
+Trace element diffusion in garnet can be described by Fick's second law of diffusion:
+
+```math
+\begin{equation}
+  \label{ficks_second_law}
+\begin{aligned}
+    \frac{\partial C}{\partial t} = \mathbf{\nabla} \cdot (D \mathbf{\nabla} C),
+\end{aligned}
+\end{equation}
+```
+
+with ``C`` the fraction of the diffusing species in µg/g, ``D`` the diffusion coefficient, ``t`` the time, and ``\mathbf{\nabla}`` the gradient operator.
+
+In most cases, ``D`` can be calculated from an Arrhenius relationship and is linear with respect to the diffusing species composition due to the low concentration of the trace elements.
+In DiffusionGarnet.jl, the diffusion coefficients available are from the package [GeoParams.jl]{https://juliageodynamics.github.io/GeoParams.jl/dev/man/chemicaldiffusion}.
+
+### Multi-component theory
 
 Major element diffusion in garnet is described by a coupled multicomponent system between four poles: Mg, Fe, Mn and Ca. This can be expressed by a system of parabolic partial differential equations (PDEs) following Fick's first law of diffusion:
 
@@ -52,7 +71,7 @@ In DiffusionGarnet.jl, ``D_{0,i}``, ``E_{a,i}``, and ``\Delta V^+_i`` are those 
 
 ### Numerical approach
 
-By defining the *PT* conditions of the metamorphic event of interest, (3) can be solved for each component, and the diffusion coefficient matrix can be calculated using (2) from the initial major composition data. In DiffusionGarnet.jl, (1) is then discretised in space using finite differences, and the resulting system of ordinary differential equations is solved with ROCK2, a stabilised explicit method (Abdulle & Medovikov, 2001 [[4]](@ref refs)) using the [DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl) ecosystem.
+For both trace and major elements, the PDEs are first discretised in space using finite differences and the resulting system of ordinary differential equations is solved with ROCK2, a stabilised explicit method (Abdulle & Medovikov, 2001 [[4]](@ref refs)) using the [DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl) ecosystem but other time-integration methods can also be used.
 
 ## [References](@id refs)
 

@@ -28,7 +28,7 @@ function semi_discretisation_diffusion_spherical_trace(du::T,u::T,p,t) where T <
 
     @unpack D, D_charact, Δr_ad, Δr_ad_, r_ad = p.domain
 
-    D_ad = D / D_charact
+    D_ad = D[1] / D_charact
 
     # semi-discretization
     stencil_diffusion_spherical_trace!(du, u, D_ad, Δr_ad_, r_ad)

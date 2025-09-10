@@ -41,7 +41,7 @@ function semi_discretisation_diffusion_cartesian_trace(du::T,u::T,p,t) where T <
 
     @unpack D, Δxad_, bc_neumann, D_charact = p.domain
 
-    D_ad = D / D_charact
+    D_ad = D[1] / D_charact
 
     # semi-discretization
     stencil_diffusion_1D_trace!(du, u, D_ad, Δxad_, bc_neumann)

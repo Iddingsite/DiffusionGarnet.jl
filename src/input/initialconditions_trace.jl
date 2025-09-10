@@ -1,5 +1,8 @@
 
-@kwdef struct InitialConditions1DTrace{T1, T2, T_float, T_Int, T_Vec} <: InitialConditions
+abstract type InitialConditionsTrace <: InitialConditions end
+abstract type DomainTrace <: Domain end
+
+@kwdef struct InitialConditions1DTrace{T1, T2, T_float, T_Int, T_Vec} <: InitialConditionsTrace
     C0::T1
     D::T2
     Lx::T_float
@@ -40,13 +43,13 @@ function IC1DTrace(;C0::AbstractArray{<:Real, 1},
 end
 
 
-@kwdef struct Domain1DTrace{T1, T2, T3, T4, T_Vec} <: Domain
+@kwdef struct Domain1DTrace{T1, T2, T3, T4, T_Vec} <: DomainTrace
     IC::T4
     T::T1
     P::T1
     fugacity_O2::T1
     time_update::T1
-    D::T2
+    D::Vector{T2}
     L_charact::T2
     D_charact::T2
     t_charact::T2
@@ -67,9 +70,10 @@ end
         T2 = eltype(C0)
         u0 = copy(C0)
 
-        T_K = (T+273.15) * 1u"K"
-        P_kbar = P * 1u"kbar"
-        D =  ustrip(u"µm^2/Myr", compute_D(IC.D, T = T_K, P = P_kbar))  # diffusion coefficient in µm^2/Myr
+        T_K = (T[1] +273.15) * 1u"K"
+        P_kbar = P[1] * 1u"kbar"
+        D = similar(u0, 1)  # preallocate D as a vector of length 1 to be able to mutate it
+        D[1] = ustrip(u"µm^2/Myr", compute_D(IC.D, T = T_K, P = P_kbar))  # diffusion coefficient in µm^2/Myr
 
         L_charact = copy(Lx)  # characteristic length
         t_charact = 1.0  # characteristic time
@@ -104,7 +108,7 @@ function Domain(IC::InitialConditions1DTrace,
     Domain1DTrace(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)), bc_neumann)
 end
 
-@kwdef struct InitialConditionsSphericalTrace{T1, T2, T_float, T_Int, T_Vec} <: InitialConditions
+@kwdef struct InitialConditionsSphericalTrace{T1, T2, T_float, T_Int, T_Vec} <: InitialConditionsTrace
     C0::T1
     D::T2
     Lr::T_float
@@ -140,13 +144,13 @@ function ICSphTrace(;C0::AbstractArray{<:Real, 1},
     InitialConditionsSphericalTrace(C0, D, convert(Float64,ustrip(u"µm", Lr)), ustrip.(u"µm", r), convert(Float64,ustrip(u"Myr",tfinal)))
 end
 
-@kwdef struct DomainSphericalTrace{T1, T2, T3, T_Vec} <: Domain
+@kwdef struct DomainSphericalTrace{T1, T2, T3, T_Vec} <: DomainTrace
     IC::T3
     T::T1
     P::T1
     fugacity_O2::T1
     time_update::T1
-    D::T2
+    D::Vector{T2}
     L_charact::T2
     D_charact::T2
     t_charact::T2
@@ -167,9 +171,10 @@ end
         T2 = eltype(C0)
         u0 = copy(C0)
 
-        T_K = (T+273.15) * 1u"K"
-        P_kbar = P * 1u"kbar"
-        D = ustrip(u"µm^2/Myr", compute_D(IC.D, T = T_K, P = P_kbar))  # diffusion coefficient in µm^2/Myr
+        T_K = (T[1]+273.15) * 1u"K"
+        P_kbar = P[1] * 1u"kbar"
+        D = similar(u0, 1)  # preallocate D as a vector of length 1 to be able to mutate it
+        D[1] = ustrip(u"µm^2/Myr", compute_D(IC.D, T = T_K, P = P_kbar))  # diffusion coefficient in µm^2/Myr
 
         L_charact = copy(Lr)  # characteristic length
         t_charact = 1.0  # characteristic time
@@ -204,7 +209,7 @@ function Domain(IC::InitialConditionsSphericalTrace,
 end
 
 
-@kwdef struct InitialConditions2DTrace{T1, T2, T_float, T_Int, T_range, T_arr_bound} <: InitialConditions
+@kwdef struct InitialConditions2DTrace{T1, T2, T_float, T_Int, T_range, T_arr_bound} <: InitialConditionsTrace
     C0::T1
     D::T2
     Lx::T_float
@@ -259,13 +264,13 @@ function IC2DTrace(;C0::AbstractArray{<:Real, 2},
     InitialConditions2DTrace(C0, D, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"µm", Ly)), convert(Float64,ustrip(u"Myr",tfinal)), grt_boundary)
 end
 
-@kwdef struct Domain2DTrace{T1, T2, T3, T_C} <: Domain
+@kwdef struct Domain2DTrace{T1, T2, T3, T_C} <: DomainTrace
     IC::T3
     T::T1
     P::T1
     fugacity_O2::T1
     time_update::T1
-    D::T2
+    D::Vector{T2}
     L_charact::T2
     D_charact::T2
     t_charact::T2
@@ -285,9 +290,10 @@ end
         T2 = eltype(C0)
         u0 = copy(C0)
 
-        T_K = (T+273.15) * 1u"K"
-        P_kbar = P * 1u"kbar"
-        D = ustrip(u"µm^2/Myr", compute_D(IC.D, T = T_K, P = P_kbar))  # diffusion coefficient in µm^2/Myr
+        T_K = (T[1]+273.15) * 1u"K"
+        P_kbar = P[1] * 1u"kbar"
+        D = Vector{T2}(undef,1)  # preallocate D as a vector of length 1 to be able to mutate it
+        D[1] = ustrip(u"µm^2/Myr", compute_D(IC.D, T = T_K, P = P_kbar))  # diffusion coefficient in µm^2/Myr
 
         L_charact = copy(Lx)
         t_charact = 1.0
@@ -320,7 +326,7 @@ function Domain(IC::InitialConditions2DTrace,
     Domain2DTrace(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)))
 end
 
-@kwdef struct InitialConditions3DTrace{T1, T2, T_float, T_Int, T_range, T_arr_bound} <: InitialConditions
+@kwdef struct InitialConditions3DTrace{T1, T2, T_float, T_Int, T_range, T_arr_bound} <: InitialConditionsTrace
     C0::T1
     D::T2
     Lx::T_float
@@ -388,13 +394,13 @@ function IC3DTrace(;C0::AbstractArray{<:Real, 3},
 
 end
 
-@kwdef struct Domain3DTrace{T1, T2, T3, T_C} <: Domain
+@kwdef struct Domain3DTrace{T1, T2, T3, T_C} <: DomainTrace
     IC::T3
     T::T1
     P::T1
     fugacity_O2::T1
     time_update::T1
-    D::T2
+    D::Vector{T2}
     L_charact::T2
     D_charact::T2
     t_charact::T2
@@ -415,9 +421,10 @@ end
         T2 = eltype(C0)
         u0 = copy(C0)
 
-        T_K = (T+273.15) * 1u"K"
-        P_kbar = P * 1u"kbar"
-        D = ustrip(u"µm^2/Myr", compute_D(IC.D, T = T_K, P = P_kbar))  # diffusion coefficient in µm^2/Myr
+        T_K = (T[1]+273.15) * 1u"K"
+        P_kbar = P[1] * 1u"kbar"
+        D = Vector{T2}(undef,1)  # preallocate D as a vector of length 1 to be able to mutate it
+        D[1] = ustrip(u"µm^2/Myr", compute_D(IC.D, T = T_K, P = P_kbar))  # diffusion coefficient in µm^2/Myr
 
         L_charact = copy(Lx)
         t_charact = 1.0
