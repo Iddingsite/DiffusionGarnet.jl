@@ -47,6 +47,47 @@ function hdf5_initial_conditions_paraview(IC::InitialConditions2DMajor, Domain::
     end
 end
 
+function hdf5_initial_conditions_paraview(IC::InitialConditions2DTrace, Domain::Domain2DTrace, path_hdf5)
+
+    h5open(path_hdf5, "w") do file
+        g = create_group(file, "Diffusion_Grt") # create a group
+
+        # Set attributes for group g
+        attrs_values = (
+            ("LengthX(µm)", IC.Lx),
+            ("LengthY(µm)", IC.Ly),
+            ("Dx(µm)", IC.Δx),
+            ("Dy(µm)", IC.Δy),
+            ("Nx", IC.nx),
+            ("Ny", IC.ny),
+            ("TotalTime(Myr)", IC.tfinal),
+            ("Coordinates", "2D Cartesian"),
+            ("CharacteristicLength", Domain.L_charact),
+            ("CharacteristicDiffusionCoefficient", Domain.D_charact),
+            ("CharacteristicTime", Domain.t_charact)
+        )
+        for (attr, value) in attrs_values
+            attributes(g)[attr] = value
+        end
+
+        t0 = create_group(file, "Diffusion_Grt/t$(lpad("0", 4, "0"))") # create a group
+        attributes(t0)["Time(Myr)"] = 0
+        attributes(t0)["Temperature(°C)"] = Domain.T[1]
+        attributes(t0)["Pressure(GPa)"] = Domain.P[1]
+        # Create groups and set attributes for each group
+        groups = ("C", "GrtPosition", "GrtBoundary")
+        for group in groups
+            grp = create_group(t0, group)
+            attributes(grp)["DataType"] = "Scalar"
+            attributes(grp)["Center"] = "Node"
+        end
+
+        t0["C"]["C"] = column_to_row(convert(Array{Float32}, IC.C0))
+        t0["GrtPosition"]["GrtPosition"] = column_to_row(convert(Array{Int32},IC.grt_position))
+        t0["GrtBoundary"]["GrtBoundary"] = column_to_row(convert(Array{Int32},IC.grt_boundary))
+    end
+end
+
 function hdf5_initial_conditions_paraview(IC::InitialConditions3DMajor, Domain::Domain3DMajor, path_hdf5)
 
   h5open(path_hdf5, "w") do file
@@ -94,8 +135,51 @@ function hdf5_initial_conditions_paraview(IC::InitialConditions3DMajor, Domain::
   end
 end
 
+function hdf5_initial_conditions_paraview(IC::InitialConditions3DTrace, Domain::Domain3DTrace, path_hdf5)
 
-function hdf5_timestep_paraview(u, dt, tcurrent, path_hdf5, IC)
+  h5open(path_hdf5, "w") do file
+      g = create_group(file, "Diffusion_Grt") # create a group
+
+      # Set attributes for group g
+      attrs_values = (
+          ("LengthX(µm)", IC.Lx),
+          ("LengthY(µm)", IC.Ly),
+          ("LengthZ(µm)", IC.Lz),
+          ("Dx(µm)", IC.Δx),
+          ("Dy(µm)", IC.Δy),
+          ("Dz(µm)", IC.Δz),
+          ("Nx", IC.nx),
+          ("Ny", IC.ny),
+          ("Nz", IC.nz),
+          ("TotalTime(Myr)", IC.tfinal),
+          ("Coordinates", "3D Cartesian"),
+          ("CharacteristicLength", Domain.L_charact),
+          ("CharacteristicDiffusionCoefficient", Domain.D_charact),
+          ("CharacteristicTime", Domain.t_charact)
+      )
+      for (attr, value) in attrs_values
+          attributes(g)[attr] = value
+      end
+
+      t0 = create_group(file, "Diffusion_Grt/t$(lpad("0", 4, "0"))") # create a group
+      attributes(t0)["Time(Myr)"] = 0
+      attributes(t0)["Temperature(°C)"] = Domain.T[1]
+      attributes(t0)["Pressure(GPa)"] = Domain.P[1]
+      # Create groups and set attributes for each group
+      groups = ("C", "GrtPosition", "GrtBoundary")
+      for group in groups
+          grp = create_group(t0, group)
+          attributes(grp)["DataType"] = "Scalar"
+          attributes(grp)["Center"] = "Node"
+      end
+
+      t0["C"]["C"] = column_to_row(convert(Array{Float32}, IC.C0))
+      t0["GrtPosition"]["GrtPosition"] = column_to_row(convert(Array{Int32},IC.grt_position))
+      t0["GrtBoundary"]["GrtBoundary"] = column_to_row(convert(Array{Int32},IC.grt_boundary))
+  end
+end
+
+function hdf5_timestep_paraview(u, dt, tcurrent, path_hdf5, IC::InitialConditionsMajor)
 
     CMg, CFe, CMn = view_u(u)
 
@@ -120,6 +204,32 @@ function hdf5_timestep_paraview(u, dt, tcurrent, path_hdf5, IC)
         t["Fe"]["Fe"] = column_to_row(convert(Array{Float32}, CFe))
         t["Mn"]["Mn"] = column_to_row(convert(Array{Float32}, CMn))
         t["Ca"]["Ca"] = column_to_row(replace!(convert(Array{Float32}, (1 .- CMg .- CFe .- CMn)), 1=>0))
+        t["GrtPosition"]["GrtPosition"] = column_to_row(convert(Array{Int32},IC.grt_position))
+        t["GrtBoundary"]["GrtBoundary"] = column_to_row(convert(Array{Int32},IC.grt_boundary))
+    end
+end
+
+
+function hdf5_timestep_paraview(u, dt, tcurrent, path_hdf5, IC::InitialConditionsTrace)
+
+    h5open(path_hdf5, "r+") do file
+
+        # output the number of group in the HDF5
+        n = length((file["Diffusion_Grt"]))
+
+        t = create_group(file, "Diffusion_Grt/t$(lpad(string(n), 4, "0"))") # create a group
+        attributes(t)["Time(Myr)"] = tcurrent
+        attributes(t)["CurrentDt(Myr)"] = dt
+
+        # Create groups and set attributes for each group
+        groups = ("C", "GrtPosition", "GrtBoundary")
+        for group in groups
+            grp = create_group(t, group)
+            attributes(grp)["DataType"] = "Scalar"
+            attributes(grp)["Center"] = "Node"
+        end
+
+        t["C"]["C"] = column_to_row(convert(Array{Float32}, u))
         t["GrtPosition"]["GrtPosition"] = column_to_row(convert(Array{Int32},IC.grt_position))
         t["GrtBoundary"]["GrtBoundary"] = column_to_row(convert(Array{Int32},IC.grt_boundary))
     end

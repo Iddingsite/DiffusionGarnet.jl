@@ -13,4 +13,4 @@ Return a struct containing the struct `IC`, the PT conditions `T` and `P`  and t
 function Domain end
 
 include("initialconditions_major.jl")
-# include("initialconditions_trace.jl")
+include("initialconditions_trace.jl")

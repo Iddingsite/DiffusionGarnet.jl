@@ -43,7 +43,7 @@ function stencil_diffusion_spherical_major!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, 
     end
 end
 
-function semi_discretisation_diffusion_spherical(du,u,p,t)
+function semi_discretisation_diffusion_spherical_major(du,u,p,t)
 
     @unpack D, D0, D_charact, Δr_ad_, r_ad = p.domain
 

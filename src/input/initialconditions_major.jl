@@ -1,5 +1,8 @@
 
-@kwdef struct InitialConditions1DMajor{T1, T2, T3, T4} <: InitialConditions
+abstract type InitialConditionsMajor <: InitialConditions end
+abstract type DomainMajor <: Domain end
+
+@kwdef struct InitialConditions1DMajor{T1, T2, T3, T4} <: InitialConditionsMajor
     CMg0::T1
     CFe0::T1
     CMn0::T1
@@ -26,7 +29,7 @@
     end
 end
 
-@kwdef struct InitialConditionsSpherical{T1, T2, T3, T4} <: InitialConditions
+@kwdef struct InitialConditionsSphericalMajor{T1, T2, T3, T4} <: InitialConditionsMajor
     CMg0::T1
     CFe0::T1
     CMn0::T1
@@ -35,7 +38,7 @@ end
     Δr::T4
     r::T4
     tfinal::T2
-    function InitialConditionsSpherical(CMg0::T1, CFe0::T1, CMn0::T1, Lr::T2, r::ArrayR, tfinal::T2) where {T1 <: AbstractArray{<:Real, 1}, T2 <: Float64, ArrayR <: AbstractArray{<:Real, 1}}
+    function InitialConditionsSphericalMajor(CMg0::T1, CFe0::T1, CMn0::T1, Lr::T2, r::ArrayR, tfinal::T2) where {T1 <: AbstractArray{<:Real, 1}, T2 <: Float64, ArrayR <: AbstractArray{<:Real, 1}}
         if Lr <= 0
             error("Length should be positive.")
         elseif tfinal <= 0
@@ -53,7 +56,7 @@ end
     end
 end
 
-@kwdef struct InitialConditions2DMajor{T1, T2, T3, T4, T5} <: InitialConditions
+@kwdef struct InitialConditions2DMajor{T1, T2, T3, T4, T5} <: InitialConditionsMajor
     CMg0::T1
     CFe0::T1
     CMn0::T1
@@ -103,7 +106,7 @@ end
 end
 
 
-@kwdef struct InitialConditions3DMajor{T1, T2, T3, T4, T5} <: InitialConditions
+@kwdef struct InitialConditions3DMajor{T1, T2, T3, T4, T5} <: InitialConditionsMajor
     CMg0::T1
     CFe0::T1
     CMn0::T1
@@ -187,7 +190,7 @@ function ICSphMajor(;
                     tfinal::Unitful.Time
                     )
 
-    InitialConditionsSpherical(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lr)), ustrip.(u"µm", r), convert(Float64,ustrip(u"Myr",tfinal)))
+    InitialConditionsSphericalMajor(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lr)), ustrip.(u"µm", r), convert(Float64,ustrip(u"Myr",tfinal)))
 end
 
 """
@@ -230,7 +233,7 @@ function IC3DMajor(;
 end
 
 
-@kwdef struct Domain1DMajor{T1, T2, T3, T4, T5, T_tuplediffdata} <: Domain
+@kwdef struct Domain1DMajor{T1, T2, T3, T4, T5, T_tuplediffdata} <: DomainMajor
     IC::T4
     T::T1
     P::T1
@@ -344,7 +347,7 @@ end
     end
 end
 
-@kwdef struct DomainSphericalMajor{T1, T2, T3, T_tuplediffdata} <: Domain
+@kwdef struct DomainSphericalMajor{T1, T2, T3, T_tuplediffdata} <: DomainMajor
     IC::T3
     T::T1
     P::T1
@@ -364,7 +367,7 @@ end
     u0::Matrix{T2}
     tfinal_ad::T2
     time_update_ad::T1
-    function DomainSphericalMajor(IC::InitialConditionsSpherical, T::T1, P::T1, time_update::T1, fugacity_O2::T1, diffcoef::Int) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}}
+    function DomainSphericalMajor(IC::InitialConditionsSphericalMajor, T::T1, P::T1, time_update::T1, fugacity_O2::T1, diffcoef::Int) where {T1 <: Union{Float64, AbstractArray{Float64, 1}}}
 
         #check that T, P and time_update have the same size
         if size(T, 1) ≠ size(P, 1) || size(T, 1) ≠ size(time_update, 1)
@@ -462,7 +465,7 @@ end
     end
 end
 
-@kwdef struct Domain2DMajor{T1, T2, T3, T4, T5, T6, T_tuplediffdata} <: Domain
+@kwdef struct Domain2DMajor{T1, T2, T3, T4, T5, T6, T_tuplediffdata} <: DomainMajor
     IC::T6
     T::T1
     P::T1
@@ -571,7 +574,7 @@ end
     end
 end
 
-@kwdef struct Domain3DMajor{T1, T2, T3, T4, T5, T6, T_tuplediffdata} <: Domain
+@kwdef struct Domain3DMajor{T1, T2, T3, T4, T5, T6, T_tuplediffdata} <: DomainMajor
     IC::T6
     T::T1
     P::T1
@@ -593,6 +596,11 @@ end
     function Domain3DMajor(IC::InitialConditions3DMajor, T::T1, P::T1, time_update::T1, fugacity_O2::T1, diffcoef::Int) where {T1 <: Union{Float64, Array{Float64, 1}}}
 
         @unpack nx, ny, nz, Δx, Δy, Δz, tfinal, Lx, CMg0, CFe0, CMn0, grt_position, grt_boundary = IC
+
+        # check that T, P and time_update have the same size
+        if size(T, 1) ≠ size(P, 1) || size(T, 1) ≠ size(time_update, 1)
+            error("T, P and time_update should have the same size.")
+        end
 
         D0 = similar(CMg0, 4)
         D0 .= (0.0, 0.0, 0.0, 0.0)
@@ -682,7 +690,14 @@ end
 
 When applied to 1D initial conditions, define corresponding 1D domain. `bc_neumann` can be used to define Neumann boundary conditions on the left or right side of the domain if set to true.
 """
-function Domain(IC::InitialConditions1DMajor, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr", fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa";diffcoef::Symbol=:CG92, bc_neumann::Tuple=(false, false))
+function Domain(IC::InitialConditions1DMajor,
+                T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}},
+                P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}},
+                time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr",
+                fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa";
+                diffcoef::Symbol=:CG92,
+                bc_neumann::Tuple=(false, false)
+                )
 
     if diffcoef == :CG92
         diffcoef = 1
@@ -698,11 +713,11 @@ function Domain(IC::InitialConditions1DMajor, T::Union{Unitful.Temperature,Array
 end
 
 """
-    Domain(IC::InitialConditionsSpherical, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr")
+    Domain(IC::InitialConditionsSphericalMajor, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr")
 
 When applied to spherical initial conditions, define corresponding spherical domain. Assume that the center of the grain is on the left side.
 """
-function Domain(IC::InitialConditionsSpherical, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr", fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa"; diffcoef::Symbol=:CG92)
+function Domain(IC::InitialConditionsSphericalMajor, T::Union{Unitful.Temperature,Array{<:Unitful.Temperature{<:Real}, 1}}, P::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}, time_update::Union{Unitful.Time,Array{<:Unitful.Time{<:Real}, 1}}=0u"Myr", fugacity_O2::Union{Unitful.Pressure,Array{<:Unitful.Pressure{<:Real}, 1}}=ones(size(P)) .* 1e-25u"Pa"; diffcoef::Symbol=:CG92)
 
     if diffcoef == :CG92
         diffcoef = 1
