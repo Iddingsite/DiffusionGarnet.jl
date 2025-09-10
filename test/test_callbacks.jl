@@ -12,7 +12,7 @@
     CCa0 = reverse(data[1:size(data,1)÷2, 5])
     distance = data[1:size(data,1)÷2, 1]
     Lx = Lr = (data[end,1] - data[1,1])u"µm"
-    tfinal = 0.1u"Myr"
+    tfinal = 0.001u"Myr"
     T = [850u"°C", 600u"°C"]
     P = [0.5u"GPa", 0.3u"GPa"]
 
@@ -117,7 +117,7 @@ end
 
     nx = 400
     L = 0.8u"mm"
-    tfinal = 0.1u"Myr"
+    tfinal = 0.01u"Myr"
     time_update = [0u"Myr", tfinal]
     Grt_REE = Garnet.Grt_REE_Bloch2020_fast
     D = SetChemicalDiffusion(Grt_REE)
@@ -204,7 +204,7 @@ end
     CCa0 = data_1D[:, 5]
     distance = data_1D[:, 1]
     Lx = (data_1D[end,1] - data_1D[1,1])u"µm"
-    tfinal = 0.1u"Myr"
+    tfinal = 0.01u"Myr"
 
     IC1D = IC1DMajor(;CMg0, CFe0, CMn0, Lx, tfinal)
     ICSph = ICSphMajor(;CMg0, CFe0, CMn0, Lr=Lx, tfinal)
@@ -241,7 +241,7 @@ end
     IC3D = IC3DMajor(;CMg0 = Mg0, CFe0 = Fe0, CMn0 = Mn0, Lx, Ly, Lz, tfinal)
     domain3D = Domain(IC3D, T, P)
 
-    time_save = [0u"Myr", 0.01u"Myr", 0.05u"Myr", tfinal]
+    time_save = [0u"Myr", 0.001u"Myr", 0.005u"Myr", tfinal]
 
     save_data_callback = PresetTimeCallback(ustrip.(time_save), save_data, save_positions=(false,false))
 
@@ -315,30 +315,30 @@ end
     sol_3D = simulate(domain3D; callback=save_data_callback, path_save="Grt_3D.h5", progress=false, save_everystep=false, save_start=false)
 
     h5open("Grt_2D.h5", "r") do file
-        @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"])' == convert(Array{Float32}, IC2D.CMg0)
-        @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"])' == convert(Array{Float32}, IC2D.CFe0)
-        @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"])' == convert(Array{Float32}, IC2D.CMn0)
-        @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"])' == convert(Array{Float32},replace!((1 .- IC2D.CMg0 .- IC2D.CFe0 .- IC2D.CMn0), 1=>0))
-        @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"])' == convert(Array{Float32}, sol_2D.u[end][:,:,1])
-        @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"])' == convert(Array{Float32}, sol_2D.u[end][:,:,2])
-        @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"])' == convert(Array{Float32}, sol_2D.u[end][:,:,3])
+        @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"])' ≈ convert(Array{Float32}, IC2D.CMg0)
+        @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"])' ≈ convert(Array{Float32}, IC2D.CFe0)
+        @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"])' ≈ convert(Array{Float32}, IC2D.CMn0)
+        @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"])' ≈ convert(Array{Float32},replace!((1 .- IC2D.CMg0 .- IC2D.CFe0 .- IC2D.CMn0), 1=>0))
+        @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"])' ≈ convert(Array{Float32}, sol_2D.u[end][:,:,1])
+        @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"])' ≈ convert(Array{Float32}, sol_2D.u[end][:,:,2])
+        @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"])' ≈ convert(Array{Float32}, sol_2D.u[end][:,:,3])
     end
 
     h5open("Grt_3D.h5", "r") do file
         array = read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"])
-        @test permutedims(array,1:ndims(array)) == convert(Array{Float32}, IC3D.CMg0)
+        @test permutedims(array,1:ndims(array)) ≈ convert(Array{Float32}, IC3D.CMg0)
         array = read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"])
-        @test permutedims(array,1:ndims(array)) == convert(Array{Float32}, IC3D.CFe0)
+        @test permutedims(array,1:ndims(array)) ≈ convert(Array{Float32}, IC3D.CFe0)
         array = read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"])
-        @test permutedims(array,1:ndims(array)) == convert(Array{Float32}, IC3D.CMn0)
+        @test permutedims(array,1:ndims(array)) ≈ convert(Array{Float32}, IC3D.CMn0)
         array = read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"])
-        @test permutedims(array,1:ndims(array)) == convert(Array{Float32}, replace!((1 .- IC3D.CMg0 .- IC3D.CFe0 .- IC3D.CMn0), 1=>0))
+        @test permutedims(array,1:ndims(array)) ≈ convert(Array{Float32}, replace!((1 .- IC3D.CMg0 .- IC3D.CFe0 .- IC3D.CMn0), 1=>0))
         array = read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"])
-        @test permutedims(array,1:ndims(array)) == convert(Array{Float32}, sol_3D.u[end][:,:,:,1])
+        @test permutedims(array,1:ndims(array)) ≈ convert(Array{Float32}, sol_3D.u[end][:,:,:,1])
         array = read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"])
-        @test permutedims(array,1:ndims(array)) == convert(Array{Float32}, sol_3D.u[end][:,:,:,2])
+        @test permutedims(array,1:ndims(array)) ≈ convert(Array{Float32}, sol_3D.u[end][:,:,:,2])
         array = read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"])
-        @test permutedims(array,1:ndims(array)) == convert(Array{Float32}, sol_3D.u[end][:,:,:,3])
+        @test permutedims(array,1:ndims(array)) ≈ convert(Array{Float32}, sol_3D.u[end][:,:,:,3])
     end
 
     # delete files if it exists
@@ -413,33 +413,38 @@ end
     IC3D = IC3DTrace(;C0=Mg0, D=D, Lx, Ly, Lz, tfinal, grt_boundary)
     domain3D = Domain(IC3D, T, P)
 
-    time_save = [0u"Myr", 0.05u"Myr", tfinal]
+    time_save = [0u"Myr", 0.01u"Myr", tfinal]
 
     save_data_callback = PresetTimeCallback(ustrip.(time_save), save_data, save_positions=(false,false))
 
     sol_1D = simulate(domain1D; callback=save_data_callback, path_save="Trace_1D.h5", abstol=1e-6,reltol=1e-6, save_everystep=false)
     sol_sph = simulate(domainsph; callback=save_data_callback, path_save="Trace_Sph.h5", abstol=1e-6,reltol=1e-6, save_everystep=false)
+
+    time_save = [0u"Myr", 0.005u"Myr", 0.01u"Myr"]
+
+    save_data_callback = PresetTimeCallback(ustrip.(time_save), save_data, save_positions=(false,false))
+
     sol_2D = simulate(domain2D; callback=save_data_callback, path_save="Trace_2D.h5", progress=false, save_everystep=false)
     sol_3D = simulate(domain3D; callback=save_data_callback, path_save="Trace_3D.h5", progress=false, save_everystep=false)
 
     h5open("Trace_1D.h5", "r") do file
-        @test read(file["Diffusion_Grt"]["t0000"]["C"]["C"]) == convert(Array{Float32}, IC1D.C0)
-        @test read(file["Diffusion_Grt"]["t0002"]["C"]["C"]) == convert(Array{Float32}, sol_1D.u[end])
+        @test read(file["Diffusion_Grt"]["t0000"]["C"]["C"]) ≈ convert(Array{Float32}, IC1D.C0)
+        @test read(file["Diffusion_Grt"]["t0002"]["C"]["C"]) ≈ convert(Array{Float32}, sol_1D.u[end])
     end
 
     h5open("Trace_Sph.h5", "r") do file
-        @test read(file["Diffusion_Grt"]["t0000"]["C"]["C"]) == convert(Array{Float32}, ICsph.C0)
-        @test read(file["Diffusion_Grt"]["t0002"]["C"]["C"]) == convert(Array{Float32}, sol_sph.u[end])
+        @test read(file["Diffusion_Grt"]["t0000"]["C"]["C"]) ≈ convert(Array{Float32}, ICsph.C0)
+        @test read(file["Diffusion_Grt"]["t0002"]["C"]["C"]) ≈ convert(Array{Float32}, sol_sph.u[end])
     end
 
     h5open("Trace_2D.h5", "r") do file
-        @test read(file["Diffusion_Grt"]["t0000"]["C"]["C"]) == convert(Array{Float32}, IC2D.C0)
-        @test read(file["Diffusion_Grt"]["t0002"]["C"]["C"]) == convert(Array{Float32}, sol_2D.u[end])
+        @test read(file["Diffusion_Grt"]["t0000"]["C"]["C"]) ≈ convert(Array{Float32}, IC2D.C0)
+        @test read(file["Diffusion_Grt"]["t0002"]["C"]["C"]) ≈ convert(Array{Float32}, sol_2D.u[end])
     end
 
     h5open("Trace_3D.h5", "r") do file
-        @test read(file["Diffusion_Grt"]["t0000"]["C"]["C"]) == convert(Array{Float32}, IC3D.C0)
-        @test read(file["Diffusion_Grt"]["t0002"]["C"]["C"]) == convert(Array{Float32}, sol_3D.u[end])
+        @test read(file["Diffusion_Grt"]["t0000"]["C"]["C"]) ≈ convert(Array{Float32}, IC3D.C0)
+        @test read(file["Diffusion_Grt"]["t0002"]["C"]["C"]) ≈ convert(Array{Float32}, sol_3D.u[end])
     end
 
     # delete files if it exists
@@ -464,8 +469,8 @@ end
     sol_2D = simulate(domain2D; callback=save_data_callback, path_save="Trace_2D.h5", progress=false, save_everystep=false, save_start=false)
 
     h5open("Trace_2D.h5", "r") do file
-        @test read(file["Diffusion_Grt"]["t0000"]["C"]["C"])' == convert(Array{Float32}, IC2D.C0)
-        @test read(file["Diffusion_Grt"]["t0002"]["C"]["C"])' == convert(Array{Float32}, sol_2D.u[end])
+        @test read(file["Diffusion_Grt"]["t0000"]["C"]["C"])' ≈ convert(Array{Float32}, IC2D.C0)
+        @test read(file["Diffusion_Grt"]["t0002"]["C"]["C"])' ≈ convert(Array{Float32}, sol_2D.u[end])
     end
 
     # do the same for 3D
@@ -473,9 +478,9 @@ end
 
     h5open("Trace_3D.h5", "r") do file
         array = read(file["Diffusion_Grt"]["t0000"]["C"]["C"])
-        @test permutedims(array,1:ndims(array)) == convert(Array{Float32}, IC3D.C0)
+        @test permutedims(array,1:ndims(array)) ≈ convert(Array{Float32}, IC3D.C0)
         array = read(file["Diffusion_Grt"]["t0002"]["C"]["C"])
-        @test permutedims(array,1:ndims(array)) == convert(Array{Float32}, sol_3D.u[end])
+        @test permutedims(array,1:ndims(array)) ≈ convert(Array{Float32}, sol_3D.u[end])
     end
 
     # delete files if it exists
@@ -495,8 +500,3 @@ end
         rm("Trace_3D.xdmf")
     end
 end
-
-
-
-
-

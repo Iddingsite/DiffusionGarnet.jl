@@ -18,4 +18,6 @@ function runtests()
     return
 end
 
-runtests()
+@testset "All tests" begin
+    runtests()
+end
