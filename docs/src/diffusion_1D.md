@@ -1,6 +1,6 @@
-# [Diffusion in 1D Cartesian coordinates](@id 1D_diffusion)
+# [Multicomponent diffusion in 1D Cartesian coordinates](@id 1D_diffusion)
 
-DiffusionGarnet expects the user to provide real natural data for modelling major element diffusion in garnet. Note that the profiles must be evenly spaced. A set of example data can be found in the repository of the package in the [1D examples section](https://github.com/Iddingsite/DiffusionGarnet.jl/tree/main/examples/1D) for 1D profile called `Data_grt_1D.txt`.
+DiffusionGarnet expects the user to provide real natural data for modelling major element diffusion in garnet. Note that the profiles can be evenly spaced or not. A set of example data can be found in the repository of the package in the [1D examples section](https://github.com/Iddingsite/DiffusionGarnet.jl/tree/main/examples/1D) for 1D profile called `Data_grt_1D.txt`.
 This is what we will use for this tutorial.
 
 First, we will load the data, which should be in the same folder as your current session:

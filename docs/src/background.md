@@ -1,7 +1,6 @@
 # [Background](@id background)
 
-Garnet is a mineral commonly used in metamorphic petrology to better understand geological processes, as it occurs in a variety of rock types. This mineral often exhibits a wide range of compositional zoning, which can be interpreted as recording ranges of pressure and temperature (*PT*) conditions. Modelling diffusion processes can help to better understand this zoning and better constrain the pressure-temperature-time (*PTt*) conditions of the metamorphic event of interest.
-
+Garnet is a mineral commonly used in metamorphic and magmatic petrology to better understand geological processes, as it occurs in a variety of rock types. This mineral often exhibits a wide range of compositional zoning, which can be interpreted as recording ranges of pressure and temperature (*PT*) conditions. Modelling diffusion processes can help to better understand this zoning and better constrain the pressure-temperature-time (*PTt*) conditions of the metamorphic or magmatic event of interest.
 
 ### Linear diffusion theory
 
@@ -19,7 +18,7 @@ Trace element diffusion in garnet can be described by Fick's second law of diffu
 with ``C`` the fraction of the diffusing species in µg/g, ``D`` the diffusion coefficient, ``t`` the time, and ``\mathbf{\nabla}`` the gradient operator.
 
 In most cases, ``D`` can be calculated from an Arrhenius relationship and is linear with respect to the diffusing species composition due to the low concentration of the trace elements.
-In DiffusionGarnet.jl, the diffusion coefficients available are from the package [GeoParams.jl]{https://juliageodynamics.github.io/GeoParams.jl/dev/man/chemicaldiffusion}.
+In DiffusionGarnet.jl, the diffusion coefficients available are from the package [GeoParams.jl](https://juliageodynamics.github.io/GeoParams.jl/dev/man/chemicaldiffusion).
 
 ### Multi-component theory
 
@@ -36,7 +35,7 @@ Major element diffusion in garnet is described by a coupled multicomponent syste
 
 with ``C_i`` the molar fraction of the ``i^{th}`` pole of garnet, ``n`` the total number of poles, and ``\textbf{D}_{ij}`` the interdiffusion coefficient matrix.
 
-For a system of ``n`` components, only ``n-1`` equations are needed, as the sum of the molar fractions of all components is equal to 1. Thus, Ca is made dependent on the other concentrations and (1) is made up of three coupled PDEs.
+For a system of ``n`` components, only ``n-1`` equations are needed, as the sum of the molar fractions of all components is equal to 1. Thus, Ca is made dependent on the other concentrations and the equations are made of three coupled PDEs.
 
 According to Lasaga (1979) [[1]](@ref refs), ``\textbf{D}_{ij}`` can be defined, assuming an ideal system for garnet, with:
 

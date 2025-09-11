@@ -46,7 +46,6 @@ domain1D_CA15 = Domain(IC1D, T, P, diffcoef = :CA15)
 !!! note
     This is exactly the same syntax to change the dataset of diffusion coefficients for spherical, 2D Cartesian, and 3D Cartesian coordinates.
 
-
 We can now simulate the three domains:
 
 ```julia

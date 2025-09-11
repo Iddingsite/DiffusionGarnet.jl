@@ -1,6 +1,6 @@
-# [Diffusion in spherical coordinates](@id sph_diffusion)
+# [Multicomponent diffusion in spherical coordinates](@id sph_diffusion)
 
-When working with 1D profiles of major elements in garnet, it is often better to consider spherical coordinates. This approximates a garnet grain as a sphere and allows the change in volume relative to the distance from the core to be taken into account.
+When working with 1D profiles of major elements in garnet, it is often better to consider spherical coordinates if the grain is euhedral. This approximates a garnet grain as a sphere and allows the change in volume relative to the distance from the core to be taken into account.
 
 In DiffusionGarnet, spherical coordinates are as easy to use as 1D Cartesian coordinates. To illustrate this, we will compare the diffusion of a core-rim profile using the 2 coordinate systems. We will follow the same procedure as in the [1D diffusion tutorial](@ref 1D_diffusion).
 

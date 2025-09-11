@@ -1,4 +1,4 @@
-# [Diffusion in 3D Cartesian coordinates on GPU](@id 3D_diffusion_GPU)
+# [Multicomponent diffusion in 3D Cartesian coordinates on GPU](@id 3D_diffusion_GPU)
 
 !!! note
     This tutorial is a follow-up to the [3D modelling](@ref 3D_diffusion_CPU) tutorial. Make sure to understand it before starting this one. Also, you need an NVIDIA GPU to run this tutorial.

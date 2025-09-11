@@ -2,9 +2,11 @@
 push!(LOAD_PATH,"../src/")
 using DiffusionGarnet
 using Documenter
+using DocumenterVitepress
 
 makedocs(;
          sitename = "DiffusionGarnet.jl",
+         authors="Hugo Dominguez",
          pages=[
                 "Home" => "index.md"
                 "Background" => "background.md"
@@ -19,15 +21,11 @@ makedocs(;
                 ]
                 "List of functions" => "reference.md"
                ],
-        format = Documenter.HTML(; mathengine=
-        Documenter.MathJax3(Dict(  # use MathJax3 as engine for latex (to be able to reference equations)
-            :loader => Dict("load" => ["[tex]/physics"]),
-            :tex => Dict(
-                "inlineMath" => [["\$","\$"], ["\\(","\\)"]],
-                "tags" => "ams",
-            )))),
+        format = DocumenterVitepress.MarkdownVitepress(; repo="https://github.com/Iddingsite/DiffusionGarnet.jl",
+        devbranch = "main",
+        devurl = "dev"),
 )
 
-deploydocs(;
-    repo="github.com/Iddingsite/DiffusionGarnet.jl", devbranch = "main"
+DocumenterVitepress.deploydocs(;
+    repo="github.com/Iddingsite/DiffusionGarnet.jl", push_preview=true, target="build", devbranch = "main"
 )

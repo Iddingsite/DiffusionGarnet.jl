@@ -3,6 +3,7 @@ Manifest.toml
 *.jl.cov
 *.jl.mem
 docs/build/
+docs/node_modules/
 .vscode/
 *.h5
 *.hdf5

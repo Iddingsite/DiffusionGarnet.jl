@@ -1,4 +1,4 @@
-# [Diffusion in 3D Cartesian coordinates on CPU and GPU](@id 3D_diffusion_CPU)
+# [Multicomponent diffusion in 3D Cartesian coordinates on CPU and GPU](@id 3D_diffusion_CPU)
 
 !!! note
     This tutorial is combining the knowledge acquired from the [2D modelling](@ref 2D_diffusion_CPU) and the [Saving output as HDF5 files](@ref saving_output) tutorials. Make sure to understand them before starting this one.
