@@ -4,7 +4,7 @@
 layout: home
 
 hero:
-  name: DiffusionGarnet.jl Docs
+  name: DiffusionGarnet.jl
   text: Model chemical diffusion in garnet for petrological problems.
   tagline: Made for performance for 1D, 2D, and 3D problems
   actions:
