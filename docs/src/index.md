@@ -33,7 +33,6 @@ features:
   - icon: 🧩
     title: Composable and Flexible
     details: Built on top of the DifferentialEquations.jl ecosystem, providing flexibility and composability in defining both numerical solvers and problems.
-    link: /introduction
 
   - icon: 🪨
     title: Compare and Calibrate
