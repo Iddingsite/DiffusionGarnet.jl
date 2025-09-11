@@ -1,4 +1,4 @@
-# [Diffusion in 2D Cartesian coordinates on CPU](@id 2D_diffusion_CPU)
+# [Multicomponent diffusion in 2D Cartesian coordinates on CPU](@id 2D_diffusion_CPU)
 
 From chemical maps (e.g. obtained by microprobe or SEM), we can acquire 2D composition of garnet. Assuming an initial composition, we can diffuse a garnet grain major element composition.
 
