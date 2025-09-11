@@ -15,7 +15,7 @@ Trace element diffusion in garnet can be described by Fick's second law of diffu
 \end{equation}
 ```
 
-with ``C`` the fraction of the diffusing species in µg/g, ``D`` the diffusion coefficient, ``t`` the time, and ``\mathbf{\nabla}`` the gradient operator.
+with ``C`` the composition of the diffusing species in µg/g, ``D`` the diffusion coefficient, ``t`` the time, and ``\mathbf{\nabla}`` the gradient operator.
 
 In most cases, ``D`` can be calculated from an Arrhenius relationship and is linear with respect to the diffusing species composition due to the low concentration of the trace elements.
 In DiffusionGarnet.jl, the diffusion coefficients available are from the package [GeoParams.jl](https://juliageodynamics.github.io/GeoParams.jl/dev/man/chemicaldiffusion).
