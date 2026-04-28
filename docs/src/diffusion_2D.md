@@ -102,7 +102,7 @@ We use here the arguments `progress=true` and `progress_steps=1` to display a pr
 We can now plot the results:
 
 ```julia
-@unpack t_charact = domain2D
+(; t_charact) = domain2D
 
 println("Plotting...")
 anim = @animate for i = tqdm(LinRange(0, sol.t[end], 20))

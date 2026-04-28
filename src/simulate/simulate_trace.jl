@@ -9,7 +9,7 @@ function simulate(domain::Domain1DTrace; path_save=nothing, solver=ROCK2(), abst
 
     p = (domain = domain, path_save = path_save, p_extra = p_extra)
 
-    @unpack tfinal_ad, u0 = p.domain
+    (; tfinal_ad, u0) = p.domain
 
     t = (0, tfinal_ad)
 
@@ -29,7 +29,7 @@ function simulate(domain::DomainSphericalTrace; path_save=nothing, solver=ROCK2(
 
     p = (domain = domain, path_save = path_save, p_extra = p_extra)
 
-    @unpack tfinal_ad, u0 = p.domain
+    (; tfinal_ad, u0) = p.domain
 
     t = (0, tfinal_ad)
 
@@ -49,7 +49,7 @@ function simulate(domain::Domain2DTrace; path_save=nothing, solver=ROCK2(), p_ex
 
     p = (domain = domain, path_save = path_save, p_extra = p_extra)
 
-    @unpack tfinal_ad, u0 = p.domain
+    (; tfinal_ad, u0) = p.domain
 
     t = (0.0, tfinal_ad)
 
@@ -69,7 +69,7 @@ function simulate(domain::Domain3DTrace; path_save=nothing, solver=ROCK2(), p_ex
 
     p = (domain = domain, path_save = path_save, p_extra = p_extra)
 
-    @unpack tfinal_ad, u0 = p.domain
+    (; tfinal_ad, u0) = p.domain
 
     t = (0.0, tfinal_ad)
 

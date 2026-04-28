@@ -87,7 +87,11 @@ end
     path_3D = joinpath(root, "Data", "3D", "3D_data.jld2")
 
     file = jldopen(path_3D, "r")
-    @unpack Mg0, Fe0, Mn0, Ca0, grt_boundary = file
+    Mg0 = file["Mg0"]
+    Fe0 = file["Fe0"]
+    Mn0 = file["Mn0"]
+    Ca0 = file["Ca0"]
+    grt_boundary = file["grt_boundary"]
     close(file)
 
     Lx = 9000.0u"µm"

@@ -27,7 +27,7 @@ P = 0.6u"GPa"
 domain1D = Domain(IC1D, T, P)
 
 # solve the problem using DifferentialEquations.jl
-sol = simulate(domain1D);
+sol = simulate(domain1D, solver=TSRKC3());
 
 # you can now plot the solutions from the sol variable
 

@@ -52,7 +52,7 @@
     domain1D = Domain(IC1D, T, P)
     domainSph = Domain(ICSph, T, P)
 
-    @unpack D, D0, D_charact, Δxad_, bc_neumann = domain1D
+    (; D, D0, D_charact, Δxad_, bc_neumann) = domain1D
 
     DiffusionGarnet.Diffusion_coef_1D_major!(domain1D.D, Mg0, Fe0, Mn0, domain1D.D0, domain1D.D_charact, domain1D, 0)
     DiffusionGarnet.Diffusion_coef_1D_major!(domainSph.D, Mg0, Fe0, Mn0, domainSph.D0, domainSph.D_charact, domainSph, 0)

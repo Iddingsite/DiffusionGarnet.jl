@@ -26,7 +26,7 @@ end
 
 function semi_discretisation_diffusion_spherical_trace(du::T,u::T,p,t) where T <: AbstractArray{<:Real, 1}
 
-    @unpack D, D_charact, Δr_ad, Δr_ad_, r_ad = p.domain
+    (; D, D_charact, Δr_ad, Δr_ad_, r_ad) = p.domain
 
     D_ad = D[1] / D_charact
 

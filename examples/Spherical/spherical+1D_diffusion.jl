@@ -27,7 +27,7 @@ Domain1D = Domain(IC1D, T, P; bc_neumann = (true, false))
 sol_sph = simulate(DomainSph)
 sol_1D = simulate(Domain1D)
 
-@unpack t_charact = DomainSph
+(; t_charact) = DomainSph
 
 anim = @animate for i = LinRange(0, sol_sph.t[end], 100)
     l = @layout [a ; b]

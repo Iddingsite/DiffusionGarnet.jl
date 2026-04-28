@@ -4,7 +4,7 @@ function Diffusion_coef_1D_major!(D, CMg, CFe, CMn, D0, D_charact, domain, t)
 
     DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn = D
 
-    @unpack diffcoef, D0_data, T, P, fugacity_O2, time_update_ad = domain
+    (; diffcoef, D0_data, T, P, fugacity_O2, time_update_ad) = domain
 
     D_charact_ = 1 / D_charact
 
@@ -136,7 +136,7 @@ end
 
 function semi_discretisation_diffusion_cartesian(du::T,u::T,p,t) where T <: AbstractArray{<:Real, 2}
 
-    @unpack D, D0, D_charact, Δxad_, bc_neumann = p.domain
+    (; D, D0, D_charact, Δxad_, bc_neumann) = p.domain
 
     CMg = @view u[:,1]
     CFe = @view u[:,2]

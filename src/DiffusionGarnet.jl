@@ -2,10 +2,9 @@ module DiffusionGarnet
 
 using Reexport: @reexport
 
-@reexport using UnPack: @unpack
 @reexport using Unitful
 @reexport using DiffEqCallbacks: PresetTimeCallback
-@reexport using OrdinaryDiffEqStabilizedRK: ROCK2, ROCK4, ESERK4, ESERK5
+@reexport using OrdinaryDiffEqStabilizedRK: ROCK2, ROCK4, ESERK4, ESERK5, RKC, TSRKC3
 @reexport using GeoParams: SetChemicalDiffusion
 @reexport using GeoParams.Garnet
 
@@ -20,7 +19,6 @@ using GeoParams.Garnet: Grt_Fe_Carlson2006, Grt_Mg_Carlson2006, Grt_Mn_Carlson20
 using GeoParams.Garnet: Grt_Fe_Chu2015, Grt_Mg_Chu2015, Grt_Mn_Chu2015, Grt_Ca_Chu2015
 using Preferences
 using HDF5: h5open, create_group, attributes, read_attribute
-using TOML
 
 # initialise ParallelStencil (Thx AlbertDeMontserrat!)
 function set_backend(new_backend::String)
@@ -61,7 +59,7 @@ function __init__()
             ▐▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▌
 
 
-        Version: $(TOML.parsefile(joinpath(@__DIR__, "..", "Project.toml"))["version"])
+        Version: $(pkgversion(@__MODULE__))
         """, bold=true, color=:default)
     end
 

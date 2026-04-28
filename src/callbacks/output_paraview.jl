@@ -324,8 +324,8 @@ Note that data are saved in row major format. For column major, use `save_data()
 """
 function save_data_paraview(integrator)
 
-    @unpack IC, t_charact = integrator.p.domain
-    @unpack path_save = integrator.p
+    (; IC, t_charact) = integrator.p.domain
+    (; path_save) = integrator.p
 
     if integrator.t ≠ 0.0
         hdf5_timestep_paraview(integrator.u, integrator.dt * t_charact, integrator.t * t_charact, path_save, IC)

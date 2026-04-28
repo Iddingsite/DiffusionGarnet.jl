@@ -23,7 +23,7 @@ P = [0.6, 0.5, 0.4, 0.3, 0.3, 0.3, 0.3, 0.3]u"GPa"
 
 domain1D = Domain(IC1D, T, P, time_update)
 
-@unpack time_update_ad = domain1D
+(; time_update_ad) = domain1D
 
 update_diffusion_coef_call = PresetTimeCallback(time_update_ad, update_diffusion_coef)
 

@@ -46,7 +46,7 @@ Now that we have the time and PT conditions to update, we need to create our cal
 
 ```julia
 # extract time_update_ad from domain1D
-@unpack time_update_ad = domain1D
+(; time_update_ad) = domain1D
 
 # define our callback function
 update_diffusion_coef_call = PresetTimeCallback(time_update_ad, update_diffusion_coef)

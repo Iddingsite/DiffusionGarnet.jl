@@ -24,7 +24,7 @@ DomainSph = Domain(ICSph, T, P)
 
 sol_sph = simulate(DomainSph)
 
-@unpack t_charact = DomainSph
+(; t_charact) = DomainSph
 
 
 anim = @animate for i = LinRange(0, sol_sph.t[end], 100)
