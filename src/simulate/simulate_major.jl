@@ -10,7 +10,7 @@ function simulate(domain::Domain1DMajor; path_save=nothing, solver=ROCK2(), abst
 
     p = (domain = domain, path_save = path_save, p_extra = p_extra)
 
-    @unpack tfinal_ad, u0 = p.domain
+    (; tfinal_ad, u0) = p.domain
 
     t = (0, tfinal_ad)
 
@@ -30,7 +30,7 @@ function simulate(domain::DomainSphericalMajor; path_save=nothing, solver=ROCK2(
 
     p = (domain = domain, path_save = path_save, p_extra = p_extra)
 
-    @unpack tfinal_ad, u0 = p.domain
+    (; tfinal_ad, u0) = p.domain
 
     t = (0, tfinal_ad)
 
@@ -50,7 +50,7 @@ function simulate(domain::Domain2DMajor; path_save=nothing, solver=ROCK2(), p_ex
 
     p = (domain = domain, path_save = path_save, p_extra = p_extra)
 
-    @unpack tfinal_ad, u0 = p.domain
+    (; tfinal_ad, u0) = p.domain
 
     t = (0.0, tfinal_ad)
 
@@ -71,7 +71,7 @@ function simulate(domain::Domain3DMajor; path_save=nothing, solver=ROCK2(), p_ex
 
     p = (domain = domain, path_save = path_save, p_extra = p_extra)
 
-    @unpack tfinal_ad, u0 = p.domain
+    (; tfinal_ad, u0) = p.domain
 
     t = (0.0, tfinal_ad)
 

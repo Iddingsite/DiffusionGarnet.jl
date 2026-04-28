@@ -386,8 +386,8 @@ Callback function used to save major element compositions to an HDF5 file at a s
 """
 function save_data(integrator)
 
-    @unpack IC, t_charact = integrator.p.domain
-    @unpack path_save = integrator.p
+    (; IC, t_charact) = integrator.p.domain
+    (; path_save) = integrator.p
 
     if integrator.t ≠ 0.0
         hdf5_timestep(integrator.u, integrator.dt * t_charact, integrator.t * t_charact, path_save, IC)

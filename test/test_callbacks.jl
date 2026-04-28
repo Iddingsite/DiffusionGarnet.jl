@@ -48,8 +48,9 @@
     #now 3D
     path_3D = joinpath(root, "Data", "3D", "3D_data.jld2")
     file = jldopen(path_3D, "r")
-
-    @unpack Mg0, Fe0, Mn0 = file
+    Mg0 = file["Mg0"]
+    Fe0 = file["Fe0"]
+    Mn0 = file["Mn0"]
     close(file)
 
     Lz = 900.0u"µm"
@@ -59,7 +60,7 @@
 
     @test domain3D.D0[1] ≈ 153548.37186274922
 
-    @unpack time_update_ad = domainSph
+    (; time_update_ad) = domainSph
 
     update_diffusion_coef_call = PresetTimeCallback(time_update_ad, update_diffusion_coef, save_positions=(false,false))
 
@@ -158,7 +159,8 @@ end
     path_3D = joinpath(root, "Data", "3D", "3D_data.jld2")
 
     file = jldopen(path_3D, "r")
-    @unpack Mg0, grt_boundary = file
+    Mg0 = file["Mg0"]
+    grt_boundary = file["grt_boundary"]
     close(file)
 
 
@@ -171,7 +173,7 @@ end
     IC3D = IC3DTrace(;C0=Mg0, D=D, Lx, Ly, Lz, tfinal, grt_boundary)
     domain3D = Domain(IC3D, T, P, time_update)
 
-    @unpack time_update_ad = domainsph
+    (; time_update_ad) = domainsph
     update_diffusion_coef_call = PresetTimeCallback(time_update_ad, update_diffusion_coef, save_positions=(false,false))
 
     sol_1D = simulate(domain1D; callback=update_diffusion_coef_call, save_everystep=false, save_start=false, progress=false, abstol=1e-6,reltol=1e-6)
@@ -232,8 +234,9 @@ end
     #now 3D
     path_3D = joinpath(root, "Data", "3D", "3D_data.jld2")
     file = jldopen(path_3D, "r")
-
-    @unpack Mg0, Fe0, Mn0 = file
+    Mg0 = file["Mg0"]
+    Fe0 = file["Fe0"]
+    Mn0 = file["Mn0"]
     close(file)
 
     Lz = 900.0u"µm"
@@ -399,7 +402,8 @@ end
     path_3D = joinpath(root, "Data", "3D", "3D_data.jld2")
 
     file = jldopen(path_3D, "r")
-    @unpack Mg0, grt_boundary = file
+    Mg0 = file["Mg0"]
+    grt_boundary = file["grt_boundary"]
     close(file)
 
     Lx = 9000.0u"µm"

@@ -36,7 +36,11 @@ end
 
 # use JLD2
 file = jldopen(data_file, "r")
-@unpack Mg0, Fe0, Mn0, Ca0, grt_boundary = file
+Mg0 = file["Mg0"]
+Fe0 = file["Fe0"]
+Mn0 = file["Mn0"]
+Ca0 = file["Ca0"]
+grt_boundary = file["grt_boundary"]
 close(file)
 ```
 
@@ -96,7 +100,7 @@ time_save_first = collect(range(0, 1, step=0.1))u"Myr"
 time_save_second = collect(range(1.5, 10, step=0.5))u"Myr"
 time_save = vcat(time_save_first,time_save_second)
 
-@unpack t_charact = domain3D  # unpack characteristic time to nondimensionalise the time for the simulation
+(; t_charact) = domain3D  # extract characteristic time to nondimensionalise the time for the simulation
 time_save_ad = ustrip.(u"Myr", time_save) ./ t_charact  # convert to Myr, remove units, and convert to nondimensional time
 
 # create the callback function

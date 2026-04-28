@@ -65,7 +65,7 @@ end
             error("T, P and time_update should have the same size.")
         end
 
-        @unpack nx, Δx, tfinal, Lx, C0 = IC
+        (; nx, Δx, tfinal, Lx, C0) = IC
 
         T2 = eltype(C0)
         u0 = copy(C0)
@@ -166,7 +166,7 @@ end
             error("T, P and time_update should have the same size.")
         end
 
-        @unpack nr, Δr, r, tfinal, Lr, C0 = IC
+        (; nr, Δr, r, tfinal, Lr, C0) = IC
 
         T2 = eltype(C0)
         u0 = copy(C0)
@@ -285,7 +285,7 @@ end
             error("T, P and time_update should have the same size.")
         end
 
-        @unpack nx, ny, Δx, Δy, x, y, tfinal, Lx, Ly, C0 = IC
+        (; nx, ny, Δx, Δy, x, y, tfinal, Lx, Ly, C0) = IC
 
         T2 = eltype(C0)
         u0 = copy(C0)
@@ -416,7 +416,7 @@ end
             error("T, P and time_update should have the same size.")
         end
 
-        @unpack nx, ny, nz, Δx, Δy, Δz, x, y, z, tfinal, Lx, Ly, Lz, C0 = IC
+        (; nx, ny, nz, Δx, Δy, Δz, x, y, z, tfinal, Lx, Ly, Lz, C0) = IC
 
         T2 = eltype(C0)
         u0 = copy(C0)

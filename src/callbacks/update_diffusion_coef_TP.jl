@@ -6,7 +6,7 @@ Update the diffusion coefficients `D0` based on the temperature `T_K`, pressure 
 """
 function D_update!(Domain, IC::T, T_K, P_kbar, fO2) where T <: InitialConditionsMajor
 
-    @unpack D0, D0_data, diffcoef = Domain
+    (; D0, D0_data, diffcoef) = Domain
 
     if diffcoef == 1 # because others are updated everytime step anyway
         DMg = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mg, T = T_K, P = P_kbar, fO2 = fO2)))
@@ -27,7 +27,7 @@ Update the diffusion coefficients `D0` based on the temperature `T_K`, pressure 
 """
 function D_update!(Domain, IC::T, T_K, P_kbar, fO2) where T <: InitialConditionsTrace
 
-    @unpack fugacity_O2 = Domain
+    (; fugacity_O2) = Domain
 
     Domain.D[1] = ustrip(u"µm^2/Myr", compute_D(IC.D, T = T_K, P = P_kbar, fugacity_O2 = fO2))
 end
@@ -39,7 +39,7 @@ Callback function to update the diffusion coefficients during the simulation bas
 """
 function update_diffusion_coef(integrator)
 
-    @unpack P, T, fugacity_O2, time_update_ad, IC = integrator.p.domain
+    (; P, T, fugacity_O2, time_update_ad, IC) = integrator.p.domain
 
     # find the index of the time_update_ad that is equal to t
     index = findfirst(x -> x == integrator.t, time_update_ad)

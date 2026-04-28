@@ -66,7 +66,8 @@ end
     path_3D = joinpath(root, "Data", "3D", "3D_data.jld2")
 
     file = jldopen(path_3D, "r")
-    @unpack Mg0, grt_boundary = file
+    Mg0 = file["Mg0"]
+    grt_boundary = file["grt_boundary"]
     close(file)
 
     Grt_Mg = Garnet.Grt_REE_Bloch2020_fast

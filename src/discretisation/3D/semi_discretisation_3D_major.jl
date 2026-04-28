@@ -198,8 +198,8 @@ end
 
 function semi_discretisation_diffusion_cartesian(du::Array_T,u::Array_T,p,t) where Array_T <: AbstractArray{<:Real, 4}
 
-    @unpack D, D0, D_charact, Δxad_, Δyad_, Δzad_, diffcoef, D0_data, T, P, fugacity_O2, time_update_ad = p.domain
-    @unpack grt_position, grt_boundary = p.domain.IC
+    (; D, D0, D_charact, Δxad_, Δyad_, Δzad_, diffcoef, D0_data, T, P, fugacity_O2, time_update_ad) = p.domain
+    (; grt_position, grt_boundary) = p.domain.IC
 
     CMg = @view u[:,:,:,1]
     CFe = @view u[:,:,:,2]

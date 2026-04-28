@@ -24,7 +24,7 @@ domain2D = Domain(IC2D, T, P)
 
 time_save = collect(range(0, 1, length=51))u"Myr"  # define times at which to save
 
-@unpack t_charact = domain2D  # unpack characteristic time to nondimensionalise the time for the simulation
+(; t_charact) = domain2D  # extract characteristic time to nondimensionalise the time for the simulation
 time_save_ad = ustrip.(u"Myr", time_save) ./ t_charact  # convert to Myr, remove units, and convert to nondimensional time
 
 save_data_callback = PresetTimeCallback(time_save_ad, save_data_paraview)

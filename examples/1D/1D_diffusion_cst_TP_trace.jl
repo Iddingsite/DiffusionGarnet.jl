@@ -29,7 +29,7 @@ sol = simulate(domain1D);
 
 # you can now plot the solutions from the sol variable
 
-@unpack t_charact = domain1D
+(; t_charact) = domain1D
 
 anim = @animate for i = LinRange(0, sol.t[end], 100)
     l = @layout [a ; b]

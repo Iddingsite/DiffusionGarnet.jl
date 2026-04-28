@@ -1,7 +1,5 @@
 using Unitful
 using Unitful:𝐋,𝐓
-using Statistics
-
 abstract type InitialConditions end
 abstract type Domain end
 

@@ -39,7 +39,7 @@ end
 
 function semi_discretisation_diffusion_cartesian_trace(du::T,u::T,p,t) where T <: AbstractArray{<:Real, 1}
 
-    @unpack D, Δxad_, bc_neumann, D_charact = p.domain
+    (; D, Δxad_, bc_neumann, D_charact) = p.domain
 
     D_ad = D[1] / D_charact
 

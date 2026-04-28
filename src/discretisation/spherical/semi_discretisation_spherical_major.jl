@@ -45,7 +45,7 @@ end
 
 function semi_discretisation_diffusion_spherical_major(du,u,p,t)
 
-    @unpack D, D0, D_charact, Δr_ad_, r_ad = p.domain
+    (; D, D0, D_charact, Δr_ad_, r_ad) = p.domain
 
     CMg = @view u[:,1]
     CFe = @view u[:,2]
