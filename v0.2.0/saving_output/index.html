@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Saving output as HDF5 files · DiffusionGarnet.jl</title><meta name="title" content="Saving output as HDF5 files · DiffusionGarnet.jl"/><meta property="og:title" content="Saving output as HDF5 files · DiffusionGarnet.jl"/><meta property="twitter:title" content="Saving output as HDF5 files · DiffusionGarnet.jl"/><meta name="description" content="Documentation for DiffusionGarnet.jl."/><meta property="og:description" content="Documentation for DiffusionGarnet.jl."/><meta property="twitter:description" content="Documentation for DiffusionGarnet.jl."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.svg" alt="DiffusionGarnet.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">DiffusionGarnet.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../background/">Background</a></li><li><span class="tocitem">Tutorials</span><ul><li><a class="tocitem" href="../diffusion_1D/">Diffusion in 1D Cartesian coordinates</a></li><li><a class="tocitem" href="../diffusion_spherical/">Diffusion in spherical coordinates</a></li><li><a class="tocitem" href="../diffusion_2D/">Diffusion in 2D Cartesian coordinates on CPU</a></li><li><input class="collapse-toggle" id="menuitem-3-4" type="checkbox" checked/><label class="tocitem" for="menuitem-3-4"><span class="docs-label">Callbacks</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../updating_PT/">Updating pressure and temperature conditions</a></li><li class="is-active"><a class="tocitem" href>Saving output as HDF5 files</a></li></ul></li><li><a class="tocitem" href="../diffusion_3D/">Diffusion in 3D Cartesian coordinates on CPU</a></li></ul></li><li><a class="tocitem" href="../reference/">List of functions</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li><a class="is-disabled">Callbacks</a></li><li class="is-active"><a href>Saving output as HDF5 files</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Saving output as HDF5 files</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/Iddingsite/DiffusionGarnet.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/Iddingsite/DiffusionGarnet.jl/blob/main/docs/src/saving_output.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="saving_output"><a class="docs-heading-anchor" href="#saving_output">Saving output as HDF5 files</a><a id="saving_output-1"></a><a class="docs-heading-anchor-permalink" href="#saving_output" title="Permalink"></a></h1><p>When dealing with 2D or especially 3D data, it can be impractical or even impossible to keep every timestep in memory, as the RAM on a single machine can quickly become saturated. It may then be relevant to save certain timesteps of interest to disk for later post-processing. DiffusionGarnet has a built-in function for this purpose, using a callback function based on the <a href="https://docs.sciml.ai/DiffEqCallbacks/stable/">DiffEqCallbacks</a> package to produce HDF5 files.</p><p><a href="https://www.hdfgroup.org/solutions/hdf5/">HDF5</a> is a data format designed to store and organise large amount of data and is the data format chosen for DiffusionGarnet.</p><p>As an example, we will use the data from the <a href="../diffusion_2D/#2D_diffusion_CPU">Diffusion in 2D Cartesian coordinates on CPU</a> tutorial but this is also applicable to 1D Cartesian or spherical coordinates in the same manner.</p><div class="admonition is-success"><header class="admonition-header">Tip</header><div class="admonition-body"><p>Make sure to start Julia with multiple threads of execution to speed up the simulation.</p></div></div><pre><code class="language-julia hljs">using DiffusionGarnet
+using DelimitedFiles
+using Plots
+
+Mg0 = DelimitedFiles.readdlm(&quot;Xprp.txt&quot;, &#39;\t&#39;, &#39;\n&#39;, header=false)
+Fe0 = DelimitedFiles.readdlm(&quot;Xalm.txt&quot;, &#39;\t&#39;, &#39;\n&#39;, header=false)
+Mn0 = DelimitedFiles.readdlm(&quot;Xsps.txt&quot;, &#39;\t&#39;, &#39;\n&#39;, header=false)
+Ca0 = DelimitedFiles.readdlm(&quot;Xgrs.txt&quot;, &#39;\t&#39;, &#39;\n&#39;, header=false)
+grt_boundary = DelimitedFiles.readdlm(&quot;contour_Grt.txt&quot;, &#39;\t&#39;, &#39;\n&#39;, header=false)
+
+Lx = 9000.0u&quot;µm&quot;
+Ly = 9000.0u&quot;µm&quot;
+tfinal = 1.0u&quot;Myr&quot;
+T = 900u&quot;°C&quot;
+P = 0.6u&quot;GPa&quot;
+
+IC2D = InitialConditions2D(Mg0, Fe0, Mn0, Lx, Ly, tfinal; grt_boundary = grt_boundary)
+domain2D = Domain(IC2D, T, P)</code></pre><p>We then need to decide at which timesteps we want to save our data, here at 0, 0.5 and 1 Myr:</p><pre><code class="language-julia hljs">time_save = [0, 0.5, 1]u&quot;Myr&quot;  # define times at which to save</code></pre><div class="admonition is-info"><header class="admonition-header">Note</header><div class="admonition-body"><p>Make sure to always include 0 in your timesteps to save the initial conditions.</p></div></div><p>Two additional steps are then required, we need to convert this time to dimensionless time so that the solver can use it, and we need to define our callback function:</p><pre><code class="language-julia hljs">@unpack t_charact = domain2D  # unpack characteristic time to nondimensionalise the time for the simulation
+time_save_ad = ustrip.(u&quot;Myr&quot;, time_save) ./ t_charact  # convert to Myr, remove units, and convert to nondimensional time</code></pre><p><code>time_save_ad</code> is the equivalent dimensionless time to time_save:</p><pre><code class="language-julia hljs">julia &gt; time_save_ad
+3-element Vector{Float64}:
+ 0.0
+ 0.011476148087304199
+ 0.022952296174608398</code></pre><div class="admonition is-warning"><header class="admonition-header">Warning</header><div class="admonition-body"><p>The time provided to the callback function should always be dimensionless.</p></div></div><p>We can now define our callback function that will save the data at these timesteps, using <a href="https://docs.sciml.ai/DiffEqCallbacks/stable/timed_callbacks/#DiffEqCallbacks.PresetTimeCallback"><code>PresetTimeCallback()</code></a>:</p><pre><code class="language-julia hljs">save_data_callback = PresetTimeCallback(time_save_ad, save_data)</code></pre><p><code>save_data</code> is the function that will be called at each timestep in our callback function. <code>save_data_callback</code> can then be passed to <code>simulate</code> after defining the path of the output file:</p><pre><code class="language-julia hljs">path_save = &quot;Grt_2D.h5&quot;  # chose the name and the path of the HDF5 output file (make sure to add .h5 or .hdf5 at the end)
+sol = simulate(domain2D; callback=save_data_callback, path_save=path_save, save_everystep=false);</code></pre><div class="admonition is-info"><header class="admonition-header">Note</header><div class="admonition-body"><p>We use <code>save_everystep=false</code> in <code>simulation()</code> to prevent saving every timestep in the model as we save it to disk. That should speed up the computation and reduce the burden on the RAM.</p></div></div><p>This output:</p><pre><code class="language-julia hljs">Data saved at 0.0 Myr.
+Data saved at 0.5 Myr.
+Data saved at 1.0 Myr.
+352.464431 seconds (17.47 M allocations: 1.789 GiB, 0.15% gc time, 4.01% compilation time)</code></pre><p>which indicates the time at which we saved our data and the total run time of the simulation.</p><p>The output file produced can be read with the <a href="https://www.hdfgroup.org/downloads/hdfview/#download">official viewer</a> or using <a href="https://juliaio.github.io/HDF5.jl/stable/">HDF5.jl</a> in Julia or other programming languages and external programs.</p><p>Using <a href="https://juliaio.github.io/HDF5.jl/stable/">HDF5.jl</a>, we can look at the structure of the HDF5 file produced:</p><pre><code class="language-julia-repl hljs">julia&gt; using HDF5
+julia&gt; hf5 = h5open(&quot;Grt_2D.h5&quot;)
+🗂️ HDF5.File: (read-only) Grt_2D.h5
+└─ 📂 Diffusion_Grt
+   ├─ 🏷️ CharacteristicDiffusionCoefficient
+   ├─ 🏷️ CharacteristicLength
+   ├─ 🏷️ CharacteristicTime
+   ├─ 🏷️ Coordinates
+   ├─ 🏷️ Dx(µm)
+   ├─ 🏷️ Dy(µm)
+   ├─ 🏷️ LengthX(µm)
+   ├─ 🏷️ LengthY(µm)
+   ├─ 🏷️ Nx
+   ├─ 🏷️ Ny
+   ├─ 🏷️ TotalTime(Myr)
+   ├─ 📂 t0000
+   │  ├─ 🏷️ Time(Myr)
+   │  ├─ 📂 Ca
+   │  │  ├─ 🏷️ Center
+   │  │  ├─ 🏷️ DataType
+   │  │  └─ 🔢 Ca
+   │  ├─ 📂 Fe
+   │  │  ├─ 🏷️ Center
+   │  │  ├─ 🏷️ DataType
+   │  │  └─ 🔢 Fe
+   │  ├─ 📂 Mg
+   │  │  ├─ 🏷️ Center
+   │  │  ├─ 🏷️ DataType
+   │  │  └─ 🔢 Mg
+   │  └─ 📂 Mn
+   │     ├─ 🏷️ Center
+   │     ├─ 🏷️ DataType
+   │     └─ 🔢 Mn
+   ├─ 📂 t0001
+   │  ├─ 🏷️ CurrentDt(Myr)
+   │  ├─ 🏷️ Time(Myr)
+   │  ├─ 📂 Ca
+   │  │  ├─ 🏷️ Center
+   │  │  ├─ 🏷️ DataType
+   │  │  └─ 🔢 Ca
+   │  ├─ 📂 Fe
+   │  │  ├─ 🏷️ Center
+   │  │  ├─ 🏷️ DataType
+   │  │  └─ 🔢 Fe
+   │  ├─ 📂 Mg
+   │  │  ├─ 🏷️ Center
+   │  │  ├─ 🏷️ DataType
+   │  │  └─ 🔢 Mg
+   │  └─ 📂 Mn
+   │     ├─ 🏷️ Center
+   │     ├─ 🏷️ DataType
+   │     └─ 🔢 Mn
+   └─ 📂 t0002
+      ├─ 🏷️ CurrentDt(Myr)
+      ├─ 🏷️ Time(Myr)
+      ├─ 📂 Ca
+      │  ├─ 🏷️ Center
+      │  ├─ 🏷️ DataType
+      │  └─ 🔢 Ca
+      ├─ 📂 Fe
+      │  ├─ 🏷️ Center
+      │  ├─ 🏷️ DataType
+      │  └─ 🔢 Fe
+      ├─ 📂 Mg
+      │  ├─ 🏷️ Center
+      │  ├─ 🏷️ DataType
+      │  └─ 🔢 Mg
+      └─ 📂 Mn
+         ├─ 🏷️ Center
+         ├─ 🏷️ DataType
+         └─ 🔢 Mn
+julia&gt; close(hf5)  # close the HDF5 file</code></pre><p>We can see that the HDF5 file contains some general information about the model as attributes (🏷️), such as characteristic values or the dimensions and the total time of the model. In addition, the three timesteps are stored as groups (📂) with the composition in Ca, Fe, Mg and Mn.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../updating_PT/">« Updating pressure and temperature conditions</a><a class="docs-footer-nextpage" href="../diffusion_3D/">Diffusion in 3D Cartesian coordinates on CPU »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.8.0 on <span class="colophon-date" title="Saturday 11 January 2025 22:33">Saturday 11 January 2025</span>. Using Julia version 1.11.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
