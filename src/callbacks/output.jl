@@ -172,10 +172,10 @@ function hdf5_initial_conditions(IC::InitialConditions2DMajor, Domain::Domain2DM
             attributes(grp)["Center"] = "Node"
         end
 
-        t0["Mg"]["Mg"] = convert(Array{Float32}, IC.CMg0)
-        t0["Fe"]["Fe"] = convert(Array{Float32}, IC.CFe0)
-        t0["Mn"]["Mn"] = convert(Array{Float32}, IC.CMn0)
-        t0["Ca"]["Ca"] = replace!(convert(Array{Float32}, (1 .- IC.CMg0 .- IC.CFe0 .- IC.CMn0)), 1=>0)
+        t0["Mg"]["Mg"] = convert(Array{Float32}, view(IC.u0, :, :, 1))
+        t0["Fe"]["Fe"] = convert(Array{Float32}, view(IC.u0, :, :, 2))
+        t0["Mn"]["Mn"] = convert(Array{Float32}, view(IC.u0, :, :, 3))
+        t0["Ca"]["Ca"] = replace!(convert(Array{Float32}, 1 .- view(IC.u0, :, :, 1) .- view(IC.u0, :, :, 2) .- view(IC.u0, :, :, 3)), 1=>0)
         t0["GrtPosition"]["GrtPosition"] = convert(Array{Int32},IC.grt_position)
         t0["GrtBoundary"]["GrtBoundary"] = convert(Array{Int32},IC.grt_boundary)
     end
@@ -263,10 +263,10 @@ function hdf5_initial_conditions(IC::InitialConditions3DMajor, Domain::Domain3DM
             attributes(grp)["Center"] = "Node"
         end
 
-        t0["Mg"]["Mg"] = convert(Array{Float32}, IC.CMg0)
-        t0["Fe"]["Fe"] = convert(Array{Float32}, IC.CFe0)
-        t0["Mn"]["Mn"] = convert(Array{Float32}, IC.CMn0)
-        t0["Ca"]["Ca"] = replace!(convert(Array{Float32}, (1 .- IC.CMg0 .- IC.CFe0 .- IC.CMn0)), 1=>0)
+        t0["Mg"]["Mg"] = convert(Array{Float32}, view(IC.u0, :, :, :, 1))
+        t0["Fe"]["Fe"] = convert(Array{Float32}, view(IC.u0, :, :, :, 2))
+        t0["Mn"]["Mn"] = convert(Array{Float32}, view(IC.u0, :, :, :, 3))
+        t0["Ca"]["Ca"] = replace!(convert(Array{Float32}, 1 .- view(IC.u0, :, :, :, 1) .- view(IC.u0, :, :, :, 2) .- view(IC.u0, :, :, :, 3)), 1=>0)
         t0["GrtPosition"]["GrtPosition"] = convert(Array{Int32},IC.grt_position)
         t0["GrtBoundary"]["GrtBoundary"] = convert(Array{Int32},IC.grt_boundary)
     end
