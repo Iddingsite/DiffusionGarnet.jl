@@ -601,7 +601,7 @@ end
     time_update_ad::T1
     function Domain3DMajor(IC::InitialConditions3DMajor, T::T1, P::T1, time_update::T1, fugacity_O2::T1, diffcoef::Int) where {T1 <: Union{Float64, Array{Float64, 1}}}
 
-        (; nx, ny, nz, Δx, Δy, Δz, tfinal, Lx, u0, grt_position, grt_boundary) = IC
+        (; Δx, Δy, Δz, tfinal, Lx, u0) = IC
 
         # check that T, P and time_update have the same size
         if size(T, 1) ≠ size(P, 1) || size(T, 1) ≠ size(time_update, 1)
