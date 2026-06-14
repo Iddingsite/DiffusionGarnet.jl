@@ -9,7 +9,7 @@ import Base.@propagate_inbounds
 
     @inbounds begin
         if ix>1 && ix<size(DMgMg,1) && iy>1 && iy<size(DMgMg,2)
-            if grt_position[ix,iy] == 1.0 || grt_boundary[ix,iy] == 1.0
+            if isone(grt_position[ix,iy]) || isone(grt_boundary[ix,iy])
 
                 D0Mg = D0[1]
                 D0Fe = D0[2]
@@ -28,13 +28,13 @@ import Base.@propagate_inbounds
                     X = CFe[ix,iy] * a0_Fe + CMg[ix,iy] * a0_Mg + CMn[ix,iy] * a0_Mn + (1 - (CMg[ix,iy] + CFe[ix,iy] + CMn[ix,iy])) * a0_Ca
                     X = convert(eltype(CMg), X)NoUnits
 
-                    D0Mg = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mg, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
-                    D0Fe = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Fe, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
-                    D0Mn = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mn, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
-                    D0Ca = ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Ca, T = T_K, P = P_kbar, fO2 = fO2, X = X)))
+                    D0Mg = convert(eltype(CMg), ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mg, T = T_K, P = P_kbar, fO2 = fO2, X = X))))
+                    D0Fe = convert(eltype(CMg), ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Fe, T = T_K, P = P_kbar, fO2 = fO2, X = X))))
+                    D0Mn = convert(eltype(CMg), ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Mn, T = T_K, P = P_kbar, fO2 = fO2, X = X))))
+                    D0Ca = convert(eltype(CMg), ustrip(uconvert(u"µm^2/Myr",compute_D(D0_data.Grt_Ca, T = T_K, P = P_kbar, fO2 = fO2, X = X))))
                 end
 
-                sum_D_ = 1 / sum_D(CMg,CFe,CMn,D0Mg,D0Fe,D0Mn,D0Ca,ix,iy)
+                sum_D_ = inv(sum_D(CMg,CFe,CMn,D0Mg,D0Fe,D0Mn,D0Ca,ix,iy))
 
                 sum_DMg = sum_D_ * (D0Mg - D0Ca)
                 sum_DFe = sum_D_ * (D0Fe - D0Ca)
@@ -64,8 +64,8 @@ end
 
 @parallel_indices (ix, iy) function stencil_diffusion_2D_major!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, position_Grt, Grt_boundaries, Δxad_, Δyad_)
 
-    @propagate_inbounds @inline av_D_x(D, ix, iy)       = 0.5 * (D[ix,iy] + D[ix+1,iy])
-    @propagate_inbounds @inline av_D_y(D, ix, iy)       = 0.5 * (D[ix,iy] + D[ix,iy+1])
+    @propagate_inbounds @inline av_D_x(D, ix, iy)       = (D[ix,iy] + D[ix+1,iy]) / 2
+    @propagate_inbounds @inline av_D_y(D, ix, iy)       = (D[ix,iy] + D[ix,iy+1]) / 2
     @propagate_inbounds @inline qx(D, C, ix, iy, Δxad_) = av_D_x(D, ix, iy) * (C[ix+1,iy]-C[ix,iy]) * Δxad_
     @propagate_inbounds @inline qy(D, C, ix, iy, Δyad_) = av_D_y(D, ix, iy) * (C[ix,iy+1]-C[ix,iy]) * Δyad_
 
@@ -83,14 +83,14 @@ end
     @inbounds begin
         # iterate inside the arrays
         if ix>1 && ix<size(dtCMg,1) && iy>1 && iy<size(dtCMg,2)
-            if position_Grt[ix,iy] == 1.0
+            if isone(position_Grt[ix,iy])
                 update_dtC(dtCMg, DMgMg, DMgFe, DMgMn, CMg, CFe, CMn, ix, iy, Δxad_, Δyad_)
                 update_dtC(dtCFe, DFeMg, DFeFe, DFeMn, CMg, CFe, CMn, ix, iy, Δxad_, Δyad_)
                 update_dtC(dtCMn, DMnMg, DMnFe, DMnMn, CMg, CFe, CMn, ix, iy, Δxad_, Δyad_)
 
                 # first order Neumann if inclusions
                 # bottom
-                if position_Grt[ix-1,iy] == 0.0
+                if iszero(position_Grt[ix-1,iy])
                     dtCMg[ix,iy] -= - qx(DMgMg,CMg,ix-1,iy,Δxad_) * Δxad_ -
                                     qx(DMgFe,CFe,ix-1,iy,Δxad_) * Δxad_ -
                                     qx(DMgMn,CMn,ix-1,iy,Δxad_) * Δxad_
@@ -102,7 +102,7 @@ end
                                     qx(DMnMn,CMn,ix-1,iy,Δxad_) * Δxad_
                 end
                 # top
-                if position_Grt[ix+1,iy] == 0.0
+                if iszero(position_Grt[ix+1,iy])
                     dtCMg[ix,iy] -= qx(DMgMg,CMg,ix,iy,Δxad_) * Δxad_ +
                                     qx(DMgFe,CFe,ix,iy,Δxad_) * Δxad_ +
                                     qx(DMgMn,CMn,ix,iy,Δxad_) * Δxad_
@@ -114,7 +114,7 @@ end
                                     qx(DMnMn,CMn,ix,iy,Δxad_) * Δxad_
                 end
                 # left
-                if position_Grt[ix,iy-1] == 0.0
+                if iszero(position_Grt[ix,iy-1])
                     dtCMg[ix,iy] -= - qy(DMgMg,CMg,ix,iy-1,Δyad_) * Δyad_ -
                                     qy(DMgFe,CFe,ix,iy-1,Δyad_) * Δyad_ -
                                     qy(DMgMn,CMn,ix,iy-1,Δyad_) * Δyad_
@@ -126,7 +126,7 @@ end
                                     qy(DMnMn,CMn,ix,iy-1,Δyad_) * Δyad_
                 end
                 # right
-                if position_Grt[ix,iy+1] == 0.0
+                if iszero(position_Grt[ix,iy+1])
                     dtCMg[ix,iy] -= qy(DMgMg,CMg,ix,iy,Δyad_) * Δyad_ +
                                     qy(DMgFe,CFe,ix,iy,Δyad_) * Δyad_ +
                                     qy(DMgMn,CMn,ix,iy,Δyad_) * Δyad_
@@ -144,7 +144,7 @@ end
                 dtCMn[ix,iy] = 0.0
             end
             # if point is on grain boundary
-            if Grt_boundaries[ix,iy] == 1.0
+            if isone(Grt_boundaries[ix,iy])
                 dtCMg[ix,iy] = 0.0
                 dtCFe[ix,iy] = 0.0
                 dtCMn[ix,iy] = 0.0
@@ -185,7 +185,7 @@ function semi_discretisation_diffusion_cartesian(du::Array_T,u::Array_T,p,t) whe
     T_K = (T[index]+273.15) * 1u"K"
     fO2 = (fugacity_O2[index])NoUnits
 
-    D_charact_ = 1 / D_charact
+    D_charact_ = inv(D_charact)
 
     # update diffusive parameters
     @parallel Diffusion_coef_2D_major!(D, CMg, CFe ,CMn, D0, D_charact_, grt_position, grt_boundary, diffcoef, D0_data, T_K, P_kbar, fO2)
@@ -193,4 +193,3 @@ function semi_discretisation_diffusion_cartesian(du::Array_T,u::Array_T,p,t) whe
     # semi-discretization
     @parallel stencil_diffusion_2D_major!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, grt_position, grt_boundary, Δxad_, Δyad_)
 end
-
