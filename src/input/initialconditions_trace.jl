@@ -2,7 +2,7 @@
 abstract type InitialConditionsTrace <: InitialConditions end
 abstract type DomainTrace <: Domain end
 
-@kwdef struct InitialConditions1DTrace{T1, T2, T_float, T_Int, T_Vec} <: InitialConditionsTrace
+struct InitialConditions1DTrace{T1, T2, T_float, T_Int, T_Vec} <: InitialConditionsTrace
     C0::T1
     D::T2
     Lx::T_float
@@ -43,7 +43,7 @@ function IC1DTrace(;C0::AbstractArray{<:Real, 1},
 end
 
 
-@kwdef struct Domain1DTrace{T1, T2, T3, T4, T_Vec} <: DomainTrace
+struct Domain1DTrace{T1, T2, T3, T4, T_Vec} <: DomainTrace
     IC::T4
     T::T1
     P::T1
@@ -108,7 +108,7 @@ function Domain(IC::InitialConditions1DTrace,
     Domain1DTrace(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)), bc_neumann)
 end
 
-@kwdef struct InitialConditionsSphericalTrace{T1, T2, T_float, T_Int, T_Vec} <: InitialConditionsTrace
+struct InitialConditionsSphericalTrace{T1, T2, T_float, T_Int, T_Vec} <: InitialConditionsTrace
     C0::T1
     D::T2
     Lr::T_float
@@ -144,7 +144,7 @@ function ICSphTrace(;C0::AbstractArray{<:Real, 1},
     InitialConditionsSphericalTrace(C0, D, convert(Float64,ustrip(u"µm", Lr)), ustrip.(u"µm", r), convert(Float64,ustrip(u"Myr",tfinal)))
 end
 
-@kwdef struct DomainSphericalTrace{T1, T2, T3, T_Vec} <: DomainTrace
+struct DomainSphericalTrace{T1, T2, T3, T_Vec} <: DomainTrace
     IC::T3
     T::T1
     P::T1
@@ -209,7 +209,7 @@ function Domain(IC::InitialConditionsSphericalTrace,
 end
 
 
-@kwdef struct InitialConditions2DTrace{T1, T2, T_float, T_Int, T_range, T_arr_bound} <: InitialConditionsTrace
+struct InitialConditions2DTrace{T1, T2, T_float, T_Int, T_range, T_arr_bound} <: InitialConditionsTrace
     C0::T1
     D::T2
     Lx::T_float
@@ -264,7 +264,7 @@ function IC2DTrace(;C0::AbstractArray{<:Real, 2},
     InitialConditions2DTrace(C0, D, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"µm", Ly)), convert(Float64,ustrip(u"Myr",tfinal)), grt_boundary)
 end
 
-@kwdef struct Domain2DTrace{T1, T2, T3, T_C} <: DomainTrace
+struct Domain2DTrace{T1, T2, T3, T_C} <: DomainTrace
     IC::T3
     T::T1
     P::T1
@@ -326,7 +326,7 @@ function Domain(IC::InitialConditions2DTrace,
     Domain2DTrace(IC, convert.(Float64,ustrip.(u"°C", T)), convert.(Float64,ustrip.(u"kbar", P)), convert.(Float64,ustrip.(u"Myr", time_update)), convert.(Float64,ustrip.(u"Pa", fugacity_O2)))
 end
 
-@kwdef struct InitialConditions3DTrace{T1, T2, T_float, T_Int, T_range, T_arr_bound} <: InitialConditionsTrace
+struct InitialConditions3DTrace{T1, T2, T_float, T_Int, T_range, T_arr_bound} <: InitialConditionsTrace
     C0::T1
     D::T2
     Lx::T_float
@@ -394,7 +394,7 @@ function IC3DTrace(;C0::AbstractArray{<:Real, 3},
 
 end
 
-@kwdef struct Domain3DTrace{T1, T2, T3, T_C} <: DomainTrace
+struct Domain3DTrace{T1, T2, T3, T_C} <: DomainTrace
     IC::T3
     T::T1
     P::T1
