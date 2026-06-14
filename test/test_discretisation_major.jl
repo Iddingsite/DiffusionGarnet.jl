@@ -153,6 +153,8 @@ end
     @test !hasproperty(IC, :CMg0)
     @test eltype(IC.u0) == Float32
     @test IC.u0[:,:,:,1] ≈ CMg0
+    @test IC.u0[:,:,:,2] ≈ CFe0
+    @test IC.u0[:,:,:,3] ≈ CMn0
 end
 
 @testset "Domain3DMajor.u0 is IC.u0 (no copy)" begin
