@@ -135,6 +135,10 @@ end
                    tfinal=0.01u"Myr")
     domain = Domain(IC, 900u"°C", 0.6u"GPa")
     @test domain.u0 === IC.u0
+    @test eltype(domain.u0) == Float32
+    @test domain.Δxad_ isa Float32
+    @test domain.Δyad_ isa Float32
+    @test domain.tfinal_ad isa Float32
 end
 
 @testset "IC3DMajor stores u0 not CMg0/CFe0/CMn0" begin
@@ -161,4 +165,9 @@ end
                    tfinal=0.01u"Myr")
     domain = Domain(IC, 900u"°C", 0.6u"GPa")
     @test domain.u0 === IC.u0
+    @test eltype(domain.u0) == Float32
+    @test domain.Δxad_ isa Float32
+    @test domain.Δyad_ isa Float32
+    @test domain.Δzad_ isa Float32
+    @test domain.tfinal_ad isa Float32
 end
