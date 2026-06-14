@@ -34,13 +34,13 @@ sol = simulate(domain1D, solver=TSRKC3());
 anim = @animate for i = LinRange(0, sol.t[end], 100)
     l = @layout [a ; b]
 
-    p1 = plot(distance, Fe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = @sprintf("Total Time = %.2f Myr | T = %.0f °C | P = %.1f GPa", i, T[1].val, P[1].val), legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
+    p1 = plot(distance, CFe0, label="Fe initial", linestyle = :dash, linewidth=1, dpi=200, title = @sprintf("Total Time = %.2f Myr | T = %.0f °C | P = %.1f GPa", i, T[1].val, P[1].val), legend=:outerbottomright, linecolor=1,xlabel = "Distance (µm)")
     p1 = plot!(distance, sol(i)[:,2], label="Fe",linecolor=1, linewidth=1)
 
 
-    p2 = plot(distance, Mg0, label="Mg initial", linestyle = :dash, linewidth=1, dpi=200,legend=:outerbottomright,linecolor=2,xlabel = "Distance (µm)")
-    p2 = plot!(distance, Mn0, label="Mn initial", linestyle = :dash, linewidth=1, linecolor=3)
-    p2 = plot!(distance, Ca0, label="Ca initial", linestyle = :dash, linewidth=1, linecolor=4)
+    p2 = plot(distance, CMg0, label="Mg initial", linestyle = :dash, linewidth=1, dpi=200,legend=:outerbottomright,linecolor=2,xlabel = "Distance (µm)")
+    p2 = plot!(distance, CMn0, label="Mn initial", linestyle = :dash, linewidth=1, linecolor=3)
+    p2 = plot!(distance, CCa0, label="Ca initial", linestyle = :dash, linewidth=1, linecolor=4)
     p2 = plot!(distance, sol(i)[:,1], label="Mg",linecolor=2, linewidth=1)
 
     p2 = plot!(distance, sol(i)[:,3], label="Mn", linecolor=3, linewidth=1)
