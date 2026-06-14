@@ -62,20 +62,20 @@ import Base.@propagate_inbounds
 end
 
 
-@parallel_indices (ix, iy) function stencil_diffusion_2D_major!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, position_Grt, Grt_boundaries, Δxad_, Δyad_)
+@parallel_indices (ix, iy) function stencil_diffusion_2D_major!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, position_Grt, Grt_boundaries, Δxad_², Δyad_²)
 
-    @propagate_inbounds @inline av_D_x(D, ix, iy)       = (D[ix,iy] + D[ix+1,iy]) / 2
-    @propagate_inbounds @inline av_D_y(D, ix, iy)       = (D[ix,iy] + D[ix,iy+1]) / 2
-    @propagate_inbounds @inline qx(D, C, ix, iy, Δxad_) = av_D_x(D, ix, iy) * (C[ix+1,iy]-C[ix,iy]) * Δxad_
-    @propagate_inbounds @inline qy(D, C, ix, iy, Δyad_) = av_D_y(D, ix, iy) * (C[ix,iy+1]-C[ix,iy]) * Δyad_
+    @propagate_inbounds @inline av_D_x(D, ix, iy) = (D[ix,iy] + D[ix+1,iy]) / 2
+    @propagate_inbounds @inline av_D_y(D, ix, iy) = (D[ix,iy] + D[ix,iy+1]) / 2
+    @propagate_inbounds @inline qx(D, C, ix, iy)  = av_D_x(D, ix, iy) * (C[ix+1,iy]-C[ix,iy])
+    @propagate_inbounds @inline qy(D, C, ix, iy)  = av_D_y(D, ix, iy) * (C[ix,iy+1]-C[ix,iy])
 
-    @propagate_inbounds @inline function update_dtC(dtC, D1, D2, D3, C1, C2, C3, ix, iy, Δxad_, Δyad_)
-        dtC[ix,iy] = (qx(D1,C1,ix,iy,Δxad_) - qx(D1,C1,ix-1,iy,Δxad_)) * Δxad_ +
-                     (qx(D2,C2,ix,iy,Δxad_) - qx(D2,C2,ix-1,iy,Δxad_)) * Δxad_ +
-                     (qx(D3,C3,ix,iy,Δxad_) - qx(D3,C3,ix-1,iy,Δxad_)) * Δxad_ +
-                     (qy(D1,C1,ix,iy,Δyad_) - qy(D1,C1,ix,iy-1,Δyad_)) * Δyad_ +
-                     (qy(D2,C2,ix,iy,Δyad_) - qy(D2,C2,ix,iy-1,Δyad_)) * Δyad_ +
-                     (qy(D3,C3,ix,iy,Δyad_) - qy(D3,C3,ix,iy-1,Δyad_)) * Δyad_
+    @propagate_inbounds @inline function update_dtC(dtC, D1, D2, D3, C1, C2, C3, ix, iy, Δxad_², Δyad_²)
+        dtC[ix,iy] = (qx(D1,C1,ix,iy) - qx(D1,C1,ix-1,iy)) * Δxad_² +
+                     (qx(D2,C2,ix,iy) - qx(D2,C2,ix-1,iy)) * Δxad_² +
+                     (qx(D3,C3,ix,iy) - qx(D3,C3,ix-1,iy)) * Δxad_² +
+                     (qy(D1,C1,ix,iy) - qy(D1,C1,ix,iy-1)) * Δyad_² +
+                     (qy(D2,C2,ix,iy) - qy(D2,C2,ix,iy-1)) * Δyad_² +
+                     (qy(D3,C3,ix,iy) - qy(D3,C3,ix,iy-1)) * Δyad_²
     end
 
     DMgMg, DMgFe, DMgMn, DFeMg, DFeFe, DFeMn, DMnMg, DMnFe, DMnMn = D
@@ -84,58 +84,58 @@ end
         # iterate inside the arrays
         if ix>1 && ix<size(dtCMg,1) && iy>1 && iy<size(dtCMg,2)
             if isone(position_Grt[ix,iy])
-                update_dtC(dtCMg, DMgMg, DMgFe, DMgMn, CMg, CFe, CMn, ix, iy, Δxad_, Δyad_)
-                update_dtC(dtCFe, DFeMg, DFeFe, DFeMn, CMg, CFe, CMn, ix, iy, Δxad_, Δyad_)
-                update_dtC(dtCMn, DMnMg, DMnFe, DMnMn, CMg, CFe, CMn, ix, iy, Δxad_, Δyad_)
+                update_dtC(dtCMg, DMgMg, DMgFe, DMgMn, CMg, CFe, CMn, ix, iy, Δxad_², Δyad_²)
+                update_dtC(dtCFe, DFeMg, DFeFe, DFeMn, CMg, CFe, CMn, ix, iy, Δxad_², Δyad_²)
+                update_dtC(dtCMn, DMnMg, DMnFe, DMnMn, CMg, CFe, CMn, ix, iy, Δxad_², Δyad_²)
 
                 # first order Neumann if inclusions
                 # bottom
                 if iszero(position_Grt[ix-1,iy])
-                    dtCMg[ix,iy] -= - qx(DMgMg,CMg,ix-1,iy,Δxad_) * Δxad_ -
-                                    qx(DMgFe,CFe,ix-1,iy,Δxad_) * Δxad_ -
-                                    qx(DMgMn,CMn,ix-1,iy,Δxad_) * Δxad_
-                    dtCFe[ix,iy] -= - qx(DFeMg,CMg,ix-1,iy,Δxad_) * Δxad_ -
-                                    qx(DFeFe,CFe,ix-1,iy,Δxad_) * Δxad_ -
-                                    qx(DFeMn,CMn,ix-1,iy,Δxad_) * Δxad_
-                    dtCMn[ix,iy] -= - qx(DMnMg,CMg,ix-1,iy,Δxad_) * Δxad_ -
-                                    qx(DMnFe,CFe,ix-1,iy,Δxad_) * Δxad_ -
-                                    qx(DMnMn,CMn,ix-1,iy,Δxad_) * Δxad_
+                    dtCMg[ix,iy] -= - qx(DMgMg,CMg,ix-1,iy) * Δxad_² -
+                                    qx(DMgFe,CFe,ix-1,iy) * Δxad_² -
+                                    qx(DMgMn,CMn,ix-1,iy) * Δxad_²
+                    dtCFe[ix,iy] -= - qx(DFeMg,CMg,ix-1,iy) * Δxad_² -
+                                    qx(DFeFe,CFe,ix-1,iy) * Δxad_² -
+                                    qx(DFeMn,CMn,ix-1,iy) * Δxad_²
+                    dtCMn[ix,iy] -= - qx(DMnMg,CMg,ix-1,iy) * Δxad_² -
+                                    qx(DMnFe,CFe,ix-1,iy) * Δxad_² -
+                                    qx(DMnMn,CMn,ix-1,iy) * Δxad_²
                 end
                 # top
                 if iszero(position_Grt[ix+1,iy])
-                    dtCMg[ix,iy] -= qx(DMgMg,CMg,ix,iy,Δxad_) * Δxad_ +
-                                    qx(DMgFe,CFe,ix,iy,Δxad_) * Δxad_ +
-                                    qx(DMgMn,CMn,ix,iy,Δxad_) * Δxad_
-                    dtCFe[ix,iy] -= qx(DFeMg,CMg,ix,iy,Δxad_) * Δxad_ +
-                                    qx(DFeFe,CFe,ix,iy,Δxad_) * Δxad_ +
-                                    qx(DFeMn,CMn,ix,iy,Δxad_) * Δxad_
-                    dtCMn[ix,iy] -= qx(DMnMg,CMg,ix,iy,Δxad_) * Δxad_ +
-                                    qx(DMnFe,CFe,ix,iy,Δxad_) * Δxad_ +
-                                    qx(DMnMn,CMn,ix,iy,Δxad_) * Δxad_
+                    dtCMg[ix,iy] -= qx(DMgMg,CMg,ix,iy) * Δxad_² +
+                                    qx(DMgFe,CFe,ix,iy) * Δxad_² +
+                                    qx(DMgMn,CMn,ix,iy) * Δxad_²
+                    dtCFe[ix,iy] -= qx(DFeMg,CMg,ix,iy) * Δxad_² +
+                                    qx(DFeFe,CFe,ix,iy) * Δxad_² +
+                                    qx(DFeMn,CMn,ix,iy) * Δxad_²
+                    dtCMn[ix,iy] -= qx(DMnMg,CMg,ix,iy) * Δxad_² +
+                                    qx(DMnFe,CFe,ix,iy) * Δxad_² +
+                                    qx(DMnMn,CMn,ix,iy) * Δxad_²
                 end
                 # left
                 if iszero(position_Grt[ix,iy-1])
-                    dtCMg[ix,iy] -= - qy(DMgMg,CMg,ix,iy-1,Δyad_) * Δyad_ -
-                                    qy(DMgFe,CFe,ix,iy-1,Δyad_) * Δyad_ -
-                                    qy(DMgMn,CMn,ix,iy-1,Δyad_) * Δyad_
-                    dtCFe[ix,iy] -= - qy(DFeMg,CMg,ix,iy-1,Δyad_) * Δyad_ -
-                                    qy(DFeFe,CFe,ix,iy-1,Δyad_) * Δyad_ -
-                                    qy(DFeMn,CMn,ix,iy-1,Δyad_) * Δyad_
-                    dtCMn[ix,iy] -= - qy(DMnMg,CMg,ix,iy-1,Δyad_) * Δyad_ -
-                                    qy(DMnFe,CFe,ix,iy-1,Δyad_) * Δyad_ -
-                                    qy(DMnMn,CMn,ix,iy-1,Δyad_) * Δyad_
+                    dtCMg[ix,iy] -= - qy(DMgMg,CMg,ix,iy-1) * Δyad_² -
+                                    qy(DMgFe,CFe,ix,iy-1) * Δyad_² -
+                                    qy(DMgMn,CMn,ix,iy-1) * Δyad_²
+                    dtCFe[ix,iy] -= - qy(DFeMg,CMg,ix,iy-1) * Δyad_² -
+                                    qy(DFeFe,CFe,ix,iy-1) * Δyad_² -
+                                    qy(DFeMn,CMn,ix,iy-1) * Δyad_²
+                    dtCMn[ix,iy] -= - qy(DMnMg,CMg,ix,iy-1) * Δyad_² -
+                                    qy(DMnFe,CFe,ix,iy-1) * Δyad_² -
+                                    qy(DMnMn,CMn,ix,iy-1) * Δyad_²
                 end
                 # right
                 if iszero(position_Grt[ix,iy+1])
-                    dtCMg[ix,iy] -= qy(DMgMg,CMg,ix,iy,Δyad_) * Δyad_ +
-                                    qy(DMgFe,CFe,ix,iy,Δyad_) * Δyad_ +
-                                    qy(DMgMn,CMn,ix,iy,Δyad_) * Δyad_
-                    dtCFe[ix,iy] -= qy(DFeMg,CMg,ix,iy,Δyad_) * Δyad_ +
-                                    qy(DFeFe,CFe,ix,iy,Δyad_) * Δyad_ +
-                                    qy(DFeMn,CMn,ix,iy,Δyad_) * Δyad_
-                    dtCMn[ix,iy] -= qy(DMnMg,CMg,ix,iy,Δyad_) * Δyad_ +
-                                    qy(DMnFe,CFe,ix,iy,Δyad_) * Δyad_ +
-                                    qy(DMnMn,CMn,ix,iy,Δyad_) * Δyad_
+                    dtCMg[ix,iy] -= qy(DMgMg,CMg,ix,iy) * Δyad_² +
+                                    qy(DMgFe,CFe,ix,iy) * Δyad_² +
+                                    qy(DMgMn,CMn,ix,iy) * Δyad_²
+                    dtCFe[ix,iy] -= qy(DFeMg,CMg,ix,iy) * Δyad_² +
+                                    qy(DFeFe,CFe,ix,iy) * Δyad_² +
+                                    qy(DFeMn,CMn,ix,iy) * Δyad_²
+                    dtCMn[ix,iy] -= qy(DMnMg,CMg,ix,iy) * Δyad_² +
+                                    qy(DMnFe,CFe,ix,iy) * Δyad_² +
+                                    qy(DMnMn,CMn,ix,iy) * Δyad_²
                 end
             # if point is an inclusion or matrix
             else
@@ -186,10 +186,12 @@ function semi_discretisation_diffusion_cartesian(du::Array_T,u::Array_T,p,t) whe
     fO2 = (fugacity_O2[index])NoUnits
 
     D_charact_ = inv(D_charact)
+    Δxad_² = Δxad_ * Δxad_
+    Δyad_² = Δyad_ * Δyad_
 
     # update diffusive parameters
     @parallel Diffusion_coef_2D_major!(D, CMg, CFe ,CMn, D0, D_charact_, grt_position, grt_boundary, diffcoef, D0_data, T_K, P_kbar, fO2)
 
     # semi-discretization
-    @parallel stencil_diffusion_2D_major!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, grt_position, grt_boundary, Δxad_, Δyad_)
+    @parallel stencil_diffusion_2D_major!(dtCMg, dtCFe, dtCMn, CMg, CFe ,CMn, D, grt_position, grt_boundary, Δxad_², Δyad_²)
 end
