@@ -26,7 +26,7 @@
 
     IC2D = IC2DMajor(;CMg0, CFe0, CMn0, Lx, Ly, tfinal)
 
-    @test IC2D.CMg0 == CMg0
+    @test IC2D.u0[:,:,1] == CMg0
     @test IC2D.Ly == ustrip(u"µm",Ly)
     @test IC2D.tfinal == ustrip(u"Myr",tfinal)
 
@@ -37,7 +37,7 @@
 
     IC3D = IC3DMajor(;CMg0, CFe0, CMn0, Lx, Ly, Lz, tfinal)
 
-    @test IC3D.CMg0 == CMg0
+    @test IC3D.u0[:,:,:,1] == CMg0
     @test IC3D.Lz == ustrip(u"µm",Lz)
     @test IC3D.tfinal == ustrip(u"Myr",tfinal)
 

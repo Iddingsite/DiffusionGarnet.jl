@@ -56,23 +56,20 @@ end
     end
 end
 
-@kwdef struct InitialConditions2DMajor{T1, T2, T3, T4, T5} <: InitialConditionsMajor
-    CMg0::T1
-    CFe0::T1
-    CMn0::T1
-    Lx::T2
-    Ly::T2
+struct InitialConditions2DMajor{T1, T2, T3, T4, T5} <: InitialConditionsMajor
+    u0::T1            # (nx, ny, 3) — [Mg, Fe, Mn] concatenated
     nx::T4
     ny::T4
+    Lx::T2
+    Ly::T2
     Δx::T2
     Δy::T2
     x::T5
     y::T5
     grt_position::T3
     grt_boundary::T3
-    # grid::NamedTuple{(:x, :y), Tuple{AbstractArray{T2, 2}, AbstractArray{T2, 2}}}
     tfinal::T2
-    function InitialConditions2DMajor(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, Ly::T2, tfinal::T2, grt_boundary::T3) where {T1 <: AbstractArray{<:Real, 2}, T2 <: AbstractFloat, T3 <: Union{AbstractArray{<:Real, 2}, AbstractArray{<:Bool, 2}}}
+    function InitialConditions2DMajor(CMg0::A, CFe0::A, CMn0::A, Lx::T2, Ly::T2, tfinal::T2, grt_boundary::T3) where {A <: AbstractArray{<:Real, 2}, T2 <: AbstractFloat, T3 <: Union{AbstractArray{<:Real, 2}, AbstractArray{<:Bool, 2}}}
         if Lx <= 0 || Ly <= 0
             error("Length should be positive.")
         elseif tfinal <= 0
@@ -89,27 +86,29 @@ end
             Δy = Ly / (ny-1)
             x = range(0, length=nx, stop= Lx)
             y = range(0, length=ny, stop= Ly)
-            # x first, y second
-            # grid = (x=x' .* @ones(ny), y= (@ones(nx))' .* y)
 
             # define when grt is present
             grt_position = similar(grt_boundary)
             # create a binary matrix with 1 where grt is present. 0 otherwise. This depends on if CMg0, CFe0 and CMn0 are equal to 0 or not
             grt_position .= (CMg0 .≠ 0) .& (CFe0 .≠ 0) .& (CMn0 .≠ 0)
 
+            u0 = similar(CMg0, (nx, ny, 3))
+            u0[:, :, 1] .= CMg0
+            u0[:, :, 2] .= CFe0
+            u0[:, :, 3] .= CMn0
+
+            T1 = typeof(u0)
             T4 = typeof(nx)
             T5 = typeof(x)
 
-            new{T1, T2, T3, T4, T5}(CMg0, CFe0, CMn0, Lx, Ly, nx, ny, Δx, Δy, x, y, grt_position, grt_boundary, tfinal)
+            new{T1, T2, T3, T4, T5}(u0, nx, ny, Lx, Ly, Δx, Δy, x, y, grt_position, grt_boundary, tfinal)
         end
     end
 end
 
 
-@kwdef struct InitialConditions3DMajor{T1, T2, T3, T4, T5} <: InitialConditionsMajor
-    CMg0::T1
-    CFe0::T1
-    CMn0::T1
+struct InitialConditions3DMajor{T1, T2, T3, T4, T5} <: InitialConditionsMajor
+    u0::T1            # (nx, ny, nz, 3) — [Mg, Fe, Mn] concatenated
     nx::T4
     ny::T4
     nz::T4
@@ -125,7 +124,7 @@ end
     grt_position::T3
     grt_boundary::T3
     tfinal::T2
-    function InitialConditions3DMajor(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, Ly::T2, Lz::T2, tfinal::T2, grt_boundary::T3) where {T1 <: AbstractArray{<:Real, 3}, T2 <: AbstractFloat, T3 <: Union{AbstractArray{<:Real, 3}, AbstractArray{<:Bool, 3}}}
+    function InitialConditions3DMajor(CMg0::A, CFe0::A, CMn0::A, Lx::T2, Ly::T2, Lz::T2, tfinal::T2, grt_boundary::T3) where {A <: AbstractArray{<:Real, 3}, T2 <: AbstractFloat, T3 <: Union{AbstractArray{<:Real, 3}, AbstractArray{<:Bool, 3}}}
         if Lx <= 0 || Ly <= 0 || Lz <= 0
             error("Length should be positive.")
         elseif tfinal <= 0
@@ -150,10 +149,16 @@ end
             # create a binary matrix with 1 where grt is present. 0 otherwise. This depends on if CMg0, CFe0 and CMn0 are equal to 0 or not
             grt_position .= (CMg0 .≠ 0) .& (CFe0 .≠ 0) .& (CMn0 .≠ 0)
 
+            u0 = similar(CMg0, (nx, ny, nz, 3))
+            u0[:, :, :, 1] .= CMg0
+            u0[:, :, :, 2] .= CFe0
+            u0[:, :, :, 3] .= CMn0
+
+            T1 = typeof(u0)
             T4 = typeof(nx)
             T5 = typeof(x)
 
-            new{T1, T2, T3, T4, T5}(CMg0, CFe0, CMn0, nx, ny, nz, Lx, Ly, Lz, Δx, Δy, Δz, x, y, z, grt_position, grt_boundary, tfinal)
+            new{T1, T2, T3, T4, T5}(u0, nx, ny, nz, Lx, Ly, Lz, Δx, Δy, Δz, x, y, z, grt_position, grt_boundary, tfinal)
         end
     end
 end
@@ -497,11 +502,11 @@ end
             error("T, P and time_update should have the same size.")
         end
 
-        (; nx, ny, Δx, Δy, tfinal, Lx, CMg0, CFe0, CMn0, grt_position, grt_boundary) = IC
+        (; nx, ny, Δx, Δy, tfinal, Lx, u0, grt_position, grt_boundary) = IC
 
 
-        D0 = similar(CMg0, 4)
-        D0 .= (0.0, 0.0, 0.0, 0.0)
+        D0 = similar(u0, 4)
+        D0 .= (zero(eltype(u0)), zero(eltype(u0)), zero(eltype(u0)), zero(eltype(u0)))
 
         # define the trace diffusion coefficients based on the chosen dataset
         if diffcoef == 1
@@ -542,28 +547,23 @@ end
 
         T_tuplediffdata = typeof(D0_data)
 
-        D = (DMgMg = similar(CMg0, (nx, ny)),
-             DMgFe = similar(CMg0, (nx, ny)),
-             DMgMn = similar(CMg0, (nx, ny)),
-             DFeMg = similar(CMg0, (nx, ny)),
-             DFeFe = similar(CMg0, (nx, ny)),
-             DFeMn = similar(CMg0, (nx, ny)),
-             DMnMg = similar(CMg0, (nx, ny)),
-             DMnFe = similar(CMg0, (nx, ny)),
-             DMnMn = similar(CMg0, (nx, ny)))  # matrix of interdiffusion coefficients
+        D = (DMgMg = similar(u0, (nx, ny)),
+             DMgFe = similar(u0, (nx, ny)),
+             DMgMn = similar(u0, (nx, ny)),
+             DFeMg = similar(u0, (nx, ny)),
+             DFeFe = similar(u0, (nx, ny)),
+             DFeMn = similar(u0, (nx, ny)),
+             DMnMg = similar(u0, (nx, ny)),
+             DMnFe = similar(u0, (nx, ny)),
+             DMnMn = similar(u0, (nx, ny)))  # matrix of interdiffusion coefficients
 
         for i in eachindex(D)
             D[i] .= 0
         end
 
-        u0 = similar(CMg0, (nx, ny, 3))
-        u0[:, :, 1] .= CMg0
-        u0[:, :, 2] .= CFe0
-        u0[:, :, 3] .= CMn0
-
         # Now fix t to be 1 and make D_charact = L_charact^2 / t_charact
         L_charact = Lx  # characteristic length
-        t_charact = one(eltype(CMg0))
+        t_charact = one(eltype(u0))
         D_charact = L_charact^2 / t_charact
 
         Δxad_ = 1 / (Δx / L_charact)  # inverse of nondimensionalised Δx
@@ -602,15 +602,15 @@ end
     time_update_ad::T1
     function Domain3DMajor(IC::InitialConditions3DMajor, T::T1, P::T1, time_update::T1, fugacity_O2::T1, diffcoef::Int) where {T1 <: Union{Float64, Array{Float64, 1}}}
 
-        (; nx, ny, nz, Δx, Δy, Δz, tfinal, Lx, CMg0, CFe0, CMn0, grt_position, grt_boundary) = IC
+        (; nx, ny, nz, Δx, Δy, Δz, tfinal, Lx, u0, grt_position, grt_boundary) = IC
 
         # check that T, P and time_update have the same size
         if size(T, 1) ≠ size(P, 1) || size(T, 1) ≠ size(time_update, 1)
             error("T, P and time_update should have the same size.")
         end
 
-        D0 = similar(CMg0, 4)
-        D0 .= (0.0, 0.0, 0.0, 0.0)
+        D0 = similar(u0, 4)
+        D0 .= (zero(eltype(u0)), zero(eltype(u0)), zero(eltype(u0)), zero(eltype(u0)))
 
         # define the trace diffusion coefficients based on the chosen dataset
         if diffcoef == 1
@@ -651,28 +651,23 @@ end
 
         T_tuplediffdata = typeof(D0_data)
 
-        D = (DMgMg = similar(CMg0, (nx, ny, nz)),
-             DMgFe = similar(CMg0, (nx, ny, nz)),
-             DMgMn = similar(CMg0, (nx, ny, nz)),
-             DFeMg = similar(CMg0, (nx, ny, nz)),
-             DFeFe = similar(CMg0, (nx, ny, nz)),
-             DFeMn = similar(CMg0, (nx, ny, nz)),
-             DMnMg = similar(CMg0, (nx, ny, nz)),
-             DMnFe = similar(CMg0, (nx, ny, nz)),
-             DMnMn = similar(CMg0, (nx, ny, nz)))  # matrix of interdiffusion coefficients
+        D = (DMgMg = similar(u0, (nx, ny, nz)),
+             DMgFe = similar(u0, (nx, ny, nz)),
+             DMgMn = similar(u0, (nx, ny, nz)),
+             DFeMg = similar(u0, (nx, ny, nz)),
+             DFeFe = similar(u0, (nx, ny, nz)),
+             DFeMn = similar(u0, (nx, ny, nz)),
+             DMnMg = similar(u0, (nx, ny, nz)),
+             DMnFe = similar(u0, (nx, ny, nz)),
+             DMnMn = similar(u0, (nx, ny, nz)))  # matrix of interdiffusion coefficients
 
         for i in eachindex(D)
             D[i] .= 0
         end
 
-        u0 = similar(CMg0, (nx, ny, nz, 3))
-        u0[:, :, :, 1] .= CMg0
-        u0[:, :, :, 2] .= CFe0
-        u0[:, :, :, 3] .= CMn0
-
         # Now fix t to be 1 and make D_charact = L_charact^2 / t_charact
         L_charact = Lx  # characteristic length
-        t_charact = one(eltype(CMg0))
+        t_charact = one(eltype(u0))
         D_charact = L_charact^2 / t_charact
 
         Δxad_ = 1 / (Δx / L_charact)  # inverse of nondimensionalised Δx

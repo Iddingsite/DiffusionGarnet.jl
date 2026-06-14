@@ -278,10 +278,10 @@ end
     end
 
     h5open("Grt_2D.h5", "r") do file
-        @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"]) == convert(Array{Float32}, IC2D.CMg0)
-        @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"]) == convert(Array{Float32}, IC2D.CFe0)
-        @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"]) == convert(Array{Float32}, IC2D.CMn0)
-        @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"]) == convert(Array{Float32}, replace!((1 .- IC2D.CMg0 .- IC2D.CFe0 .- IC2D.CMn0), 1=>0))
+        @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"]) == convert(Array{Float32}, view(IC2D.u0, :, :, 1))
+        @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"]) == convert(Array{Float32}, view(IC2D.u0, :, :, 2))
+        @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"]) == convert(Array{Float32}, view(IC2D.u0, :, :, 3))
+        @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"]) == convert(Array{Float32}, replace!(1 .- view(IC2D.u0, :, :, 1) .- view(IC2D.u0, :, :, 2) .- view(IC2D.u0, :, :, 3), 1=>0))
         @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"]) == convert(Array{Float32}, sol_2D.u[end][:,:,1])
         @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"]) == convert(Array{Float32}, sol_2D.u[end][:,:,2])
         @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"]) == convert(Array{Float32}, sol_2D.u[end][:,:,3])
@@ -289,10 +289,10 @@ end
 
     # 3D
     h5open("Grt_3D.h5", "r") do file
-        @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"]) == convert(Array{Float32}, IC3D.CMg0)
-        @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"]) == convert(Array{Float32}, IC3D.CFe0)
-        @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"]) == convert(Array{Float32}, IC3D.CMn0)
-        @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"]) == convert(Array{Float32}, replace!((1 .- IC3D.CMg0 .- IC3D.CFe0 .- IC3D.CMn0), 1=>0))
+        @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"]) == convert(Array{Float32}, view(IC3D.u0, :, :, :, 1))
+        @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"]) == convert(Array{Float32}, view(IC3D.u0, :, :, :, 2))
+        @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"]) == convert(Array{Float32}, view(IC3D.u0, :, :, :, 3))
+        @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"]) == convert(Array{Float32}, replace!(1 .- view(IC3D.u0, :, :, :, 1) .- view(IC3D.u0, :, :, :, 2) .- view(IC3D.u0, :, :, :, 3), 1=>0))
         @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"]) == convert(Array{Float32}, sol_3D.u[end][:,:,:,1])
         @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"]) == convert(Array{Float32}, sol_3D.u[end][:,:,:,2])
         @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"]) == convert(Array{Float32}, sol_3D.u[end][:,:,:,3])
@@ -318,10 +318,10 @@ end
     sol_3D = simulate(domain3D; callback=save_data_callback, path_save="Grt_3D.h5", progress=false, save_everystep=false, save_start=false)
 
     h5open("Grt_2D.h5", "r") do file
-        @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"])' ≈ convert(Array{Float32}, IC2D.CMg0)
-        @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"])' ≈ convert(Array{Float32}, IC2D.CFe0)
-        @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"])' ≈ convert(Array{Float32}, IC2D.CMn0)
-        @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"])' ≈ convert(Array{Float32},replace!((1 .- IC2D.CMg0 .- IC2D.CFe0 .- IC2D.CMn0), 1=>0))
+        @test read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"])' ≈ convert(Array{Float32}, view(IC2D.u0, :, :, 1))
+        @test read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"])' ≈ convert(Array{Float32}, view(IC2D.u0, :, :, 2))
+        @test read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"])' ≈ convert(Array{Float32}, view(IC2D.u0, :, :, 3))
+        @test read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"])' ≈ convert(Array{Float32}, replace!(1 .- view(IC2D.u0, :, :, 1) .- view(IC2D.u0, :, :, 2) .- view(IC2D.u0, :, :, 3), 1=>0))
         @test read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"])' ≈ convert(Array{Float32}, sol_2D.u[end][:,:,1])
         @test read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"])' ≈ convert(Array{Float32}, sol_2D.u[end][:,:,2])
         @test read(file["Diffusion_Grt"]["t0003"]["Mn"]["Mn"])' ≈ convert(Array{Float32}, sol_2D.u[end][:,:,3])
@@ -329,13 +329,13 @@ end
 
     h5open("Grt_3D.h5", "r") do file
         array = read(file["Diffusion_Grt"]["t0000"]["Mg"]["Mg"])
-        @test permutedims(array,1:ndims(array)) ≈ convert(Array{Float32}, IC3D.CMg0)
+        @test permutedims(array,1:ndims(array)) ≈ convert(Array{Float32}, view(IC3D.u0, :, :, :, 1))
         array = read(file["Diffusion_Grt"]["t0000"]["Fe"]["Fe"])
-        @test permutedims(array,1:ndims(array)) ≈ convert(Array{Float32}, IC3D.CFe0)
+        @test permutedims(array,1:ndims(array)) ≈ convert(Array{Float32}, view(IC3D.u0, :, :, :, 2))
         array = read(file["Diffusion_Grt"]["t0000"]["Mn"]["Mn"])
-        @test permutedims(array,1:ndims(array)) ≈ convert(Array{Float32}, IC3D.CMn0)
+        @test permutedims(array,1:ndims(array)) ≈ convert(Array{Float32}, view(IC3D.u0, :, :, :, 3))
         array = read(file["Diffusion_Grt"]["t0000"]["Ca"]["Ca"])
-        @test permutedims(array,1:ndims(array)) ≈ convert(Array{Float32}, replace!((1 .- IC3D.CMg0 .- IC3D.CFe0 .- IC3D.CMn0), 1=>0))
+        @test permutedims(array,1:ndims(array)) ≈ convert(Array{Float32}, replace!(1 .- view(IC3D.u0, :, :, :, 1) .- view(IC3D.u0, :, :, :, 2) .- view(IC3D.u0, :, :, :, 3), 1=>0))
         array = read(file["Diffusion_Grt"]["t0003"]["Mg"]["Mg"])
         @test permutedims(array,1:ndims(array)) ≈ convert(Array{Float32}, sol_3D.u[end][:,:,:,1])
         array = read(file["Diffusion_Grt"]["t0003"]["Fe"]["Fe"])
