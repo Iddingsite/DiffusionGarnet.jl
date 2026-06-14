@@ -108,3 +108,37 @@ end
 
     @test norm(sol.u[end][:,:,:,1]) ≈ 371.1775756471261
 end
+
+@testset "IC3DMajor accepts Float32 arrays" begin
+    n = 5
+    CMg0 = fill(0.2f0, n, n, n)
+    CFe0 = fill(0.6f0, n, n, n)
+    CMn0 = fill(0.1f0, n, n, n)
+
+    IC = IC3DMajor(;CMg0, CFe0, CMn0,
+                   Lx=9000.0u"µm", Ly=9000.0u"µm", Lz=9000.0u"µm",
+                   tfinal=0.01u"Myr")
+
+    @test eltype(IC.CMg0) == Float32
+    @test IC.Lx isa Float32
+    @test IC.Δx isa Float32
+    @test IC.tfinal isa Float32
+end
+
+@testset "Domain3DMajor scalars follow CMg0 eltype (Float32)" begin
+    n = 5
+    CMg0 = fill(0.2f0, n, n, n)
+    CFe0 = fill(0.6f0, n, n, n)
+    CMn0 = fill(0.1f0, n, n, n)
+
+    IC = IC3DMajor(;CMg0, CFe0, CMn0,
+                   Lx=9000.0u"µm", Ly=9000.0u"µm", Lz=9000.0u"µm",
+                   tfinal=0.01u"Myr")
+    domain = Domain(IC, 900u"°C", 0.6u"GPa")
+
+    @test domain.Δxad_ isa Float32
+    @test domain.Δyad_ isa Float32
+    @test domain.Δzad_ isa Float32
+    @test domain.tfinal_ad isa Float32
+    @test eltype(domain.u0) == Float32
+end

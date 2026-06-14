@@ -125,7 +125,7 @@ end
     grt_position::T3
     grt_boundary::T3
     tfinal::T2
-    function InitialConditions3DMajor(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, Ly::T2, Lz::T2, tfinal::T2, grt_boundary::T3) where {T1 <: AbstractArray{<:Real, 3}, T2 <: Float64, T3 <: Union{AbstractArray{<:Real, 3}, AbstractArray{<:Bool, 3}}}
+    function InitialConditions3DMajor(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, Ly::T2, Lz::T2, tfinal::T2, grt_boundary::T3) where {T1 <: AbstractArray{<:Real, 3}, T2 <: AbstractFloat, T3 <: Union{AbstractArray{<:Real, 3}, AbstractArray{<:Bool, 3}}}
         if Lx <= 0 || Ly <= 0 || Lz <= 0
             error("Length should be positive.")
         elseif tfinal <= 0
@@ -229,7 +229,13 @@ function IC3DMajor(;
                    grt_boundary::Union{AbstractArray{<:Real, 3}, AbstractArray{<:Bool, 3}}=zeros(Bool, size(CMg0)...)
                    )
 
-    InitialConditions3DMajor(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"µm", Ly)), convert(Float64,ustrip(u"µm", Lz)), convert(Float64,ustrip(u"Myr", tfinal)), grt_boundary)
+    T_float = eltype(CMg0)
+    InitialConditions3DMajor(CMg0, CFe0, CMn0,
+                             convert(T_float, ustrip(u"µm", Lx)),
+                             convert(T_float, ustrip(u"µm", Ly)),
+                             convert(T_float, ustrip(u"µm", Lz)),
+                             convert(T_float, ustrip(u"Myr", tfinal)),
+                             grt_boundary)
 end
 
 
@@ -665,7 +671,7 @@ end
 
         # Now fix t to be 1 and make D_charact = L_charact^2 / t_charact
         L_charact = Lx  # characteristic length
-        t_charact = 1.0
+        t_charact = one(eltype(CMg0))
         D_charact = L_charact^2 / t_charact
 
         Δxad_ = 1 / (Δx / L_charact)  # inverse of nondimensionalised Δx

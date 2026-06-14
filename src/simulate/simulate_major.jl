@@ -73,7 +73,7 @@ function simulate(domain::Domain3DMajor; path_save=nothing, solver=ROCK2(), p_ex
 
     (; tfinal_ad, u0) = p.domain
 
-    t = (0.0, tfinal_ad)
+    t = (zero(tfinal_ad), tfinal_ad)
 
     prob = ODEProblem(semi_discretisation_diffusion_cartesian, u0, t, p)
 
