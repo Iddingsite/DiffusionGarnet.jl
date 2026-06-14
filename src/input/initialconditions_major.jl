@@ -72,7 +72,7 @@ end
     grt_boundary::T3
     # grid::NamedTuple{(:x, :y), Tuple{AbstractArray{T2, 2}, AbstractArray{T2, 2}}}
     tfinal::T2
-    function InitialConditions2DMajor(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, Ly::T2, tfinal::T2, grt_boundary::T3) where {T1 <: AbstractArray{<:Real, 2}, T2 <: Float64, T3 <: Union{AbstractArray{<:Real, 2}, AbstractArray{<:Bool, 2}}}
+    function InitialConditions2DMajor(CMg0::T1, CFe0::T1, CMn0::T1, Lx::T2, Ly::T2, tfinal::T2, grt_boundary::T3) where {T1 <: AbstractArray{<:Real, 2}, T2 <: AbstractFloat, T3 <: Union{AbstractArray{<:Real, 2}, AbstractArray{<:Bool, 2}}}
         if Lx <= 0 || Ly <= 0
             error("Length should be positive.")
         elseif tfinal <= 0
@@ -209,7 +209,8 @@ function IC2DMajor(;
                    grt_boundary::Union{AbstractArray{<:Real, 2}, AbstractArray{<:Bool, 2}}=zeros(Bool, size(CMg0)...)
                    )
 
-    InitialConditions2DMajor(CMg0, CFe0, CMn0, convert(Float64,ustrip(u"µm", Lx)), convert(Float64,ustrip(u"µm", Ly)), convert(Float64,ustrip(u"Myr", tfinal)), grt_boundary)
+    T_float = eltype(CMg0)
+    InitialConditions2DMajor(CMg0, CFe0, CMn0, convert(T_float, ustrip(u"µm", Lx)), convert(T_float, ustrip(u"µm", Ly)), convert(T_float, ustrip(u"Myr", tfinal)), grt_boundary)
 end
 
 """
@@ -562,7 +563,7 @@ end
 
         # Now fix t to be 1 and make D_charact = L_charact^2 / t_charact
         L_charact = Lx  # characteristic length
-        t_charact = 1.0
+        t_charact = one(eltype(CMg0))
         D_charact = L_charact^2 / t_charact
 
         Δxad_ = 1 / (Δx / L_charact)  # inverse of nondimensionalised Δx
