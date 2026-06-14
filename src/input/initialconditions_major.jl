@@ -581,7 +581,7 @@ end
     end
 end
 
-@kwdef struct Domain3DMajor{T1, T2, T3, T4, T5, T6, T_tuplediffdata} <: DomainMajor
+@kwdef struct Domain3DMajor{T1, T2, T3, T5, T6, T_tuplediffdata} <: DomainMajor
     IC::T6
     T::T1
     P::T1
@@ -590,7 +590,6 @@ end
     diffcoef::Int
     D0_data::T_tuplediffdata  # tuple of diffusion coefficients data
     D0::T3
-    D::T4
     L_charact::T2
     D_charact::T2
     t_charact::T2
@@ -651,20 +650,6 @@ end
 
         T_tuplediffdata = typeof(D0_data)
 
-        D = (DMgMg = similar(u0, (nx, ny, nz)),
-             DMgFe = similar(u0, (nx, ny, nz)),
-             DMgMn = similar(u0, (nx, ny, nz)),
-             DFeMg = similar(u0, (nx, ny, nz)),
-             DFeFe = similar(u0, (nx, ny, nz)),
-             DFeMn = similar(u0, (nx, ny, nz)),
-             DMnMg = similar(u0, (nx, ny, nz)),
-             DMnFe = similar(u0, (nx, ny, nz)),
-             DMnMn = similar(u0, (nx, ny, nz)))  # matrix of interdiffusion coefficients
-
-        for i in eachindex(D)
-            D[i] .= 0
-        end
-
         # Now fix t to be 1 and make D_charact = L_charact^2 / t_charact
         L_charact = Lx  # characteristic length
         t_charact = one(eltype(u0))
@@ -678,11 +663,10 @@ end
 
         T2 = typeof(t_charact)
         T3 = typeof(D0)
-        T4 = typeof(D)
         T5 = typeof(u0)
         T6 = typeof(IC)
 
-        new{T1, T2, T3, T4, T5, T6, T_tuplediffdata}(IC, T, P, fugacity_O2, time_update, diffcoef, D0_data, D0, D, L_charact, D_charact, t_charact, Δxad_, Δyad_, Δzad_, u0, tfinal_ad, time_update_ad)
+        new{T1, T2, T3, T5, T6, T_tuplediffdata}(IC, T, P, fugacity_O2, time_update, diffcoef, D0_data, D0, L_charact, D_charact, t_charact, Δxad_, Δyad_, Δzad_, u0, tfinal_ad, time_update_ad)
     end
 end
 

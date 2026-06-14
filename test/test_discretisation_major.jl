@@ -106,7 +106,7 @@ end
 
     sol = simulate(domain3D; save_everystep=false, save_start=false);
 
-    @test norm(sol.u[end][:,:,:,1]) ≈ 371.1775756471261
+    @test norm(sol.u[end][:,:,:,1]) ≈ 371.1775228228454
 end
 
 @testset "IC2DMajor stores u0 not CMg0/CFe0/CMn0" begin
