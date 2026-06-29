@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Using different diffusion coefficient datasets · DiffusionGarnet.jl</title><meta name="title" content="Using different diffusion coefficient datasets · DiffusionGarnet.jl"/><meta property="og:title" content="Using different diffusion coefficient datasets · DiffusionGarnet.jl"/><meta property="twitter:title" content="Using different diffusion coefficient datasets · DiffusionGarnet.jl"/><meta name="description" content="Documentation for DiffusionGarnet.jl."/><meta property="og:description" content="Documentation for DiffusionGarnet.jl."/><meta property="twitter:description" content="Documentation for DiffusionGarnet.jl."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.svg" alt="DiffusionGarnet.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">DiffusionGarnet.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../background/">Background</a></li><li><span class="tocitem">Tutorials</span><ul><li><a class="tocitem" href="../diffusion_1D/">Diffusion in 1D Cartesian coordinates</a></li><li><a class="tocitem" href="../diffusion_spherical/">Diffusion in spherical coordinates</a></li><li class="is-active"><a class="tocitem" href>Using different diffusion coefficient datasets</a></li><li><a class="tocitem" href="../diffusion_2D/">Diffusion in 2D Cartesian coordinates on CPU</a></li><li><input class="collapse-toggle" id="menuitem-3-5" type="checkbox"/><label class="tocitem" for="menuitem-3-5"><span class="docs-label">Callbacks</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../updating_PT/">Updating pressure and temperature conditions</a></li><li><a class="tocitem" href="../saving_output/">Saving output as HDF5 files</a></li></ul></li><li><a class="tocitem" href="../diffusion_3D_CPU/">Diffusion in 3D Cartesian coordinates on CPU</a></li><li><a class="tocitem" href="../diffusion_3D_GPU/">Diffusion in 3D Cartesian coordinates on GPU</a></li></ul></li><li><a class="tocitem" href="../reference/">List of functions</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li class="is-active"><a href>Using different diffusion coefficient datasets</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Using different diffusion coefficient datasets</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/Iddingsite/DiffusionGarnet.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/Iddingsite/DiffusionGarnet.jl/blob/main/docs/src/comparing_diffcoef.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Coeff_Diff"><a class="docs-heading-anchor" href="#Coeff_Diff">Using different diffusion coefficient datasets</a><a id="Coeff_Diff-1"></a><a class="docs-heading-anchor-permalink" href="#Coeff_Diff" title="Permalink"></a></h1><p>By default, DiffusionGarnet.jl uses the diffusion coefficients of <a href="https://doi.org/10.1007/BF00296579">Chakraborty &amp; Ganguly (1992)</a> to model garnet diffusion. However, it is possible to use other datasets: the one from <a href="https://doi.org/10.2138/am.2006.2043">Carlson (2006)</a> and the one from <a href="https://doi.org/10.1007/s00410-015-1175-y">Chu and Ague 2015</a>. This tutorial will show how to use these different datasets in DiffusionGarnet.jl and we will compare them with a simple simulation.</p><p>We will use the same data as in the <a href="../diffusion_1D/#1D_diffusion">1D diffusion tutorial</a> for this example. First, we will load the data, which should be in the same folder as your current session:</p><pre><code class="language-julia hljs">using DiffusionGarnet  # this can take a while
+using DelimitedFiles
+# load the data of your choice (here from the text file located in https://github.com/Iddingsite/DiffusionGarnet.jl/tree/main/examples/1D, place it in the same folder as where you are running the code)
+data = DelimitedFiles.readdlm(&quot;Data_Grt_1D.txt&quot;, &#39;\t&#39;, &#39;\n&#39;, header=true)[1]
+
+Mg0 = data[:, 4]  # load initial Mg mole fraction
+Fe0 = data[:, 2]  # load initial Fe mole fraction
+Mn0 = data[:, 3]  # load initial Mn mole fraction
+Ca0 = data[:, 5]  # load initial Ca mole fraction
+distance = data[:, 1]
+
+Lx = (data[end,1] - data[1,1])u&quot;µm&quot;  # length in x of the model, here in µm
+tfinal = 15u&quot;Myr&quot;  # total time of the model, here in Myr
+
+# define the initial conditions in 1D of your problem
+IC1D = IC1DMajor(;CMg0, CFe0, CMn0, Lx, tfinal)
+
+# define the pressure and temperature conditions of diffusion
+T = 700u&quot;°C&quot;
+P = 0.6u&quot;GPa&quot;</code></pre><p>To choose the diffusion coefficient dataset, it only requires a keyword argument in the <code>Domain</code> constructor: <code>diffcoef</code>.</p><p>It can take the following values:</p><ul><li><code>:C92</code> for the dataset of Chakraborty and Ganguly (1992), which is the default value.</li><li><code>:C06</code> for the dataset of Carlson (2006)</li><li><code>:CA15</code> for the dataset of Chu and Ague (2015)</li></ul><p>Let&#39;s define three domains with these different datasets:</p><pre><code class="language-julia hljs">domain1D_C92 = Domain(IC1D, T, P, diffcoef = :C92)
+domain1D_C06 = Domain(IC1D, T, P, diffcoef = :C06)
+domain1D_CA15 = Domain(IC1D, T, P, diffcoef = :CA15)</code></pre><div class="admonition is-info" id="Note-27b1adc3610f174e"><header class="admonition-header">Note<a class="admonition-anchor" href="#Note-27b1adc3610f174e" title="Permalink"></a></header><div class="admonition-body"><p>This is exactly the same syntax to change the dataset of diffusion coefficients for spherical, 2D Cartesian, and 3D Cartesian coordinates.</p></div></div><p>We can now simulate the three domains:</p><pre><code class="language-julia hljs">sol_C92 = simulate(domain1D_C92; progress=true, progress_steps=1)
+sol_C06 = simulate(domain1D_C06; progress=true, progress_steps=1)
+sol_CA15 = simulate(domain1D_CA15; progress=true, progress_steps=1)</code></pre><p>Done! We can now plot the results of our simulations to compare the different diffusion coefficient datasets:</p><pre><code class="language-julia hljs"># Choose consistent base colors for each element
+col_Fe = 1
+col_Mg = 2
+col_Mn = 3
+col_Ca = 4
+
+anim = @animate for i in LinRange(0, sol_CG92.t[end], 100)
+    l = @layout [a ; b]
+
+    # ----------- Panel 1: Fe -----------
+    p1 = plot(distance, CFe0, label=&quot;Fe initial&quot;,
+              linestyle=:dash, linewidth=1, dpi=200,
+              title=@sprintf(&quot;Total Time = %.2f Myr | T = %.0f °C | P = %.1f GPa&quot;,
+                             i, T[1].val, P[1].val),
+              legend=:outerbottomright, linecolor=col_Fe,
+              xlabel=&quot;Distance (µm)&quot;)
+
+    # Fe - CG92
+    plot!(p1, distance, sol_CG92(i)[:,2], label=&quot;Fe CG92&quot;,
+          color=col_Fe, linewidth=1, linestyle=:solid)
+    # Fe - C06
+    plot!(p1, distance, sol_C06(i)[:,2],
+          label=&quot;Fe C06&quot;, color=col_Fe, linewidth=1, linestyle=:dashdot)
+    # Fe - CA15
+    plot!(p1, distance, sol_CA15(i)[:,2],
+          label=&quot;Fe CA15&quot;, color=col_Fe, linewidth=1, linestyle=:dot)
+
+
+    # ----------- Panel 2: Mg, Mn, Ca -----------
+    p2 = plot(distance, CMg0, label=&quot;Mg initial&quot;,
+              linestyle=:dash, linewidth=1, dpi=200,
+              legend=:outerbottomright, color=col_Mg, xlabel=&quot;Distance (µm)&quot;)
+
+    plot!(p2, distance, CMn0, label=&quot;Mn initial&quot;,
+          linestyle=:dash, linewidth=1, color=col_Mn)
+    plot!(p2, distance, CCa0, label=&quot;Ca initial&quot;,
+          linestyle=:dash, linewidth=1, color=col_Ca)
+
+    # Mg
+    plot!(p2, distance, sol_CG92(i)[:,1], label=&quot;Mg CG92&quot;,
+          color=col_Mg, linewidth=1, linestyle=:solid)
+    plot!(p2, distance, sol_C06(i)[:,1],
+          label=&quot;Mg C06&quot;, color=col_Mg, linewidth=1, linestyle=:dashdot)
+    plot!(p2, distance, sol_CA15(i)[:,1],
+          label=&quot;Mg CA15&quot;, color=col_Mg, linewidth=1, linestyle=:dot)
+
+    # Mn
+    plot!(p2, distance, sol_CG92(i)[:,3], label=&quot;Mn CG92&quot;,
+          color=col_Mn, linewidth=1, linestyle=:solid)
+    plot!(p2, distance, sol_C06(i)[:,3],
+          label=&quot;Mn C06&quot;, color=col_Mn, linewidth=1, linestyle=:dashdot)
+    plot!(p2, distance, sol_CA15(i)[:,3],
+          label=&quot;Mn CA15&quot;, color=col_Mn, linewidth=1, linestyle=:dot)
+
+    # Ca (closure relation)
+    plot!(p2, distance, 1 .- sol_CG92(i)[:,1] .- sol_CG92(i)[:,2] .- sol_CG92(i)[:,3],
+          label=&quot;Ca CG92&quot;, color=col_Ca, linewidth=1, linestyle=:solid)
+    plot!(p2, distance, 1 .- sol_C06(i)[:,1]
+                       .- sol_C06(i)[:,2]
+                       .- sol_C06(i)[:,3],
+          label=&quot;Ca C06&quot;, color=col_Ca, linewidth=1, linestyle=:dashdot)
+    plot!(p2, distance, 1 .- sol_CA15(i)[:,1]
+                       .- sol_CA15(i)[:,2]
+                       .- sol_CA15(i)[:,3],
+          label=&quot;Ca CA15&quot;, color=col_Ca, linewidth=1, linestyle=:dot)
+
+    plot(p1, p2, layout=l)
+end every 1
+
+println(&quot;Now, generating the gif...&quot;)
+gif(anim, &quot;Grt_1D_compare.gif&quot;, fps = 7)
+println(&quot;...Done!&quot;)</code></pre><p>Here is the resulting gif obtained:</p><p><img src="../assets/img/Grt_1D_compare.gif" alt="Comparison diffusion coefficients"/></p><p>Notice the differences, especially in Mn and Fe.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../diffusion_spherical/">« Diffusion in spherical coordinates</a><a class="docs-footer-nextpage" href="../diffusion_2D/">Diffusion in 2D Cartesian coordinates on CPU »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Tuesday 19 August 2025 15:51">Tuesday 19 August 2025</span>. Using Julia version 1.11.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

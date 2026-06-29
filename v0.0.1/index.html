@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Home · DiffusionGarnet.jl</title><meta name="title" content="Home · DiffusionGarnet.jl"/><meta property="og:title" content="Home · DiffusionGarnet.jl"/><meta property="twitter:title" content="Home · DiffusionGarnet.jl"/><meta name="description" content="Documentation for DiffusionGarnet.jl."/><meta property="og:description" content="Documentation for DiffusionGarnet.jl."/><meta property="twitter:description" content="Documentation for DiffusionGarnet.jl."/><script data-outdated-warner src="assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js"></script><script src="search_index.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href>DiffusionGarnet.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li class="is-active"><a class="tocitem" href>Home</a><ul class="internal"><li><a class="tocitem" href="#Installation"><span>Installation</span></a></li><li><a class="tocitem" href="#Quick-Start"><span>Quick Start</span></a></li></ul></li><li><a class="tocitem" href="reference/">Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Home</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Home</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/Iddingsite/DiffusionGarnet.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/Iddingsite/DiffusionGarnet.jl/blob/main/docs/src/index.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="DiffusionGarnet.jl"><a class="docs-heading-anchor" href="#DiffusionGarnet.jl">DiffusionGarnet.jl</a><a id="DiffusionGarnet.jl-1"></a><a class="docs-heading-anchor-permalink" href="#DiffusionGarnet.jl" title="Permalink"></a></h1><p>Garnet is a mineral commonly used in metamorphic petrology to better understand geological processes as it is present in various different rock types. This mineral commonly shows a wide spread of compositional zoning that has been interpreted as recording ranges of pressure (P) and temperature (T) conditions. Modelling diffusion processes can help to better understand this zoning and better constrain the pressure-temperature-time (PTt) conditions of the metamorphic event of interest.</p><p>DiffusionGarnet is a Julia package that can be used to model coupled diffusion of major elements on real garnet data. It currently supports 1D and spherical coordinates for evenly spaced data and is soon to be extended to support 2D and 3D coordinates.</p><h2 id="Installation"><a class="docs-heading-anchor" href="#Installation">Installation</a><a id="Installation-1"></a><a class="docs-heading-anchor-permalink" href="#Installation" title="Permalink"></a></h2><p>DiffusionGarnet may be installed directly with the <a href="https://docs.julialang.org/en/v1/stdlib/Pkg/index.html">Julia package manager</a> from the REPL:</p><pre><code class="language-julia-repl hljs">julia&gt;]
+  pkg&gt; add DiffusionGarnet
+  pkg&gt; test DiffusionGarnet</code></pre><h2 id="Quick-Start"><a class="docs-heading-anchor" href="#Quick-Start">Quick Start</a><a id="Quick-Start-1"></a><a class="docs-heading-anchor-permalink" href="#Quick-Start" title="Permalink"></a></h2><p>DiffusionGarnet requires input data for the initial Mg, Fe and Mn mass fractions. </p><pre><code class="language-julia hljs"># load the data of your choice (here from the text file located in https://github.com/Iddingsite/DiffusionGarnet.jl/tree/main/examples/1D, place it in the same folder as where you are running the code)
+data = DelimitedFiles.readdlm(&quot;./Data_Grt_1D.txt&quot;, &#39;\t&#39;, &#39;\n&#39;, header=true)[1]
+
+Mg0 = data[:, 4]
+Fe0 = data[:, 2]
+Mn0 = data[:, 3]
+Ca0 = data[:, 5]
+distance = data[:, 1]
+Lx = (data[end,1] - data[1,1])u&quot;µm&quot;  # length in x of the model
+tfinal = 15u&quot;Myr&quot;  # total time of the model
+
+# define the initial conditions in 1D of your problem
+IC1D = InitialConditions1D(Mg0, Fe0, Mn0, Lx, tfinal)
+
+# define the PT conditions
+T = 900u&quot;°C&quot;
+P = 0.6u&quot;GPa&quot;
+
+# define a Domain struct containing the definition of your problem
+domain1D = Domain(IC1D, T, P)
+
+# solve the problem using DifferentialEquations.jl
+sol = simulate(domain1D)
+
+# you can now plot the solutions from the sol variable
+
+# extract characteristic time to convert back to dimensional time
+@unpack tfinal_ad, t_charact = domain1D
+
+anim = @animate for i = LinRange(0, tfinal_ad, 100)
+    l = @layout [a ; b]
+
+    p1 = plot(distance, Fe0, label=&quot;Fe initial&quot;, linestyle = :dash, linewidth=1, dpi=200, title = &quot;Timestep = $(round(((i)* t_charact);digits=2)) Ma&quot;, legend=:outerbottomright, linecolor=1,xlabel = &quot;Distance (µm)&quot;)
+    p1 = plot!(distance, sol(i)[:,2], label=&quot;Fe&quot;,linecolor=1, linewidth=1)
+
+
+    p2 = plot(distance, Mg0, label=&quot;Mg initial&quot;, linestyle = :dash, linewidth=1, dpi=200,legend=:outerbottomright,linecolor=2,xlabel = &quot;Distance (µm)&quot;)
+    p2 = plot!(distance, Mn0, label=&quot;Mn initial&quot;, linestyle = :dash, linewidth=1, linecolor=3)
+    p2 = plot!(distance, Ca0, label=&quot;Ca initial&quot;, linestyle = :dash, linewidth=1, linecolor=4)
+    p2 = plot!(distance, sol(i)[:,1], label=&quot;Mg&quot;,linecolor=2, linewidth=1)
+
+    p2 = plot!(distance, sol(i)[:,3], label=&quot;Mn&quot;, linecolor=3, linewidth=1)
+
+    p2 = plot!(distance, 1 .- sol(i)[:,1] .- sol(i)[:,2] .- sol(i)[:,3], label=&quot;Ca&quot;, linecolor=4, linewidth=1)
+
+    plot(p1, p2, layout = l)
+end every 1
+
+println(&quot;Now, generating the gif...&quot;)
+gif(anim, &quot;./Grt_1D_test.gif&quot;, fps = 7)
+println(&quot;...Done!&quot;)</code></pre><p>Here is the resulting gif obtained:</p><p><img src="assets/img/Grt_1D.gif" alt="1D diffusion profil of a garnet"/></p><p>It represents the compositional evolution of a 1D profil through a garnet grain with homogeneous dirichlet boundaries on both sides.</p></article><nav class="docs-footer"><a class="docs-footer-nextpage" href="reference/">Reference »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="auto">Automatic (OS)</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.0.1 on <span class="colophon-date" title="Tuesday 19 September 2023 17:39">Tuesday 19 September 2023</span>. Using Julia version 1.9.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
